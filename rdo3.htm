@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play CBC Radio Stream</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        #link {
+            display: inline-block;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        #link:hover {
+            background-color: #0056b3;
+        }
+
+        #audio {
+            width: 100%;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Live Radio Stream Playlist</h1>
+
+    <!-- Clickable link to start the radio playlist -->
+    <a href="javascript:void(0);" id="link">Click to Play Radio Playlist</a>
+
+    <!-- Audio player -->
+    <audio id="audio" controls>
+        Your browser does not support the audio element.
+    </audio>
+
+    <script>
+        $(document).ready(function() {
+            var audio = document.getElementById('audio');
+            var stations = [
+                "https://cbcradiolive.akamaized.net/hls/live/2040987/ES_R1AHF/master.m3u8", // CBC Radio 1
+                "https://rogers-hls.leanstream.co/rogers/hal957.stream/playlist.m3u8", // Replace with other station URLs
+                "https://stream.zeno.fm/aad4e51qz7zuv"  // Replace with other station URLs
+            ];
+            var currentStationIndex = 0;
+
+            // Function to play the next station
+            function playNextStation() {
+                // Load the current station URL
+                var audioUrl = stations[currentStationIndex];
+
+                // Check if Hls.js is supported by the browser
+                if (Hls.isSupported()) {
+                    var hls = new Hls();
+                    hls.loadSource(audioUrl);
+                    hls.attachMedia(audio);
+
+                    hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                        console.log('Manifest loaded');
+                    });
+
+                    // Play the current station
+                    audio.play().catch(function(error) {
+                        console.error("Error trying to play the audio:", error);
+                    });
+                }
+                // Fallback for Safari or browsers with native HLS support
+                else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+                    audio.src = audioUrl;
+                    audio.play().catch(function(error) {
+                        console.error("Error trying to play the audio:", error);
+                    });
+                } else {
+                    alert("Your browser does not support HLS streams.");
+                }
+            }
+
+            // Event handler for clicking the "Play Radio Playlist" link
+            $('#link').click(function() {
+                playNextStation(); // Start playing the first station in the playlist
+            });
+
+            // Event listener to play the next station when the current one ends
+            audio.addEventListener('ended', function() {
+                // Move to the next station in the playlist (loop back to the first one if necessary)
+                currentStationIndex = (currentStationIndex + 1) % stations.length;
+                playNextStation(); // Play the next station in the playlist
+            });
+        });
+    </script>
+</body>
+</html>
