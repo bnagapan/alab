@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play CBC Radio Stream</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        #link {
+            display: inline-block;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        #link:hover {
+            background-color: #0056b3;
+        }
+
+        #audio {
+            width: 100%;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Live CBC Radio Stream</h1>
+
+    <!-- Clickable link to play the CBC radio stream -->
+    <a href="javascript:void(0);" id="link">Click to Play CBC Radio</a>
+
+    <!-- Audio player -->
+    <audio id="audio" controls>
+        Your browser does not support the audio element.
+    </audio>
+
+    <script>
+        // Define the playRadio function within the script
+        function playRadio() {
+            var audio = document.getElementById('audio');
+            var audioUrl = "https://cbcradiolive.akamaized.net/hls/live/2040987/ES_R1AHF/master.m3u8";
+
+            // Check if Hls.js is supported by the browser
+            if (Hls.isSupported()) {
+                var hls = new Hls();
+                hls.loadSource(audioUrl);
+                hls.attachMedia(audio);
+
+                hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                    console.log('Manifest loaded');
+                });
+
+                // Explicitly play the audio
+                audio.play().catch(function(error) {
+                    console.error("Error trying to play the audio:", error);
+                });
+            }
+            // Fallback for Safari or browsers with native HLS support
+            else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+                audio.src = audioUrl;
+                audio.play().catch(function(error) {
+                    console.error("Error trying to play the audio:", error);
+                });
+            } else {
+                alert("Your browser does not support HLS streams.");
+            }
+        }
+
+        $(document).ready(function() {
+            // Event handler for clicking the CBC link to trigger playRadio
+            $('#link').click(function() {
+                playRadio(); // Calls the playRadio function on link click
+            });
+        });
+    </script>
+</body>
+</html>
