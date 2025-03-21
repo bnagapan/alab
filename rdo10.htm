@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P l a y || R a d i o || S t r e a m</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        #link {
+            display: inline-block;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        #link:hover {
+            background-color: #0056b3;
+        }
+
+        #audio {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        #stationList {
+            margin-top: 20px;
+        }
+
+        #stationList ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #stationList li {
+            background-color: #f8f9fa;
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        #listButton {
+            display: inline-block;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P l a y || R a d i o || S t r e a m</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        #link {
+            display: inline-block;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        #link:hover {
+            background-color: #0056b3;
+        }
+
+        #audio {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        #stationList {
+            margin-top: 20px;
+        }
+
+        #stationList ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #stationList li {
+            background-color: #f8f9fa;
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        #listButton {
+            display: inline-block;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        #listButton:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <h1>R | a | d | i | o</h1>
+
+    <!-- Clickable link to start the radio playlist -->
+    <a href="javascript:void(0);" id="link">Click to Play</a>
+
+    <!-- Button to list all stations -->
+    <div id="listButton" onclick="listStations()">List out all the stations</div>
+
+    <!-- Audio player -->
+    <audio id="audio" controls>
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Section to display the list of stations -->
+    <div id="stationList"></div>
+
+    <script>
+        $(document).ready(function() {
+            var audio = document.getElementById('audio');
+
+            // Base64 encoded station URLs
+            var stations = [
+                { url: "aHR0cHM6Ly9yb2dlcnMtaGxzLmxlYW5zdHJlYW0uY28vcm9nZXJzL2hhbDk1Ny5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: "#1. C|i|t|y N|e|w|s" },
+                { url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: "#2. C|B|C R|a|d|i|o" },
+                { url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9hYWQ0ZTUxcXo3enV2", name: "#3. KS Chitra FM" },
+                { url: "aHR0cDovL3BzcmxpdmUyLmxpc3Rlbm9uLmluL2lybGl0ZT9haD0wZTgxNzQ5ZTM3Nzg5ZTVmYjhjMjkwOTI2Y2U4N2UzZg==", name: "#4. I|l|a|y|a|r|a|j|a Lite R|a|d|i|o" },
+                { url: "aHR0cDovL3BzcmxpdmUyLmxpc3Rlbm9uLmluL2lyYmVhdD9haD0wZTgxNzQ5ZTM3Nzg5ZTVmYjhjMjkwOTI2Y2U4N2UzZg==", name: "#5. I|l|a|y|a|r|a|j|a R|a|d|i|o" },
+                { url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NDI4L2F1ZGlv", name: "Hello F|M" }
+            ];
+            var currentStationIndex = 0;
+
+            // Decode Base64-encoded URL
+            function decodeBase64Url(base64Url) {
+                return atob(base64Url); // Decode the Base64 URL
+            }
+
+            // Function to play the next station
+            function playNextStation() {
+                var station = stations[currentStationIndex];
+                var decodedUrl = decodeBase64Url(station.url); // Decode the URL before using it
+                var stationName = station.name.replace(/\|/g, "");
+                console.log(station.name);
+                console.log(stationName);
+
+                console.log(decodedUrl);
+                // Set media session metadata for the native controls
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.metadata = new MediaMetadata({
+                        title: stationName,      // Title of the station
+                        artist: '<R a d i o>',          // Artist name or broadcaster
+                        album: 'Live Stream'      // Album name or stream name
+                    });
+
+                    // Set handlers for the native controls (next/previous actions)
+                    navigator.mediaSession.setActionHandler('nexttrack', function() {
+                        // Move to the next station in the playlist
+                        currentStationIndex = (currentStationIndex + 1) % stations.length;
+                        playNextStation();
+                    });
+
+                    navigator.mediaSession.setActionHandler('previoustrack', function() {
+                        // Move to the previous station in the playlist
+                        currentStationIndex = (currentStationIndex - 1 + stations.length) % stations.length;
+                        playNextStation();
+                    });
+                }
+
+                // Check if Hls.js is needed for an HLS stream
+                if (decodedUrl.endsWith('.m3u8') && Hls.isSupported()) {
+                    var hls = new Hls();
+                    hls.loadSource(decodedUrl);
+                    hls.attachMedia(audio);
+
+                    hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                        console.log('Manifest loaded');
+                    });
+
+                    // Start playing the station when it is ready
+                    hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+                        console.log('Media attached, starting playback');
+                        audio.play().catch(function(error) {
+                            console.error("Error trying to play the audio:", error);
+                        });
+                    });
+                }
+                // Fallback for non-HLS streams like MP3, AAC, etc.
+                else {
+                    audio.src = decodedUrl;
+                    audio.play().catch(function(error) {
+                        console.error("Error trying to play the audio:", error);
+                    });
+                }
+            }
+
+            // Event handler for clicking the "Play Radio Playlist" link
+            $('#link').click(function() {
+                playNextStation(); // Start playing the first station in the playlist
+            });
+
+            // Event listener to play the next station when the current one ends
+            audio.addEventListener('ended', function() {
+                // Move to the next station in the playlist (loop back to the first one if necessary)
+                currentStationIndex = (currentStationIndex + 1) % stations.length;
+                playNextStation(); // Play the next station in the playlist
+            });
+        });
+
+        // Function to list out all stations when the button is clicked
+        function listStations() {
+            var stationListDiv = document.getElementById('stationList');
+            var listHtml = '<ul>';
+
+            // Loop through all stations and create a list item for each
+            var stations = [
+                { url: "aHR0cHM6Ly9yb2dlcnMtaGxzLmxlYW5zdHJlYW0uY28vcm9nZXJzL2hhbDk1Ny5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: "#1. C|i|t|y N|e|w|s" },
+                { url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: "#2. C|B|C R|a|d|i|o" },
+                { url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9hYWQ0ZTUxcXo3enV2", name: "#3. KS Chitra FM" },
+                { url: "aHR0cDovL3BzcmxpdmUyLmxpc3Rlbm9uLmluL2lybGl0ZT9haD0wZTgxNzQ5ZTM3Nzg5ZTVmYjhjMjkwOTI2Y2U4N2UzZg==", name: "#4. I|l|a|y|a|r|a|j|a Lite R|a|d|i|o" },
+                { url: "aHR0cDovL3BzcmxpdmUyLmxpc3Rlbm9uLmluL2lyYmVhdD9haD0wZTgxNzQ5ZTM3Nzg5ZTVmYjhjMjkwOTI2Y2U4N2UzZg==", name: "#5. I|l|a|y|a|r|a|j|a R|a|d|i|o" },
+                { url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NDI4L2F1ZGlv", name: "#6. Hello F|M" }
+            ];
+
+            // Loop through all stations and create a list item for each
+            for (var i = 0; i < stations.length; i++) {
+                listHtml += '<li>' + stations[i].name.replace(/\|/g, "") + '</li>';
+            }
+
+            listHtml += '</ul>';
+            stationListDiv.innerHTML = listHtml; // Display the list of stations
+        }
+    </script>
+</body>
+</html>
