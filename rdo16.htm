@@ -208,9 +208,12 @@
             return atob(base64Url);
         }
 
- function playStation(index) {
-    currentStationIndex = index % stations.length;
+function playStation(index) {
+    // Stop the currently playing audio before switching stations
+    audio.pause();
+    audio.src = "";
 
+    currentStationIndex = index % stations.length;
     var decodedUrl = decodeBase64Url(stations[currentStationIndex].url);
     var stationName = stations[currentStationIndex].name.replace(/\|/g, "");
 
@@ -284,6 +287,7 @@
             });
     }
 }
+
 
 
 
