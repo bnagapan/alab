@@ -280,12 +280,15 @@ function playStation(index) {
                 return decodedUrl;
             })
             .then(url => {
-                audio.pause();
+                /*audio.pause();
                 setTimeout(function () {
                     audio.src = url;
                     audio.load();
                     audio.play().catch(() => handlePlaybackError('Load Failed'));
-                }, 500);
+                }, 500);*/
+				 audio.src = url;
+                    audio.load();
+                    audio.play().catch(() => handlePlaybackError('Load Failed'));
             })
             .catch(error => {
                 handlePlaybackError(error.message);
@@ -297,9 +300,10 @@ function playStation(index) {
                     album: 'Live Stream'
                 });
 
-                setTimeout(() => {
+                /*setTimeout(() => {
                     playStation((currentStationIndex + 1) % stations.length);
-                }, 1000);
+                }, 1000);*/
+				playStation((currentStationIndex + 1) % stations.length);
             });
     }
 }
