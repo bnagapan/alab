@@ -294,16 +294,17 @@ function playStation(index) {
                 handlePlaybackError(error.message);
                 
                 // **Ensure media session doesn't break on iPhone**
-                navigator.mediaSession.metadata = new MediaMetadata({
+                /*navigator.mediaSession.metadata = new MediaMetadata({
                     title: "Station unavailable, skipping...",
                     artist: 'Radio',
                     album: 'Live Stream'
-                });
+                });*/
 
                 /*setTimeout(() => {
                     playStation((currentStationIndex + 1) % stations.length);
                 }, 1000);*/
-				playStation((currentStationIndex + 1) % stations.length);
+				//playStation((currentStationIndex + 1) % stations.length);
+				updateMediaSession("Error: " + error.message);
             });
     }
 }
