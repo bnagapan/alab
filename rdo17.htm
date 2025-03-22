@@ -209,8 +209,8 @@
         }
 
 function playStation(index) {
-    var previousIndex = currentStationIndex; // Store current station index
-    var previousUrl = audio.src; // Store previous station URL for fallback
+    var previousIndex = currentStationIndex;
+    var previousUrl = audio.src;
 
     currentStationIndex = index % stations.length;
     var decodedUrl = decodeBase64Url(stations[currentStationIndex].url);
@@ -219,44 +219,46 @@ function playStation(index) {
     $('#stationList div').removeClass('active');
     $('#stationList div').eq(currentStationIndex).addClass('active');
 
-    if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-            title: stationName,
-            artist: 'Radio',
-            album: 'Live Stream'
-        });
+    function updateMediaSession(title) {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: title,
+                artist: 'Radio',
+                album: 'Live Stream'
+            });
 
-        navigator.mediaSession.setActionHandler('nexttrack', function () {
-            playStation((currentStationIndex + 1) % stations.length);
-        });
+            navigator.mediaSession.setActionHandler('nexttrack', function () {
+                playStation((currentStationIndex + 1) % stations.length);
+            });
 
-        navigator.mediaSession.setActionHandler('previoustrack', function () {
-            playStation((currentStationIndex - 1 + stations.length) % stations.length);
-        });
+            navigator.mediaSession.setActionHandler('previoustrack', function () {
+                playStation((currentStationIndex - 1 + stations.length) % stations.length);
+            });
+        }
     }
 
     function handlePlaybackError(message) {
         console.error('Playback error:', message);
+        updateMediaSession(message); // Keep navigation working
 
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.metadata = new MediaMetadata({
-                title: message,
-                artist: 'Error',
-                album: 'Playback Failed'
-            });
+        if (message === '502 Bad Gateway') {
+            console.warn('502 Error detected. Skipping to next station.');
+            playStation((currentStationIndex + 1) % stations.length);
+        } else {
+            // Revert to the last working station
+            currentStationIndex = previousIndex;
+            audio.src = previousUrl;
         }
-
-        // Revert to the last working station
-        currentStationIndex = previousIndex;
-        audio.src = previousUrl;
     }
+
+    updateMediaSession(stationName); // Set station name before playing
 
     if (decodedUrl.endsWith('.m3u8') && Hls.isSupported()) {
         var hls = new Hls();
         hls.loadSource(decodedUrl);
         hls.attachMedia(audio);
         hls.on(Hls.Events.MEDIA_ATTACHED, function () {
-            audio.play().catch(() => handlePlaybackError('Playback failed'));
+            audio.play().catch(() => handlePlaybackError('Load Failed'));
         });
         hls.on(Hls.Events.ERROR, function (event, data) {
             if (data.response) {
@@ -265,36 +267,31 @@ function playStation(index) {
                 } else if (data.response.code === 404) {
                     handlePlaybackError('404 Not Found');
                 } else {
-                    handlePlaybackError('Playback failed'); // Generic error for other response codes
+                    handlePlaybackError('Load Failed');
                 }
             }
         });
     } else {
         fetch(decodedUrl)
             .then(response => {
-                if (response.status === 502) {
-                    throw new Error('502 Bad Gateway');
-                } else if (response.status === 404) {
-                    throw new Error('404 Not Found');
-                } else if (!response.ok) {
-                    throw new Error('Playback failed'); // Generic error for all other bad responses
-                }
+                if (response.status === 502) throw new Error('502 Bad Gateway');
+                if (response.status === 404) throw new Error('404 Not Found');
+                if (!response.ok) throw new Error('Load Failed');
                 return decodedUrl;
             })
             .then(url => {
-                // Stop the previous audio only after confirming the new one works
                 audio.pause();
                 setTimeout(function () {
                     audio.src = url;
                     audio.load();
-                    audio.play().catch(() => handlePlaybackError('Playback failed'));
+                    audio.play().catch(() => handlePlaybackError('Load Failed'));
                 }, 500);
             })
-            .catch(error => {
-                handlePlaybackError(error.message);
-            });
+            .catch(error => handlePlaybackError(error.message));
     }
 }
+
+
 
 
 
