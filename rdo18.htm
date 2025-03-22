@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P l a y || R a d i o || S t r e a m</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+         /* Basic reset */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        /* Responsive viewport for mobile devices */
+        meta[name="viewport"] {
+            width: device-width, initial-scale: 1.0, user-scalable=no;
+        }
+
+        /* Main container */
+        #content {
+            padding: 20px;
+            max-width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        /* Header */
+        h1 {
+            font-size: 26px;
+            margin-bottom: 20px;
+        }
+
+        /* Button styling */
+        #link {
+            display: inline-block;
+            padding: 12px;
+            background-color: #007bff; /* Primary Blue */
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 16px;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        #link:hover {
+            background-color: #0056b3; /* Darker Blue for hover */
+        }
+
+        #listButton {
+            display: inline-block;
+            padding: 12px;
+            background-color: #1e90ff; /* Dodger Blue */
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 16px;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        #listButton:hover {
+            background-color: #1c74d4; /* Slightly darker Dodger Blue for hover */
+        }
+
+        #prevButton {
+            display: inline-block;
+            padding: 12px;
+            background-color: #4682b4; /* Steel Blue */
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 16px;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        #prevButton:hover {
+            background-color: #3b6e8f; /* Darker Steel Blue for hover */
+        }
+
+        #nextButton {
+            display: inline-block;
+            padding: 12px;
+            background-color: #5f9ea0; /* Cadet Blue */
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 16px;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        #nextButton:hover {
+            background-color: #4e8a8a; /* Darker Cadet Blue for hover */
+        }
+
+        /* Audio player */
+        #audio {
+            width: 100%;
+            margin-top: 20px;
+            max-width: 400px;
+        }
+
+        /* Styling for the station list */
+        #stationList {
+            margin-top: 20px;
+        }
+
+        #stationList div {
+            background-color: #f8f9fa;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 80%;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: left;
+        }
+
+        #stationList div:hover {
+            background-color: #e9ecef;
+        }
+
+        #stationList div.active {
+            background-color: #007bff;
+            color: white;
+        }
+
+        /* Responsiveness for small screens */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 22px;
+            }
+
+            #link, #listButton, #prevButton, #nextButton, #stationList div {
+                font-size: 14px;
+                padding: 10px;
+                width: 90%;
+                max-width: 280px;
+            }
+
+            #audio {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="content">
+        <h1>R | a | d | i | o</h1>
+
+        <!-- Clickable link to start the radio playlist -->
+        <a href="javascript:void(0);" id="link">Click to Play</a>
+
+        <!-- Navigation buttons -->
+        <div id="prevButton">⏮ Previous</div>
+        <div id="nextButton">⏭ Next</div>
+
+        <!-- Button to list all stations -->
+        <div id="listButton" onclick="listStations()">List out all the stations</div>
+
+        <!-- Audio player -->
+        <audio id="audio" controls>
+            Your browser does not support the audio element.
+        </audio>
+
+        <!-- Section to display the list of stations -->
+        <div id="stationList"></div>
+    </div>
+
+    <script>
+        var audio = document.getElementById('audio');
+
+        // Base64 encoded station URLs
+        var stations = [
+            { url: "aHR0cHM6Ly9yb2dlcnMtaGxzLmxlYW5zdHJlYW0uY28vcm9nZXJzL2hhbDk1Ny5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: "#1. C|i|t|y N|e|w|s" },
+            { url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: "#2. C|B|C R|a|d|i|o" },
+            { url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9hYWQ0ZTUxcXo3enV2", name: "#3. KS Chitra FM" },
+            { url: "aHR0cDovL3BzcmxpdmUyLmxpc3Rlbm9uLmluL2lybGl0ZT9haD0wZTgxNzQ5ZTM3Nzg5ZTVmYjhjMjkwOTI2Y2U4N2UzZg==", name: "#4. I|l|a|y|a|r|a|j|a Lite R|a|d|i|o" },
+            { url: "aHR0cDovL3BzcmxpdmUyLmxpc3Rlbm9uLmluL2lyYmVhdD9haD0wZTgxNzQ5ZTM3Nzg5ZTVmYjhjMjkwOTI2Y2U4N2UzZg==", name: "#5. I|l|a|y|a|r|a|j|a R|a|d|i|o" },
+            { url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NDI4L2F1ZGlv", name: "#6. Hello F|M" },
+            { url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NTQzL2F1ZGlv", name: "#7. M|i|r|c|y F|M" }
+        ];
+
+        var currentStationIndex = 0;
+
+        function decodeBase64Url(base64Url) {
+            return atob(base64Url);
+        }
+
+function playStation(index) {
+    var previousIndex = currentStationIndex;
+    var previousUrl = audio.src;
+
+    currentStationIndex = index % stations.length;
+    var decodedUrl = decodeBase64Url(stations[currentStationIndex].url);
+    var stationName = stations[currentStationIndex].name.replace(/\|/g, "");
+
+    $('#stationList div').removeClass('active');
+    $('#stationList div').eq(currentStationIndex).addClass('active');
+
+    function updateMediaSession(title) {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: title,
+                artist: 'Radio',
+                album: 'Live Stream'
+            });
+
+            navigator.mediaSession.setActionHandler('nexttrack', function () {
+                playStation((currentStationIndex + 1) % stations.length);
+            });
+
+            navigator.mediaSession.setActionHandler('previoustrack', function () {
+                playStation((currentStationIndex - 1 + stations.length) % stations.length);
+            });
+        }
+    }
+
+    function handlePlaybackError(message) {
+        console.error('Playback error:', message);
+        updateMediaSession("Error: " + message); // Keep navigation active
+
+        if (message === '502 Bad Gateway') {
+            console.warn('502 Error detected. Skipping to next station.');
+            playStation((currentStationIndex + 1) % stations.length);
+        } else {
+            // Revert to the last working station
+            currentStationIndex = previousIndex;
+            audio.src = previousUrl;
+        }
+    }
+
+    updateMediaSession(stationName); // Set station name before playing
+
+    if (decodedUrl.endsWith('.m3u8') && Hls.isSupported()) {
+        var hls = new Hls();
+        hls.loadSource(decodedUrl);
+        hls.attachMedia(audio);
+        hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+            audio.play().catch(() => handlePlaybackError('Load Failed'));
+        });
+        hls.on(Hls.Events.ERROR, function (event, data) {
+            if (data.response) {
+                if (data.response.code === 502) {
+                    handlePlaybackError('502 Bad Gateway');
+                } else if (data.response.code === 404) {
+                    handlePlaybackError('404 Not Found');
+                } else {
+                    handlePlaybackError('Load Failed');
+                }
+            }
+        });
+    } else {
+        fetch(decodedUrl)
+            .then(response => {
+                if (response.status === 502) throw new Error('502 Bad Gateway');
+                if (response.status === 404) throw new Error('404 Not Found');
+                if (!response.ok) throw new Error('Load Failed');
+                return decodedUrl;
+            })
+            .then(url => {
+                audio.pause();
+                setTimeout(function () {
+                    audio.src = url;
+                    audio.load();
+                    audio.play().catch(() => handlePlaybackError('Load Failed'));
+                }, 500);
+            })
+            .catch(error => {
+                handlePlaybackError(error.message);
+                
+                // **Ensure media session doesn't break on iPhone**
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: "Station unavailable, skipping...",
+                    artist: 'Radio',
+                    album: 'Live Stream'
+                });
+
+                setTimeout(() => {
+                    playStation((currentStationIndex + 1) % stations.length);
+                }, 1000);
+            });
+    }
+}
+
+
+
+
+
+
+
+
+        $('#link').click(function () {
+			listStations();
+            playStation(currentStationIndex);
+        });
+
+        $('#nextButton').click(function () {
+            playStation((currentStationIndex + 1) % stations.length);
+        });
+
+        $('#prevButton').click(function () {
+            playStation((currentStationIndex - 1 + stations.length) % stations.length);
+        });
+
+        audio.addEventListener('ended', function () {
+            playStation((currentStationIndex + 1) % stations.length);
+        });
+
+        function listStations() {
+            $('#stationList').html(stations.map((s, i) => 
+                `<div onclick="playStation(${i})">${s.name.replace(/\|/g, "")}</div>`
+            ).join(''));
+        }
+    </script>
+</body>
+</html>
