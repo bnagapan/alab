@@ -208,9 +208,9 @@
             return atob(base64Url);
         }
 
- function playStation(index) {
-    var previousIndex = currentStationIndex; // Store the currently playing station
-    var previousUrl = audio.src; // Store previous station URL in case of errors
+function playStation(index) {
+    var previousIndex = currentStationIndex; // Store current station index
+    var previousUrl = audio.src; // Store previous station URL for fallback
 
     currentStationIndex = index % stations.length;
     var decodedUrl = decodeBase64Url(stations[currentStationIndex].url);
@@ -246,7 +246,7 @@
             });
         }
 
-        // If an error occurs, revert back to the previous station
+        // Revert to the last working station
         currentStationIndex = previousIndex;
         audio.src = previousUrl;
     }
@@ -264,6 +264,8 @@
                     handlePlaybackError('502 Bad Gateway');
                 } else if (data.response.code === 404) {
                     handlePlaybackError('404 Not Found');
+                } else {
+                    handlePlaybackError('Playback failed'); // Generic error for other response codes
                 }
             }
         });
@@ -274,11 +276,13 @@
                     throw new Error('502 Bad Gateway');
                 } else if (response.status === 404) {
                     throw new Error('404 Not Found');
+                } else if (!response.ok) {
+                    throw new Error('Playback failed'); // Generic error for all other bad responses
                 }
                 return decodedUrl;
             })
             .then(url => {
-                // Stop the previous audio only after confirming the new one is valid
+                // Stop the previous audio only after confirming the new one works
                 audio.pause();
                 setTimeout(function () {
                     audio.src = url;
@@ -287,12 +291,11 @@
                 }, 500);
             })
             .catch(error => {
-                if (error.message === '502 Bad Gateway' || error.message === '404 Not Found') {
-                    handlePlaybackError(error.message);
-                }
+                handlePlaybackError(error.message);
             });
     }
 }
+
 
 
 
