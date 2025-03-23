@@ -196,6 +196,8 @@
 					<audio id="audio" controls>
 					Your browser does not support the audio element.
 					</audio>
+					<br>
+					v 1.0
 				</td>
 			</tr>
 			
@@ -288,6 +290,7 @@
 					});
 				} else {
 					// Non-HLS stream: Load the audio and ensure it's ready to play
+					writeOutput('Buffering...CP0');
 					if ('mediaSession' in navigator) {
 						navigator.mediaSession.metadata = new MediaMetadata({
 							title: stationName + ' Buffering...',
@@ -298,12 +301,12 @@
 
 					audio.src = decodedUrl;
 					audio.load();
-
+					writeOutput('Loading...CP1');
 					// Wait for the audio to be ready before playing it
 					audio.addEventListener('canplaythrough', function () {
 						audio.play().catch(handlePlaybackError);
 					});
-
+					writeOutput('Playing...CP2');
 					// Handle audio load error
 					audio.addEventListener('error', function () {
 						writeOutput('Error loading audio stream');
@@ -369,6 +372,13 @@
 			
 			$('#btnClear').click(function () {
 			$('#output').val('');
+			});
+			
+			$('audio').each(function () {
+			if (this !== audio) {
+			this.pause();
+			this.currentTime = 0;
+			}
 			});
 		</script>
 	</body>
