@@ -187,7 +187,7 @@
 						<div id="listButton" onclick="listStations()">List out all the stations</div>
 				</td>
 				<td colspan="2">
-					<div id="btnClear" onclick="btnClear()">Clear</div>
+					<div id="btnClear" onclick="clearData()">Clear</div>
 				</td>
 			</tr>
 			<tr>
@@ -243,11 +243,6 @@
 			}
 
 			function playStation(index) {
-				if (index ==0)
-				{
-					navigator.mediaSession.metadata = null;
-					writeOutput('cleared media sesison');
-				}
 				writeHeader();
 				currentStationIndex = index % stations.length;
 				var decodedUrl = decodeBase64Url(stations[currentStationIndex].url);
@@ -260,7 +255,17 @@
 				writeOutput('URL: ' + decodedUrl);
 				writeOutput('currentStationIndex: ' + currentStationIndex);
 
+
+					// Set new metadata for the current station
 				if ('mediaSession' in navigator) {
+					// Clear any existing metadata and actions
+					if (index == 0)
+					{
+						navigator.mediaSession.metadata = null;
+						//navigator.mediaSession.clearActionHandlers();
+						writeOutput('Media session cleared');
+					}
+					// Set new metadata for the current station
 					navigator.mediaSession.metadata = new MediaMetadata({
 						title: stationName,
 						artist: 'Radio',
@@ -298,7 +303,7 @@
 					writeOutput('Buffering...CP0');
 					if ('mediaSession' in navigator) {
 						navigator.mediaSession.metadata = new MediaMetadata({
-							title: stationName + ' Buffering...',
+							title: stationName + '(Buffering...)',
 							artist: 'Radio',
 							album: 'Live Stream'
 						});
@@ -375,9 +380,9 @@
 				$('#output').val($('#output').val() + '\n--------------------------------');
 			}
 			
-			$('#btnClear').click(function () {
+			function clearData() {
 			$('#output').val('');
-			});
+			}
 			
 			$('audio').each(function () {
 			if (this !== audio) {
