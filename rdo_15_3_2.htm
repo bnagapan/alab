@@ -36,7 +36,7 @@
 			}
 
 			/* Button styling */
-			#link {
+			#link  {
 				display: inline-block;
 				padding: 12px;
 				background-color: #007bff; /* Primary Blue */
@@ -51,11 +51,11 @@
 				cursor: pointer;
 			}
 
-			#link:hover {
+			#link :hover {
 				background-color: #0056b3; /* Darker Blue for hover */
 			}
 
-			#listButton {
+			#listButton,  #btnClear {
 				display: inline-block;
 				padding: 12px;
 				background-color: #1e90ff; /* Dodger Blue */
@@ -70,7 +70,7 @@
 				cursor: pointer;
 			}
 
-			#listButton:hover {
+			#listButton , #btnClear :hover {
 				background-color: #1c74d4; /* Slightly darker Dodger Blue for hover */
 			}
 
@@ -173,27 +173,32 @@
 			<tr>
 						<!-- Navigation buttons -->
 				<td> <div id="prevButton">⏮ Previous</div>	</td>
+				<td>&nbsp;</td>
 				<td>
 					 <!-- Clickable link to start the radio playlist -->
 					<a href="javascript:void(0);" id="link"> ▶ ️ </a>
 				</td>
-							<td>&nbsp;</td>
+				<td>&nbsp;</td>
 				<td>        <div id="nextButton">⏭ Next</div></td>
 			</tr>	
 			<tr>
-				<td colspan="4"> 
+				<td colspan="3"> 
 						<!-- Button to list all stations -->
 						<div id="listButton" onclick="listStations()">List out all the stations</div>
 				</td>
+				<td colspan="2">
+					<div id="btnClear" onclick="btnClear()">Clear</div>
+				</td>
 			</tr>
 			<tr>
-				<td colspan="4">
+				<td colspan="5">
 					<!-- Audio player -->
 					<audio id="audio" controls>
 					Your browser does not support the audio element.
 					</audio>
 				</td>
 			</tr>
+			
 
 
 			</table>
@@ -305,7 +310,7 @@ function playStation(index) {
                 writeOutput('Error loading audio stream');
                 handlePlaybackError(new Error('Error loading audio stream'));
             });
-        }, 10000); // 2-second delay (adjust as needed)
+        }, 2000); // 2-second delay (adjust as needed)
     }
 }
 
@@ -362,6 +367,10 @@ function playStation(index) {
 			{
 				$('#output').val($('#output').val() + '\n--------------------------------');
 			}
+			
+			$('#btnClear').click(function () {
+			$('#output').val('');
+			});
 		</script>
 	</body>
 	</html>
