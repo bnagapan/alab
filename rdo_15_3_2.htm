@@ -197,7 +197,7 @@
 					Your browser does not support the audio element.
 					</audio>
 					<br>
-					v 1.0
+					v 1.1
 				</td>
 			</tr>
 			
@@ -243,6 +243,11 @@
 			}
 
 			function playStation(index) {
+				if (index ==0)
+				{
+					navigator.mediaSession.metadata = null;
+					writeOutput('cleared media sesison');
+				}
 				writeHeader();
 				currentStationIndex = index % stations.length;
 				var decodedUrl = decodeBase64Url(stations[currentStationIndex].url);
