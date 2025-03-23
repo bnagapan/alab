@@ -240,79 +240,78 @@
 				return atob(base64Url);
 			}
 
-function playStation(index) {
-    writeHeader();
-    currentStationIndex = index % stations.length;
-    var decodedUrl = decodeBase64Url(stations[currentStationIndex].url);
-    var stationName = stations[currentStationIndex].name.replace(/\|/g, "");
+			function playStation(index) {
+				writeHeader();
+				currentStationIndex = index % stations.length;
+				var decodedUrl = decodeBase64Url(stations[currentStationIndex].url);
+				var stationName = stations[currentStationIndex].name.replace(/\|/g, "");
 
-    $('#stationList div').removeClass('active');
-    $('#stationList div').eq(currentStationIndex).addClass('active');
+				$('#stationList div').removeClass('active');
+				$('#stationList div').eq(currentStationIndex).addClass('active');
 
-    writeOutput('Station Name: ' + stationName);
-    writeOutput('URL: ' + decodedUrl);
-    writeOutput('currentStationIndex: ' + currentStationIndex);
+				writeOutput('Station Name: ' + stationName);
+				writeOutput('URL: ' + decodedUrl);
+				writeOutput('currentStationIndex: ' + currentStationIndex);
 
-    if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-            title: stationName,
-            artist: 'Radio',
-            album: 'Live Stream'
-        });
+				if ('mediaSession' in navigator) {
+					navigator.mediaSession.metadata = new MediaMetadata({
+						title: stationName,
+						artist: 'Radio',
+						album: 'Live Stream'
+					});
 
-        navigator.mediaSession.setActionHandler('nexttrack', function () {
-            playStation((currentStationIndex + 1) % stations.length);
-        });
+					navigator.mediaSession.setActionHandler('nexttrack', function () {
+						playStation((currentStationIndex + 1) % stations.length);
+					});
 
-        navigator.mediaSession.setActionHandler('previoustrack', function () {
-            playStation((currentStationIndex - 1 + stations.length) % stations.length);
-        });
-    }
+					navigator.mediaSession.setActionHandler('previoustrack', function () {
+						playStation((currentStationIndex - 1 + stations.length) % stations.length);
+					});
+				}
 
-    audio.pause(); // Ensure previous audio is stopped before playing new one.
+				audio.pause(); // Ensure previous audio is stopped before playing new one.
 
-    // Check if HLS is supported for m3u8 streams
-    if (decodedUrl.endsWith('.m3u8') && Hls.isSupported()) {
-        var hls = new Hls();
-        hls.loadSource(decodedUrl);
-        hls.attachMedia(audio);
+				// Check if HLS is supported for m3u8 streams
+				if (decodedUrl.endsWith('.m3u8') && Hls.isSupported()) {
+					var hls = new Hls();
+					hls.loadSource(decodedUrl);
+					hls.attachMedia(audio);
 
-        // Wait for the media to be attached before starting playback
-        hls.on(Hls.Events.MEDIA_ATTACHED, function () {
-            audio.play().catch(handlePlaybackError);
-        });
+					// Wait for the media to be attached before starting playback
+					hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+						audio.play().catch(handlePlaybackError);
+					});
 
-        hls.on(Hls.Events.ERROR, function (event, data) {
-            writeOutput('Error in HLS: ' + data.type);
-            handlePlaybackError(data);
-        });
-    } else {
-        // Adding a delay before playing non-m3u8 stations
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.metadata = new MediaMetadata({
-                title: stationName + ' Buffering...',
-                artist: 'Radio',
-                album: 'Live Stream'
-            });
-        }
+					hls.on(Hls.Events.ERROR, function (event, data) {
+						writeOutput('Error in HLS: ' + data.type);
+						handlePlaybackError(data);
+					});
+				} else {
+					// Non-HLS stream: Load the audio and ensure it's ready to play
+					if ('mediaSession' in navigator) {
+						navigator.mediaSession.metadata = new MediaMetadata({
+							title: stationName + ' Buffering...',
+							artist: 'Radio',
+							album: 'Live Stream'
+						});
+					}
 
-        setTimeout(function () {
-            audio.src = decodedUrl;
-            audio.load();
+					audio.src = decodedUrl;
+					audio.load();
 
-            // Wait for the audio to be ready before playing it
-            audio.addEventListener('canplay', function () {
-                audio.play().catch(handlePlaybackError);
-            });
+					// Wait for the audio to be ready before playing it
+					audio.addEventListener('canplaythrough', function () {
+						audio.play().catch(handlePlaybackError);
+					});
 
-            // Handle audio load error
-            audio.addEventListener('error', function () {
-                writeOutput('Error loading audio stream');
-                handlePlaybackError(new Error('Error loading audio stream'));
-            });
-        }, 2000); // 2-second delay (adjust as needed)
-    }
-}
+					// Handle audio load error
+					audio.addEventListener('error', function () {
+						writeOutput('Error loading audio stream');
+						handlePlaybackError(new Error('Error loading audio stream'));
+					});
+				}
+			}
+
 
 
 
