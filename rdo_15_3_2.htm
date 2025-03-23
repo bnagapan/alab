@@ -314,7 +314,9 @@
 					writeOutput('Loading...CP1');
 					// Wait for the audio to be ready before playing it
 					audio.addEventListener('canplaythrough', function () {
-						audio.play().catch(handlePlaybackError);
+						audio.play().catch(
+						audio.play().catch(new Error('Error loading audio stream#2'))
+						);
 					});
 					writeOutput('Playing...CP2');
 					// Handle audio load error
