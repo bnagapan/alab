@@ -178,7 +178,7 @@
         }
 
     function playStation(index) {
-			navigator.mediaSession.metadata = null;
+			
             currentStationIndex = index % stations.length;
             var station = stations[currentStationIndex];
             var decodedUrl = decodeBase64Url(station.url);
@@ -278,6 +278,7 @@
 
         function clearData() {
             $('#output').val('');
+			navigator.mediaSession.metadata = null;
         }
 
         function toggleTextArea() {
