@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P l a y || R a d i o || S t r e a m</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        /* Basic reset */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        /* Main container */
+        #content {
+            padding: 20px;
+            max-width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        /* Header */
+        h1 {
+            font-size: 26px;
+            margin-bottom: 20px;
+        }
+        /* Button styling */
+        #link  {
+            display: inline-block;
+            padding: 12px;
+            background-color: #007bff; /* Primary Blue */
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 16px;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+            cursor: pointer;
+        }
+        #link :hover {
+            background-color: #0056b3; /* Darker Blue for hover */
+        }
+        #listButton,  #btnClear , #toggleButton , #prevButton, #nextButton {
+            display: inline-block;
+            padding: 12px;
+            background-color: #1e90ff; /* Dodger Blue */
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 16px;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+            cursor: pointer;
+        }
+        #listButton , #btnClear ,#toggleButton ,#prevButton , #nextButton :hover {
+            background-color: #1c74d4; /* Slightly darker Dodger Blue for hover */
+        }
+        /* Audio player */
+        .audio-player {
+            width: 100%;
+            margin-top: 20px;
+            max-width: 400px;
+        }
+		
+		 video::-webkit-media-controls-fullscreen-button {
+            display: none;
+        }
+		
+        /* Styling for the station list */
+        #stationList {
+            margin-top: 20px;
+        }
+        #stationList div {
+            background-color: #f8f9fa;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 80%;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: left;
+        }
+        #stationList div:hover {
+            background-color: #e9ecef;
+        }
+        #stationList div.active {
+            background-color: #007bff;
+            color: white;
+        }
+        /* Responsiveness for small screens */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 22px;
+            }
+            #link, #listButton, #prevButton, #nextButton, #stationList div {
+                font-size: 14px;
+                padding: 10px;
+                width: 90%;
+                max-width: 280px;
+            }
+        }
+        #output {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="content">
+        <h1>R | a | d | i | o</h1>
+        v 20.1.0<br><br>
+        <table border="0" cellspacing="3" cellpadding="3" align="center">
+        <tr>
+            <!-- Navigation buttons -->
+            <td> <div id="prevButton">⏮ Previous</div> </td>
+            <td>&nbsp;</td>
+            <td>
+                <!-- Clickable link to start the radio playlist -->
+                <a href="javascript:void(0);" id="link"> ▶ ️ </a>
+            </td>
+            <td>&nbsp;</td>
+            <td>        <div id="nextButton">⏭ Next</div></td>
+        </tr>
+        <tr>
+            <td colspan="3"> 
+                <!-- Button to list all stations -->
+                <div id="listButton" onclick="listStations()">List out all the stations</div>
+            </td>
+            <td colspan="2">
+                <div id="btnClear" onclick="clearData()">Clear</div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="5">
+                <!-- Dynamic Audio player elements will be appended here -->
+                <div id="audioContainer"></div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="5">            <div id="toggleButton" onclick="toggleTextArea()">Toggle Logs Output</div></td>
+        </tr>
+        <tr>
+            <td colspan="5"><textarea id="output" name="w3review" rows="15" cols="80">
+    At w3schools.com you will learn how to make a website. They offer free tutorials in all web development technologies.
+    </textarea></td>
+        </tr>
+        </table>
+    </div>
+
+    <div id="stationList"></div>
+
+    <script>
+        var currentStationIndex = 0;
+
+        // Base64 encoded station URLs
+        var stations = [
+            { url: "aHR0cHM6Ly9yb2dlcnMtaGxzLmxlYW5zdHJlYW0uY28vcm9nZXJzL2hhbDk1Ny5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: "#1. C|i|t|y N|e|w|s" },
+            { url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: "#2. C|B|C R|a|d|i|o" },
+            { url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9hYWQ0ZTUxcXo3enV2", name: "#3. KS Chitra FM" },
+            { url: "aHR0cDovL3BzcmxpdmUyLmxpc3Rlbm9uLmluL2lybGl0ZT9haD0wZTgxNzQ5ZTM3Nzg5ZTVmYjhjMjkwOTI2Y2U4N2UzZg==", name: "#4. I|l|a|y|a|r|a|j|a Lite R|a|d|i|o" },
+            { url: "aHR0cDovL3BzcmxpdmUyLmxpc3Rlbm9uLmluL2lyYmVhdD9haD0wZTgxNzQ5ZTM3Nzg5ZTVmYjhjMjkwOTI2Y2U4N2UzZg==", name: "#5. I|l|a|y|a|r|a|j|a R|a|d|i|o" },
+            { url: "aHR0cDovL3BzcmxpdmUyLmxpc3Rlbm9uLmluL2FycmxpdGU/YWg9MGU4MTc0OWUzNzc4OWU1ZmI4YzI5MDkyNmNlODdlM2Y=", name: "#6. A|R| R|a|h|m|a|n Lite" },
+            { url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtLzBjeXMyaDQxdzBodnY=", name: "#7. A|R|R F|M" },                
+            { url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NDI4L2F1ZGlv", name: "#8. Hello F|M" },
+            { url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NTQzL2F1ZGlv", name: "#9. M|i|r|c|y F|M" }
+        ];
+
+        function decodeBase64Url(base64Url) {
+            return atob(base64Url);
+        }
+
+    function playStation(index) {
+			navigator.mediaSession.metadata = null;
+            currentStationIndex = index % stations.length;
+            var station = stations[currentStationIndex];
+            var decodedUrl = decodeBase64Url(station.url);
+            var stationName = station.name.replace(/\|/g, "");
+
+            $('#stationList div').removeClass('active');
+            $('#stationList div').eq(currentStationIndex).addClass('active');
+            writeOutput('------------------------------------------');
+            writeOutput('Station Name: ' + stationName);
+            writeOutput('URL: ' + decodedUrl);
+            writeOutput('currentStationIndex: ' + currentStationIndex);
+
+            var audioContainer = $('#audioContainer');
+            audioContainer.empty();
+
+            if (decodedUrl.endsWith('.m3u8')) {
+             // var video = $('<video class="audio-player" playsinline controls controlsList="nofullscreen"></video>').appendTo(audioContainer);
+			    var video = $('<audio class="audio-player" controls>').appendTo(audioContainer);
+                  var hls = new Hls();
+                hls.loadSource(decodedUrl);
+                hls.attachMedia(video.get(0));
+                video.get(0).play().catch(handlePlaybackError);
+            } else {
+                var audioPlayer = $('<audio class="audio-player" controls>').get(0);
+                audioPlayer.src = decodedUrl;
+                audioPlayer.load();
+                audioContainer.append(audioPlayer);
+                audioPlayer.play().catch(handlePlaybackError);
+            }
+			
+			 if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: stationName,
+                    artist: "Live Radio",
+					album: 'Buffering...' 
+                    //artwork: [{ src: "radio-icon.png", sizes: "512x512", type: "image/png" }]
+                });
+			
+			//MediaSesion API changes
+			navigator.mediaSession.setActionHandler("play", function() {
+				audioPlayer.play();
+			});
+			navigator.mediaSession.setActionHandler("pause", function() {
+				audioPlayer.pause();
+			});
+			navigator.mediaSession.setActionHandler("previoustrack", function() {
+				playStation((currentStationIndex - 1 + stations.length) % stations.length);
+			});
+			navigator.mediaSession.setActionHandler("nexttrack", function() {
+				playStation((currentStationIndex + 1) % stations.length);
+			});
+			
+			navigator.mediaSession.metadata = new MediaMetadata({
+                    title: stationName,
+                    artist: "Live Radio",
+					album: 'Radio' 
+                    //artwork: [{ src: "radio-icon.png", sizes: "512x512", type: "image/png" }]
+                });
+			
+			}
+			
+
+        }
+
+        function handlePlaybackError(error) {
+            writeOutput('Error playing stream: ' + error.message);
+            console.error('Playback error:', error);
+        }
+
+        $('#link').click(function () {
+            $("#output").val('');
+            playStation(currentStationIndex);
+            listStations();
+        });
+
+        $('#nextButton').click(function () {
+            playStation((currentStationIndex + 1) % stations.length);
+        });
+
+        $('#prevButton').click(function () {
+            playStation((currentStationIndex - 1 + stations.length) % stations.length);
+        });
+
+        function listStations() {
+            $('#stationList').html(stations.map((s, i) => 
+                `<div onclick="playStation(${i})" id="station-${i}" class="${i === currentStationIndex ? 'active' : ''}">
+                    ${s.name.replace(/\|/g, "")}
+                </div>`
+            ).join(''));
+        }
+
+        function writeOutput(txt) {
+            $('#output').val(
+			txt + '\n' + $('#output').val()
+			);
+        }
+
+        function clearData() {
+            $('#output').val('');
+        }
+
+        function toggleTextArea() {
+            var textArea = document.getElementById('output');
+            if (textArea.style.display === 'none') {
+                textArea.style.display = 'block';
+            } else {
+                textArea.style.display = 'none';
+            }
+        }
+
+    </script>
+</body>
+</html>
