@@ -67,6 +67,11 @@
             margin-top: 20px;
             max-width: 400px;
         }
+		
+		 video::-webkit-media-controls-fullscreen-button {
+            display: none;
+        }
+		
         /* Styling for the station list */
         #stationList {
             margin-top: 20px;
@@ -189,8 +194,9 @@
             audioContainer.empty();
 
             if (decodedUrl.endsWith('.m3u8')) {
-                var video = $('<video class="audio-player" controls></video>').appendTo(audioContainer);
-                var hls = new Hls();
+             // var video = $('<video class="audio-player" playsinline controls controlsList="nofullscreen"></video>').appendTo(audioContainer);
+			    var video = $('<video class="audio-player" playsinline controls controlsList="nofullscreen"></video>').appendTo(audioContainer);
+                  var hls = new Hls();
                 hls.loadSource(decodedUrl);
                 hls.attachMedia(video.get(0));
                 video.get(0).play().catch(handlePlaybackError);
