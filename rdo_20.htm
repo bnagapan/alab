@@ -111,7 +111,7 @@
 <body>
     <div id="content">
         <h1>R | a | d | i | o</h1>
-        v 1.5<br><br>
+        v 20.1<br><br>
         <table border="0" cellspacing="3" cellpadding="3" align="center">
         <tr>
             <!-- Navigation buttons -->
@@ -201,6 +201,28 @@
                 audioContainer.append(audioPlayer);
                 audioPlayer.play().catch(handlePlaybackError);
             }
+			
+			 if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: stationName,
+                    artist: "Live Radio"
+                    //artwork: [{ src: "radio-icon.png", sizes: "512x512", type: "image/png" }]
+                });
+			
+			//MediaSesion API changes
+			navigator.mediaSession.setActionHandler("play", function() {
+				audioPlayer.play();
+			});
+			navigator.mediaSession.setActionHandler("pause", function() {
+				audioPlayer.pause();
+			});
+			navigator.mediaSession.setActionHandler("previoustrack", function() {
+				playStation((currentStationIndex - 1 + stations.length) % stations.length);
+			});
+			navigator.mediaSession.setActionHandler("nexttrack", function() {
+				playStation((currentStationIndex + 1) % stations.length);
+			});
+			}
         }
 
         function handlePlaybackError(error) {
