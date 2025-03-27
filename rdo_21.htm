@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play Radio Stream</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            text-align: center;
+        }
+        h1 { font-size: 26px; margin-bottom: 20px; }
+        #stationList div {
+            background-color: #f8f9fa;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: left;
+        }
+        #stationList div.active {
+            background-color: #007bff;
+            color: white;
+        }
+        .audio-player {
+            width: 100%;
+            margin-top: 20px;
+            max-width: 400px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Radio Player</h1>
+    <div id="stationList"></div>
+    <div id="audioContainer"></div>
+
+    <script>
+        var currentStationIndex = null;
+        var currentAudio = null;
+        var hlsInstance = null;
+
+        var stations = [
+            { url: "aHR0cHM6Ly9yb2dlcnMtaGxzLmxlYW5zdHJlYW0uY28vcm9nZXJzL2hhbDk1Ny5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: "City News" },
+            { url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: "CBC Radio" },
+            { url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9hYWQ0ZTUxcXo3enV2", name: "KS Chitra FM" },
+            { url: "aHR0cDovL3BzcmxpdmUyLmxpc3Rlbm9uLmluL2lybGl0ZT9haD0wZTgxNzQ5ZTM3Nzg5ZTVmYjhjMjkwOTI2Y2U4N2UzZg==", name: "Ilaiyaraaja Lite" }
+        ];
+
+        function decodeBase64Url(base64Url) {
+            return atob(base64Url);
+        }
+
+        function stopCurrentAudio() {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.src = "";
+                currentAudio = null;
+            }
+            if (hlsInstance) {
+                hlsInstance.destroy();
+                hlsInstance = null;
+            }
+            $("#stationList div").removeClass("active");
+        }
+
+        function playStation(index) {
+            if (index === currentStationIndex) return; // Avoid reloading same station
+
+            stopCurrentAudio(); // Stop any existing audio
+
+            currentStationIndex = index;
+            var station = stations[index];
+            var decodedUrl = decodeBase64Url(station.url);
+            var stationName = station.name;
+
+            $("#stationList div").removeClass("active");
+            $("#station-" + index).addClass("active");
+
+            var audioContainer = $("#audioContainer");
+            audioContainer.empty();
+
+            var audioElement = $('<audio class="audio-player" controls autoplay>').appendTo(audioContainer);
+            currentAudio = audioElement.get(0);
+
+            if (decodedUrl.endsWith('.m3u8')) {
+                hlsInstance = new Hls();
+                hlsInstance.loadSource(decodedUrl);
+                hlsInstance.attachMedia(currentAudio);
+            } else {
+                currentAudio.src = decodedUrl;
+            }
+
+            currentAudio.play().catch(error => console.error("Playback error:", error));
+
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: stationName,
+                    artist: "Live Radio"
+                });
+
+                navigator.mediaSession.setActionHandler("previoustrack", function() {
+                    playStation((currentStationIndex - 1 + stations.length) % stations.length);
+                });
+                navigator.mediaSession.setActionHandler("nexttrack", function() {
+                    playStation((currentStationIndex + 1) % stations.length);
+                });
+            }
+        }
+
+        function listStations() {
+            $("#stationList").html(stations.map((s, i) => 
+                `<div id="station-${i}" onclick="playStation(${i})">${s.name}</div>`
+            ).join(""));
+        }
+
+        $(document).ready(function() {
+            listStations();
+        });
+    </script>
+</body>
+</html>
