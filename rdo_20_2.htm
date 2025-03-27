@@ -191,8 +191,19 @@
             writeOutput('URL: ' + decodedUrl);
             writeOutput('currentStationIndex: ' + currentStationIndex);
 
-            var audioContainer = $('#audioContainer');
+			var audioContainer = $('#audioContainer');
             audioContainer.empty();
+			var hlsInstance;
+
+	
+			if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: stationName,
+                    artist: "Live Radio",
+					album: 'Loading...' 
+                    //artwork: [{ src: "radio-icon.png", sizes: "512x512", type: "image/png" }]
+                });
+				}
 			
 			if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
@@ -203,28 +214,78 @@
                 });
 				}
 
-            if (decodedUrl.endsWith('.m3u8')) {
-             // var video = $('<video class="audio-player" playsinline controls controlsList="nofullscreen"></video>').appendTo(audioContainer);
-			    var video = $('<audio class="audio-player" controls>').appendTo(audioContainer);
-                  var hls = new Hls();
-                hls.loadSource(decodedUrl);
-                hls.attachMedia(video.get(0));
-				
-				video.get(0).addEventListener('canplay', function() {
-				writeOutput('Media can play now');
-				video.get(0).play().catch(handlePlaybackError);
-				});
 
-                video.get(0).play().catch(handlePlaybackError);
-            } else {
-                var audioPlayer = $('<audio class="audio-player" controls>').get(0);
+
+
+			if (decodedUrl.endsWith('.m3u8')) {
+			var audioElement = $('<audio class="audio-player" controls>').appendTo(audioContainer);
+			var audio = audioElement.get(0);
+
+			    // **Destroy existing HLS instance if active**
+    if (hlsInstance) {
+        hlsInstance.destroy();
+        hlsInstance = null;
+    }
+			hlsInstance = new Hls();
+			hlsInstance.loadSource(decodedUrl);
+			hlsInstance.attachMedia(audio);
+	
+			audio.addEventListener('canplay', function() {
+			writeOutput('Media can play now');
+			audio.play().catch(handlePlaybackError);
+			});
+
+			audio.play().catch(handlePlaybackError);
+			}  
+			else
+			{
+				var audioPlayer = $('<audio class="audio-player" controls>').get(0);
+				audioPlayer.src = decodedUrl;
+				audioPlayer.load();
+				audioContainer.append(audioPlayer);
+
+
+				if ('mediaSession' in navigator) {
+
+					navigator.mediaSession.setActionHandler("previoustrack", function() {
+						playStation((currentStationIndex - 1 + stations.length) % stations.length);
+					});
+					navigator.mediaSession.setActionHandler("nexttrack", function() {
+						playStation((currentStationIndex + 1) % stations.length);
+					});
+					writeOutput('Media Navigation initialized');
+				}
+				
+				
+				audioPlayer.addEventListener('canplaythrough', function() {
+				writeOutput('Media can play now..');
+				audioPlayer.play().catch(handlePlaybackError);
+				if ('mediaSession' in navigator) {
+					navigator.mediaSession.metadata = new MediaMetadata({
+					title: stationName,
+					artist: "Live Radio",
+					album: 'Loaded'
+					});
+				}
+				});
+			}
+			/*
+			else {
+                //var audioPlayer = $('<audio class="audio-player" controls>').get(0);
+                var audioPlayer = $('<audio class="audio-player" controls>').appendTo(audioContainer);
                 audioPlayer.src = decodedUrl;
                 audioPlayer.load();
-                audioContainer.append(audioPlayer);
+                //audioContainer.append(audioPlayer);
 				
+				 navigator.mediaSession.metadata = new MediaMetadata({
+                    title: stationName,
+                    artist: "Live Radio",
+					album: 'Buffering...' 
+                    //artwork: [{ src: "radio-icon.png", sizes: "512x512", type: "image/png" }]
+                });
 				// Add canplay event listener
 				audioPlayer.addEventListener('canplay', function() {
-				writeOutput('Media can play now');
+				writeOutput('Media can play now..');
 				audioPlayer.play().catch(handlePlaybackError);
 				
 				navigator.mediaSession.metadata = new MediaMetadata({
@@ -237,15 +298,15 @@
 				});
 				
                 //audioPlayer.play().catch(handlePlaybackError);
-            }
+            }*/
 			
 			 if ('mediaSession' in navigator) {
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: stationName,
-                    artist: "Live Radio",
-					album: 'Buffering...' 
-                    //artwork: [{ src: "radio-icon.png", sizes: "512x512", type: "image/png" }]
-                });
+                <!-- navigator.mediaSession.metadata = new MediaMetadata({ -->
+                    <!-- title: stationName, -->
+                    <!-- artist: "Live Radio", -->
+					<!-- album: 'Buffering...'  -->
+                    <!-- //artwork: [{ src: "radio-icon.png", sizes: "512x512", type: "image/png" }] -->
+                <!-- }); -->
 			
 			//MediaSesion API changes
 			navigator.mediaSession.setActionHandler("play", function() {
@@ -261,12 +322,12 @@
 				playStation((currentStationIndex + 1) % stations.length);
 			});
 			
-			navigator.mediaSession.metadata = new MediaMetadata({
-                    title: stationName,
-                    artist: "Live Radio",
-					album: 'Radio' 
-                    //artwork: [{ src: "radio-icon.png", sizes: "512x512", type: "image/png" }]
-                });
+			<!-- navigator.mediaSession.metadata = new MediaMetadata({ -->
+                    <!-- title: stationName, -->
+                    <!-- artist: "Live Radio", -->
+					<!-- album: 'Radio'  -->
+                    <!-- //artwork: [{ src: "radio-icon.png", sizes: "512x512", type: "image/png" }] -->
+                <!-- }); -->
 			
 			}
 			
