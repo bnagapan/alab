@@ -116,7 +116,7 @@
 <body>
     <div id="content">
         <h1>R | a | d | i | o</h1>
-        v 23.1.0<br><br>
+        v 24.1.0<br><br>
         <table border="0" cellspacing="3" cellpadding="3" align="center">
         <tr>
             <!-- Navigation buttons -->
@@ -210,14 +210,18 @@ var currentStationIndex = 0;
             if (audioPlayer.canPlayType('application/vnd.apple.mpegurl')) {
                 audioPlayer.src = decodedUrl;
                 audioPlayer.addEventListener("canplaythrough", function () {
+					writeOutput('canplaythrough-before play-m3u8');
                     audioPlayer.play().catch(handlePlaybackError);
+					writeOutput('canplaythrough-after play');
                 }, { once: true });
             } else if (Hls.isSupported()) {
                 hls = new Hls();
                 hls.loadSource(decodedUrl);
                 hls.attachMedia(audioPlayer);
                 hls.on(Hls.Events.MANIFEST_PARSED, function () {
+					writeOutput('canplaythrough-before play-m3u8');
                     audioPlayer.play().catch(handlePlaybackError);
+					writeOutput('canplaythrough-after play');
                 });
             } else {
                 writeOutput("Error: M3U8 format not supported.");
@@ -225,7 +229,9 @@ var currentStationIndex = 0;
         } else {
             audioPlayer.src = decodedUrl;
             audioPlayer.addEventListener("canplaythrough", function () {
+				writeOutput('canplaythrough-before play-regular stream');
                 audioPlayer.play().catch(handlePlaybackError);
+				writeOutput('canplaythrough-after play-regular stream');
             }, { once: true });
         }
 
