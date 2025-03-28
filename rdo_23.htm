@@ -116,7 +116,7 @@
 <body>
     <div id="content">
         <h1>R | a | d | i | o</h1>
-        v 20.2.0<br><br>
+        v 23.1.0<br><br>
         <table border="0" cellspacing="3" cellpadding="3" align="center">
         <tr>
             <!-- Navigation buttons -->
@@ -159,10 +159,11 @@
 
     <script>
 	
-
-    var currentAudio = null;
+	    var currentStationIndex = 0;
+    var audioPlayer = null;
+ 
     var hlsInstance = null;
-    var currentStationIndex = 0;
+
 	
 	 // Base64 encoded station URLs
         var stations = [
@@ -181,6 +182,13 @@
             return atob(base64Url);
         }
 
+   var currentStationIndex = 0;
+    var audioPlayer = null;
+    
+    function decodeBase64Url(base64Url) {
+        return atob(base64Url);
+    }
+
     function playStation(index) {
         currentStationIndex = index % stations.length;
         var station = stations[currentStationIndex];
@@ -189,39 +197,147 @@
 
         $('#stationList div').removeClass('active');
         $('#stationList div').eq(currentStationIndex).addClass('active');
-        writeOutput('Playing: ' + stationName + ' (' + decodedUrl + ')');
 
-        // Stop any existing playback
-        if (currentAudio) {
-            currentAudio.pause();
-            currentAudio.src = "";
-            currentAudio.load();
+        writeOutput('------------------------------------------');
+        writeOutput('Station Name: ' + stationName);
+        writeOutput('URL: ' + decodedUrl);
+        writeOutput('currentStationIndex: ' + currentStationIndex);
+
+        // Remove previous audio element
+        if (audioPlayer) {
+            audioPlayer.pause();
+            audioPlayer.src = "";
+            audioPlayer.load();
+            audioPlayer.remove();
         }
-        if (hlsInstance) {
-            hlsInstance.destroy();
-            hlsInstance = null;
+		
+		 if (audioPlayer) {
+            audioPlayer.pause();
+            audioPlayer.src = "";
+            audioPlayer.load();
+            if (hls) {
+                hls.destroy(); // Destroy HLS instance if exists
+                hls = null;
+            }
+            audioPlayer.remove();
         }
 
-        var audioContainer = $('#audioContainer');
-        audioContainer.empty();
+        // Create new audio element
+        audioPlayer = document.createElement("audio");
+        audioPlayer.controls = true;
+        audioPlayer.autoplay = true;
+        audioPlayer.setAttribute("playsinline", "true");
 
-        currentAudio = $('<audio class="audio-player" controls>').appendTo(audioContainer).get(0);
-        
-        if (decodedUrl.endsWith('.m3u8')) {
-            hlsInstance = new Hls();
-            hlsInstance.loadSource(decodedUrl);
-            hlsInstance.attachMedia(currentAudio);
+        // Detect if the URL is an M3U8 stream
+        if (decodedUrl.endsWith(".m3u8")) {
+            if (audioPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+			
+								if ("mediaSession" in navigator) {
+					navigator.mediaSession.metadata = new MediaMetadata({
+					title: stationName,
+					artist: "Live Radio",
+					album: 'Loading...'
+					});
+
+					navigator.mediaSession.setActionHandler("previoustrack", function () {
+					playStation((currentStationIndex - 1 + stations.length) % stations.length);
+					});
+
+					navigator.mediaSession.setActionHandler("nexttrack", function () {
+					playStation((currentStationIndex + 1) % stations.length);
+					});
+					writeOutput('Media - init');
+					}
+					
+                // Native support (iOS Safari, some browsers)
+                audioPlayer.src = decodedUrl;
+				 audioPlayer.addEventListener("canplaythrough", function () {
+				 writeOutput('Media - canplaythrough');
+				 
+
+                audioPlayer.play().catch(handlePlaybackError);
+				});
+                //audioPlayer.play().catch(handlePlaybackError);
+				
+				
+				
+				
+            } else if (Hls.isSupported()) {
+                // HLS.js for unsupported browsers
+                hls = new Hls();
+                hls.loadSource(decodedUrl);
+                hls.attachMedia(audioPlayer);
+                hls.on(Hls.Events.MANIFEST_PARSED, function () {
+					writeOutput('HLS - ready');
+                    audioPlayer.play().catch(handlePlaybackError);
+                });
+            } else {
+                writeOutput("Error: M3U8 format not supported on this browser.");
+            }
         } else {
-            currentAudio.src = decodedUrl;
+            // Regular audio stream
+            audioPlayer.src = decodedUrl;
+            audioPlayer.addEventListener("canplaythrough", function () {
+				writeOutput('Regular stream path - canplaythrough');
+				
+				audioPlayer.addEventListener("canplaythrough", function () {
+				 writeOutput('Media - canplaythrough');
+				 
+					if ("mediaSession" in navigator) {
+					navigator.mediaSession.metadata = new MediaMetadata({
+					title: stationName,
+					artist: "Live Radio",
+					album: 'Now Playing...'
+					});
+
+					navigator.mediaSession.setActionHandler("previoustrack", function () {
+					playStation((currentStationIndex - 1 + stations.length) % stations.length);
+					});
+
+					navigator.mediaSession.setActionHandler("nexttrack", function () {
+					playStation((currentStationIndex + 1) % stations.length);
+					});
+					writeOutput('Media - init');
+					}
+                audioPlayer.play().catch(handlePlaybackError);
+				});
+				writeOutput('regular stream path - media init complted');
+                //audioPlayer.play().catch(handlePlaybackError);
+            });
         }
 
-        currentAudio.addEventListener('canplay', function () {
-            currentAudio.play().catch(handlePlaybackError);
-        });
+        // Add to the DOM
+        $('#audioContainer').html(audioPlayer);
+		
+        // Setup Media Session API
+        if ("mediaSession" in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: stationName,
+                artist: "Live Radio",
+                album: 'Now Playing'
+            });
+
+            navigator.mediaSession.setActionHandler("play", function () {
+                audioPlayer.play();
+            });
+
+            navigator.mediaSession.setActionHandler("pause", function () {
+                audioPlayer.pause();
+            });
+
+            navigator.mediaSession.setActionHandler("previoustrack", function () {
+                playStation((currentStationIndex - 1 + stations.length) % stations.length);
+            });
+
+            navigator.mediaSession.setActionHandler("nexttrack", function () {
+                playStation((currentStationIndex + 1) % stations.length);
+            });
+        }
     }
 
     function handlePlaybackError(error) {
-        writeOutput('Playback error: ' + error.message);
+        writeOutput('Error playing stream: ' + error.message);
+        console.error('Playback error:', error);
     }
 
     function listStations() {
@@ -248,6 +364,23 @@
     $('#prevButton').click(function () {
         playStation((currentStationIndex - 1 + stations.length) % stations.length);
     });
+	
+	function toggleTextArea() {
+			var textArea = document.getElementById('output');
+			if (textArea.style.display === 'none') {
+			textArea.style.display = 'block';
+			} else {
+			textArea.style.display = 'none';
+			}
+			}
+			
+	function clearData() {
+			$('#output').val('');
+			}
+			
+	$(document).ready(function() {
+	listStations();
+	});
 </script>
 
 </body>
