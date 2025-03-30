@@ -116,7 +116,7 @@
 <body>
     <div id="content">
         <h1>R | a | d | i | o</h1>
-        v 25.1.0<br><br>
+        v 25.2.0<br><br>
         <table border="0" cellspacing="3" cellpadding="3" align="center">
         <tr>
             <!-- Navigation buttons -->
@@ -132,7 +132,7 @@
         <tr>
             <td colspan="3"> 
                 <!-- Button to list all stations -->
-                <div id="listButton" onclick="listStations()">List out all the stations</div>
+                <div id="listButton" onclick="listStations()">All Stations</div>
             </td>
             <td colspan="2">
                 <div id="btnClear" onclick="clearData()">Clear</div>
@@ -145,7 +145,7 @@
             </td>
         </tr>
         <tr>
-            <td colspan="5">            <div id="toggleButton" onclick="toggleTextArea()">Toggle Logs Output</div></td>
+            <td colspan="5">            <div id="toggleButton" onclick="toggleTextArea()">Logs Output</div></td>
         </tr>
         <tr>
             <td colspan="5"><textarea id="output" name="w3review" rows="15" cols="80" style="display:none">
@@ -179,7 +179,7 @@ var currentStationIndex = 0;
             { url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtLzBjeXMyaDQxdzBodnY=", name: "#7. A|R|R F|M" },                
             { url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NDI4L2F1ZGlv", name: "#8. Hello F|M" },
             { url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NTQzL2F1ZGlv", name: "#9. M|i|r|c|y F|M" },
-            { url: "aHR0cHM6Ly9zdHJ3My5vcGVuc3RyZWFtLmNvLzEzMTE=", name: "#10. S|u|r|y|a|n F|M" }
+            { url: "aHR0cHM6Ly9zdHJ3My5vcGVuc3RyZWFtLmNvLzEzMTE=", name: "#10. S|u|r|i|y|a|n F|M" }
         ];
 	
 
@@ -220,6 +220,7 @@ var currentStationIndex = 0;
 					//writeOutput('loadeddata-before play-m3u8');
                     audioPlayer.play().catch(handlePlaybackError);
 					writeOutput('loadeddata-after play');
+					UpdateMediaSession(stationName,"Streaming...");
                 }, { once: true });
 				
 				audioPlayer.addEventListener("loadstart", function () {
@@ -239,7 +240,7 @@ var currentStationIndex = 0;
                 });
             } else {
                 writeOutput("Error: M3U8 format not supported.");
-            }
+            } 
         } else {
             audioPlayer.src = decodedUrl;
             audioPlayer.addEventListener("canplaythrough", function () {
@@ -252,6 +253,7 @@ var currentStationIndex = 0;
 				//writeOutput('loadeddata-before play-regular stream');
                 audioPlayer.play().catch(handlePlaybackError);
 				writeOutput('loadeddata-after play-regular stream');
+				UpdateMediaSession(stationName,"Streaming...");
             }, { once: true });
 			
 				audioPlayer.addEventListener("loadstart", function () {
