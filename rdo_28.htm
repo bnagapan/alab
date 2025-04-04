@@ -224,7 +224,7 @@
 <body>
     <div id="content">
         <h1>R | a | d | i | o</h1>
-        v 28.0.1<br><br>
+        v 28.0.2<br><br>
         <table border="0" cellspacing="3" cellpadding="3" align="center">
         <tr>
             <!-- Navigation buttons -->
@@ -405,6 +405,7 @@ var currentStationIndex = 0;
 			
             writeOutput("HLS MANIFEST_PARSED - playing station");
           });
+		  UpdateSessionNew();
         } else {
           writeOutput("Error: M3U8 format not supported.");
         }
@@ -413,7 +414,9 @@ var currentStationIndex = 0;
         $(audioPlayer).one("canplaythrough", function () {
           audioPlayer.play().catch(handlePlaybackError);
           writeOutput("canplaythrough-after play-regular stream");
+		  UpdateSessionNew();
         });
+		
         $(audioPlayer).one("loadeddata", function () {
           audioPlayer.play().catch(handlePlaybackError);
           writeOutput("loadeddata-after play-regular stream");
@@ -464,6 +467,19 @@ document.addEventListener("play", () => {
   }
 });
     }
+	
+		function UpdateSessionNew()
+	{
+		if ("mediaSession" in navigator) {
+		navigator.mediaSession.setActionHandler("previoustrack", function () {
+		playStation((currentStationIndex - 1 + stations.length) % stations.length);
+		});
+		navigator.mediaSession.setActionHandler("nexttrack", function () {
+		playStation((currentStationIndex + 1) % stations.length);
+		});
+		writeOutput("UpdateSessionNew()...");
+		}
+	}
 
     // Update Media Session helper
     function UpdateMediaSession(stationName, msg) {
