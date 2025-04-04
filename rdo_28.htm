@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P l a y || R a d i o || S t r e a m</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+	
+
+	
+        /* Basic reset */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+		
+		body {
+		background-image: url('https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk102_sha.png');
+		//background-image: url('https://groupbenefits.manulife.ca/gb/member-portal/assets/ciam-sign-in-DWxAuxYg.png'); /* Replace with the actual image URL */
+		background-size:cover; /* Ensures the image covers the whole page */
+		background-position: center; /* Centers the image */
+		background-repeat: no-repeat; /* Prevents repeating */
+		background-attachment: fixed; /* Keeps the image fixed while scrolling */
+		}
+
+        /* Main container */
+        #content {
+            padding: 20px;
+            max-width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        /* Header */
+        h1 {
+            font-size: 26px;
+            margin-bottom: 20px;
+        }
+		
+		/* Container for the main control buttons */
+    #controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px; /* Space between buttons */
+        margin-bottom: 15px;
+    }
+
+    /* Styling for the grouped buttons */
+    .control-btn {
+        padding: 12px;
+        background-color: #1e90ff; /* Dodger Blue */
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 16px;
+        width: 100px;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    .control-btn:hover {
+        background-color: #1c74d4; /* Slightly darker Dodger Blue */
+    }
+		
+       /* Styling for play button */
+        #link  {
+            display: inline-block;
+            padding: 12px;
+            background-color: #007bff; /* Primary Blue */
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 16px;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+    #link:hover {
+        background-color: #0056b3; /* Darker Blue for hover */
+    }
+	
+	/* --- New Styles for Control Buttons --- */
+.control-btn {
+  padding: 12px;
+  background-color: #1e90ff; /* Dodger Blue */
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 16px;
+  width: 100px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.control-btn:hover {
+  background-color: #1c74d4; /* Slightly darker Dodger Blue */
+}	
+	
+/* --- Updated Button Wrapper Layout --- */
+.button-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 10px; /* Space between buttons */
+  margin-top: 10px;
+}
+
+/* --- Updated Styles for Button Wrapper Elements --- */
+/* Replace any existing styles for these IDs with the following if not already present */
+#listButton,#btnClear,#toggleButton,#prevButton,#nextButton,#favoritesButton,#template2Button {
+  display: inline-block;
+  padding: 12px;
+  background-color: #1e90ff; /* Dodger Blue */
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  font-size: 16px;
+  width: 150px;
+  max-width: 300px;
+  text-align: center;
+  cursor: pointer;
+}
+
+#listButton:hover,
+#btnClear:hover,
+#toggleButton:hover,
+#prevButton:hover,
+#nextButton:hover,
+#favoritesButton:hover, #template2Button:hover {
+  background-color: #1c74d4; /* Slightly darker Dodger Blue for hover */
+}
+		
+		/* Styling for the Favorites button 
+		#favoritesButton {
+		padding: 12px;
+		background-color: #1e90ff; /* Dodger Blue */
+		color: white;
+		text-decoration: none;
+		border-radius: 5px;
+		font-size: 16px;
+		width: 50%;
+		text-align: center;
+		cursor: pointer;
+		display: inline-block;
+		}*/
+
+		#favoritesButton:hover {
+		background-color: #1c74d4; /* Slightly darker Dodger Blue for hover */
+		}
+
+        /* Audio player */
+        .audio-player {
+            width: 100%;
+            margin-top: 20px;
+            max-width: 400px;
+        }
+		
+		 video::-webkit-media-controls-fullscreen-button {
+            display: none;
+        }
+		
+        /* Styling for the station list */
+        #stationList {
+            margin-top: 20px;
+        }
+		#stationList div {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		background-color: #f8f9fa;
+		padding: 12px;
+		margin-bottom: 10px;
+		border-radius: 4px;
+		font-size: 16px;
+		cursor: pointer;
+		width: 80%;
+		max-width: 300px;
+		margin-left: auto;
+		margin-right: auto;
+		text-align: left;
+		}
+
+		#stationList div button {
+		background: none;
+		border: none;
+		font-size: 18px;
+		cursor: pointer;
+		color: #ffcc00; /* Gold for favorite, change if needed */
+		flex-shrink: 0;
+		}
+
+        #stationList div:hover {
+            background-color: #e9ecef;
+        }
+        #stationList div.active {
+            background-color: #007bff;
+            color: white;
+        }
+        /* Responsiveness for small screens */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 22px;
+            }
+			
+            #link, #listButton, #template2Button, #prevButton, #nextButton, #stationList div {
+                font-size: 14px;
+                padding: 10px;
+                width: 90%;
+                max-width: 280px;
+            }
+        }
+        #output {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="content">
+        <h1>R | a | d | i | o</h1>
+        v 28.0.0<br><br>
+        <table border="0" cellspacing="3" cellpadding="3" align="center">
+        <tr>
+            <!-- Navigation buttons -->
+            <td> <div id="prevButton">⏮ Previous</div> </td>
+            <td>&nbsp;</td>
+            <td>
+                <!-- Clickable link to start the radio playlist -->
+                <a href="javascript:void(0);" id="link"> ▶ ️ </a>
+            </td>
+            <td>&nbsp;</td>
+            <td>        <div id="nextButton">⏭ Next</div></td>
+        </tr>
+        <tr>
+            <td colspan="5"> 
+                <!-- Button to list all stations -->
+				<div id="buttonWrapper" class="button-wrapper">
+						<div id="listButton" onclick="loadOriginalStations()">All Stations</div>
+						<!-- New Template 2 button -->
+						<div id="template2Button" onclick="loadTemplate2()">Template 2</div>
+						<div id="favoritesButton" onclick="listFavorites()">⭐ Favorites</div>
+
+				</div>
+
+            </td>
+           
+        </tr>
+       
+        <tr>
+            <td colspan="3">            <div id="toggleButton" onclick="toggleTextArea()">Logs Output</div></td>
+			 <td colspan="2">
+                <div id="btnClear" onclick="clearData()">Clear</div>
+            </td>
+        </tr>
+		 <tr>
+            <td colspan="5">
+                <!-- Dynamic Audio player elements will be appended here -->
+                <div id="audioContainer"></div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="5"><textarea id="output" name="w3review" rows="15" cols="80" style="display:none">
+    At w3schools.com you will learn how to make a website. They offer free tutorials in all web development technologies.
+    </textarea></td>
+        </tr>
+        </table>
+    </div>
+
+    <div id="stationList"></div>
+
+    <script>
+var currentStationIndex = 0;
+    var audioPlayer = document.createElement("audio");
+    var hls = null; // Single instance of HLS.js
+
+    audioPlayer.controls = true;
+    audioPlayer.autoplay = true;
+    audioPlayer.setAttribute("playsinline", "true");
+
+    document.getElementById("audioContainer").appendChild(audioPlayer);
+	
+		 // Base64 encoded station URLs
+        var originalStations  = [
+            { id: 1, url: "aHR0cHM6Ly9yb2dlcnMtaGxzLmxlYW5zdHJlYW0uY28vcm9nZXJzL2hhbDk1Ny5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y N|e|w|s" },
+            { id: 2, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: ". C|B|C R|a|d|i|o" },
+			{ id: 3, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NDI4L2F1ZGlv", name: ". Hello F|M" },
+            { id: 4, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NTQzL2F1ZGlv", name: ". M|i|r|c|y F|M" },
+            { id: 5, url: "aHR0cHM6Ly9zdHJ3My5vcGVuc3RyZWFtLmNvLzEzMTE=", name: ". R|a|d|i|o| |c|i|t|y F|M" },
+			{ id: 6, url: "aHR0cDovL2Fpci5wYy5jZG4uYml0Z3Jhdml0eS5jb20vYWlyL2xpdmUvcGJhdWRpbzA3OC9tYXN0ZXIubTN1OA==", name: ". D|h|a|r|a|m|a|p|u|r|i F|M" }	,		
+            { id: 7, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9hYWQ0ZTUxcXo3enV2", name: ". KS Chitra FM" },
+            { id: 8, url: "aHR0cDovL3BzcmxpdmUyLmxpc3Rlbm9uLmluL2lybGl0ZT9haD0wZTgxNzQ5ZTM3Nzg5ZTVmYjhjMjkwOTI2Y2U4N2UzZg==", name: ". I|l|a|y|a|r|a|j|a Lite R|a|d|i|o" },
+            { id: 9, url: "aHR0cDovL3BzcmxpdmUyLmxpc3Rlbm9uLmluL2lyYmVhdD9haD0wZTgxNzQ5ZTM3Nzg5ZTVmYjhjMjkwOTI2Y2U4N2UzZg==", name: ". I|l|a|y|a|r|a|j|a R|a|d|i|o" },
+            { id: 10, url: "aHR0cDovL3BzcmxpdmUyLmxpc3Rlbm9uLmluL2FycmxpdGU/YWg9MGU4MTc0OWUzNzc4OWU1ZmI4YzI5MDkyNmNlODdlM2Y=", name: ". A|R| R|a|h|m|a|n Lite" },
+            { id: 11, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtLzBjeXMyaDQxdzBodnY=", name: ". A|R|R F|M" }                
+           
+        ];
+	
+			// Start with the original stations
+		var stations = originalStations.slice();
+
+		// Template 2 stations list (provided)
+		var template2Stations = [
+			{ id: 1, url: "aHR0cHM6Ly9yb2dlcnMtaGxzLmxlYW5zdHJlYW0uY28vcm9nZXJzL2hhbDk1Ny5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y N|e|w|s" },
+			{ id: 2, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQxMDUwL0VTX1JQVkMvbWFzdGVyLm0zdTg=", name: ". C|B|C R|a|d|i|o" },
+			{ id: 3, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQxMDUwL0VTX1IxUFZDL21hc3Rlci5tM3U4", name: ". C|B|C| |T|o|r|o|n|t|o" },
+			{ id: 4, url: "aHR0cDovL3JvZ2Vycy1obHMubGVhbnN0cmVhbS5jbzo4MDAwL3JvZ2Vycy90b3I2ODAuc3RyZWFtLzQ4ay9wbGF5bGlzdC5tM3U4", name: ". C|i|t|y| |N|e|w|s| |T|o|r|o|n|t|o" },
+			{ id: 5, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NDI4L2F1ZGlv", name: ". Hello F|M" },
+			{ id: 5, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NTQzL2F1ZGlv", name: ". M|i|r|c|y F|M" },
+			{ id: 6, url: "aHR0cHM6Ly9zdHJ3My5vcGVuc3RyZWFtLmNvLzEzMTE=", name: ". R|a|d|i|o| |c|i|t|y F|M" },
+			{ id: 7, url: "aHR0cHM6Ly9yYWRpb3MuY3JhYmRhbmNlLmNvbTo4MDAyLzI=", name: ". S|u|r|y|a|n| |F|M| |9|3|.|5" },
+			{ id: 8, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9yMmduMXBnbTRxcnV2", name: ". B|I|G| |F|M" },
+			{ id: 9, url: "aHR0cDovL2Fpci5wYy5jZG4uYml0Z3Jhdml0eS5jb20vYWlyL2xpdmUvcGJhdWRpbzA3OC9tYXN0ZXIubTN1OA==", name: ". D|h|a|r|a|m|a|p|u|r|i F|M" },
+			{ id: 10, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9ka3hmdGc2azd0enV2", name: ". t|a|m|i|l|-|2|0|2|1|-|l|a|t|e|s|t|-|h|i|t|s" },
+			{ id: 11, url: "aHR0cHM6Ly9wc3JsaXZlMi5saXN0ZW5vbi5pbi9pcmJlYXQ/YWg9MGU4MTc0OWUzNzc4OWU1ZmI4YzI5MDkyNmNlODdlM2Y=", name: ". I|l|a|y|a|r|a|j|a| |S|u|p|e|r| |B|e|a|t|s| |R|a|d|i|o" },
+			{ id: 12, url: "aHR0cHM6Ly9zcHNlcnZlci5zc2Nhc3QydS5pbi9kaW5kaWd1bGNpdHlmbS9zdHJlYW0=", name: ". D|i|n|d|i|g|u|l| |F|M" },
+			{ id: 13, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtLzBjeXMyaDQxdzBodnY=", name: ". A|R|R F|M" }
+		];
+
+    function decodeBase64Url(base64Url) {
+        return atob(base64Url);
+    }
+
+     function playStation(index) {
+      currentStationIndex = index % stations.length;
+      var station = stations[currentStationIndex];
+      var decodedUrl = decodeBase64Url(station.url);
+      var stationName = station.name.replace(/\|/g, "");
+
+      $("#stationList div").removeClass("active");
+      $("#stationList div").eq(currentStationIndex).addClass("active");
+      writeOutput('---------------------------------------');
+      writeOutput("currentStationIndex = " + currentStationIndex);
+      writeOutput("Playing: " + stationName + " (" + decodedUrl + ")");
+
+      // Stop and reset audio before switching stations
+      if (hls) {
+        hls.destroy();
+        hls = null;
+      }
+      audioPlayer.pause();
+      audioPlayer.src = ""; // Clean reset
+
+      if (decodedUrl.endsWith(".m3u8")) {
+        if (audioPlayer.canPlayType("application/vnd.apple.mpegurl")) {
+          audioPlayer.src = decodedUrl;
+          $(audioPlayer).one("canplaythrough", function () {
+            //audioPlayer.play().catch(handlePlaybackError);
+			//Audio-playback fix-ios
+			audio.addEventListener("play", function () {
+			// If HLS isn't loaded anymore, or audio source isn't active, reload
+			if (!hls || hls.media !== audio || audio.src !== decodedURL) {
+			console.log("Reinitializing HLS on play attempt");
+			hls.destroy();
+			hls = new Hls();
+			hls.loadSource(decodedURL);
+			hls.attachMedia(audio);
+			}
+			});
+			
+            writeOutput("canplaythrough-after play-m3u8");
+          });
+          $(audioPlayer).one("loadeddata", function () {
+            //audioPlayer.play().catch(handlePlaybackError);
+			//Audio-playback fix-ios
+			audio.addEventListener("play", function () {
+			// If HLS isn't loaded anymore, or audio source isn't active, reload
+			if (!hls || hls.media !== audio || audio.src !== decodedURL) {
+			console.log("Reinitializing HLS on play attempt");
+			hls.destroy();
+			hls = new Hls();
+			hls.loadSource(decodedURL);
+			hls.attachMedia(audio);
+			}
+			});
+            writeOutput("loadeddata-after play");
+            UpdateMediaSession(stationName, "Streaming...");
+          });
+          $(audioPlayer).one("loadstart", function () {
+            UpdateMediaSession(stationName, "Loading...");
+            writeOutput("loadstart()-canPlayType(M3U8)");
+          });
+        } else if (Hls.isSupported()) {
+          hls = new Hls();
+          hls.loadSource(decodedUrl);
+          hls.attachMedia(audioPlayer);
+          hls.on(Hls.Events.MANIFEST_PARSED, function () {
+            //audioPlayer.play().catch(handlePlaybackError);
+			//Audio-playback fix-ios
+			audio.addEventListener("play", function () {
+			// If HLS isn't loaded anymore, or audio source isn't active, reload
+			if (!hls || hls.media !== audio || audio.src !== decodedURL) {
+			console.log("Reinitializing HLS on play attempt");
+			hls.destroy();
+			hls = new Hls();
+			hls.loadSource(decodedURL);
+			hls.attachMedia(audio);
+			}
+			});
+			
+            writeOutput("HLS MANIFEST_PARSED - playing station");
+          });
+        } else {
+          writeOutput("Error: M3U8 format not supported.");
+        }
+      } else {
+        audioPlayer.src = decodedUrl;
+        $(audioPlayer).one("canplaythrough", function () {
+          audioPlayer.play().catch(handlePlaybackError);
+          writeOutput("canplaythrough-after play-regular stream");
+        });
+        $(audioPlayer).one("loadeddata", function () {
+          audioPlayer.play().catch(handlePlaybackError);
+          writeOutput("loadeddata-after play-regular stream");
+          UpdateMediaSession(stationName, "Streaming...");
+        });
+        $(audioPlayer).one("loadstart", function () {
+          UpdateMediaSession(stationName, "Loading...");
+          writeOutput("loadstart()-else");
+        });
+      }
+
+      // Media Session API updates using jQuery (if available)
+      if ("mediaSession" in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: stationName,
+          artist: "Live Radio",
+          album: "Streaming"
+        });
+        navigator.mediaSession.setActionHandler("previoustrack", function () {
+          playStation((currentStationIndex - 1 + stations.length) % stations.length);
+        });
+        navigator.mediaSession.setActionHandler("nexttrack", function () {
+          playStation((currentStationIndex + 1) % stations.length);
+        });
+        navigator.mediaSession.setActionHandler("play", function () {
+          audioPlayer.play();
+        });
+        navigator.mediaSession.setActionHandler("pause", function () {
+          audioPlayer.pause();
+        });
+        navigator.mediaSession.setActionHandler("stop", function () {
+          audioPlayer.pause();
+          audioPlayer.currentTime = 0;
+        });
+      }
+	  
+	  document.addEventListener("visibilitychange", function() {
+  if (document.visibilityState === 'visible' && audio.paused && playPauseBtn.hasClass("playing")) {
+  writeOutput("visibilitychange()");
+    audio.play().catch(console.error);
+  }
+});
+    }
+
+    // Update Media Session helper
+    function UpdateMediaSession(stationName, msg) {
+      if ("mediaSession" in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: (currentStationIndex + 1) + stationName,
+          artist: "Live Radio",
+          album: msg
+        });
+        navigator.mediaSession.setActionHandler("previoustrack", function () {
+          playStation((currentStationIndex - 1 + stations.length) % stations.length);
+        });
+        navigator.mediaSession.setActionHandler("nexttrack", function () {
+          playStation((currentStationIndex + 1) % stations.length);
+        });
+      }
+      writeOutput("UpdateMediaSession() - Completed");
+    }
+
+    function handlePlaybackError(error) {
+      writeOutput("Playback error: " + error.message);
+      console.error("Playback error:", error);
+      UpdateMediaSession("Error", "Error");
+      writeOutput("handlePlaybackError()");
+    }
+
+    // Render station list using jQuery
+    function listStations() {
+      let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+      $("#stationList").html(
+        stations
+          .map(
+            (s, i) =>
+              `<div onclick="playStation(${i})" id="station-${i}" class="${i === currentStationIndex ? 'active' : ''}">
+                ${s.id + s.name.replace(/\|/g, "")}
+                <button onclick="event.stopPropagation(); toggleFavorite(${i})">
+                  ${favorites.includes(i) ? "★" : "☆"}
+                </button>
+              </div>`
+          )
+          .join("")
+      );
+    }
+
+    function toggleFavorite(index) {
+      let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+      if (favorites.includes(index)) {
+        favorites = favorites.filter(i => i !== index);
+      } else {
+        favorites.push(index);
+      }
+      localStorage.setItem("favorites", JSON.stringify(favorites));
+      listStations(); // Refresh list using jQuery
+    }
+
+    function listFavorites() {
+      let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+      if (favorites.length === 0) {
+        alert("No favorite stations yet!");
+        return;
+      }
+      let sortedFavorites = favorites
+        .map(i => stations[i])
+        .sort((a, b) => a.id - b.id);
+      $("#stationList").html(
+        sortedFavorites
+          .map(
+            s =>
+              `<div onclick="playStation(${stations.findIndex(st => st.id === s.id)})" id="station-${s.id}" class="active">
+                ${s.id + s.name.replace(/\|/g, "")}
+                <button onclick="event.stopPropagation(); toggleFavorite(${stations.findIndex(st => st.id === s.id)})">★</button>
+              </div>`
+          )
+          .join("")
+      );
+      playStation(stations.findIndex(st => st.id === sortedFavorites[0].id));
+    }
+
+   // Helper functions to switch station lists using jQuery
+    function loadTemplate2() {
+      stations = template2Stations.slice(); // clear current list and load Template 2 stations
+      currentStationIndex = 0;
+      listStations();
+      writeOutput("Template 2 loaded with new station list.");
+    }
+
+    function loadOriginalStations() {
+      stations = originalStations.slice(); // reload original station list
+      currentStationIndex = 0;
+      listStations();
+      writeOutput("Original station list reloaded.");
+    }
+
+
+
+
+    function writeOutput(txt) {
+        $('#output').val(txt + '\n' + $('#output').val());
+    }
+
+    $('#link').click(function () {
+        playStation(currentStationIndex);
+        listStations();
+    });
+
+    $('#nextButton').click(function () {
+        playStation((currentStationIndex + 1) % stations.length);
+    });
+
+    $('#prevButton').click(function () {
+        playStation((currentStationIndex - 1 + stations.length) % stations.length);
+    });
+
+    $(document).ready(function() {
+        listStations();
+    });
+	
+	function toggleTextArea() {
+		var textArea = document.getElementById('output');
+		if (textArea.style.display === 'none') {
+		textArea.style.display = 'block';
+		} else {
+		textArea.style.display = 'none';
+		}
+		}
+		
+		function clearData() {
+			$('#output').val('');
+			navigator.mediaSession.metadata = null;
+			writeOutput('Media session cleared')
+			localStorage.setItem("favorites", JSON.stringify([])); // Set the value to an empty array
+			writeOutput('Favorite local storage cleared')
+			listStations();
+			}
+</script>
+
+</body>
+<br><br><br>
+</html>
