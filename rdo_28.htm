@@ -224,7 +224,7 @@
 <body>
     <div id="content">
         <h1>R | a | d | i | o</h1>
-        v 28.0.0<br><br>
+        v 28.0.1<br><br>
         <table border="0" cellspacing="3" cellpadding="3" align="center">
         <tr>
             <!-- Navigation buttons -->
@@ -454,6 +454,13 @@ var currentStationIndex = 0;
   if (document.visibilityState === 'visible' && audio.paused && playPauseBtn.hasClass("playing")) {
   writeOutput("visibilitychange()");
     audio.play().catch(console.error);
+  }
+});
+
+document.addEventListener("play", () => {
+	writeOutput('play...');
+  if (hls) {
+    hls.startLoad();
   }
 });
     }
