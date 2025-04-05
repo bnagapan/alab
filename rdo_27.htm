@@ -308,8 +308,8 @@ var currentStationIndex = 0;
 		var template2Stations = [
 			{ id: 1, url: "aHR0cHM6Ly9yb2dlcnMtaGxzLmxlYW5zdHJlYW0uY28vcm9nZXJzL2hhbDk1Ny5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y N|e|w|s" },
 			{ id: 2, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQxMDUwL0VTX1JQVkMvbWFzdGVyLm0zdTg=", name: ". C|B|C R|a|d|i|o" },
-			{ id: 3, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQxMDUwL0VTX1IxUFZDL21hc3Rlci5tM3U4", name: ". C|B|C| |T|o|r|o|n|t|o" },
-			{ id: 4, url: "aHR0cDovL3JvZ2Vycy1obHMubGVhbnN0cmVhbS5jbzo4MDAwL3JvZ2Vycy90b3I2ODAuc3RyZWFtLzQ4ay9wbGF5bGlzdC5tM3U4", name: ". C|i|t|y| |N|e|w|s| |T|o|r|o|n|t|o" },
+			{ id: 3, url: "aHR0cHM6Ly9jaGktbGl2ZTEtYWlzLXJlbGF5MS5sZWFuc3RyZWFtLmNvL3JvZ2Vycy90b3I2ODAuc3RyZWFtL3BsYXlsaXN0Lm0zdTg=", name: ". C|B|C| |T|o|r|o|n|t|o" },
+			{ id: 4, url: "aHR0cHM6Ly9oZWwtYWlzLWVkZ2UxLmxlYW5zdHJlYW0uY28vcm9nZXJzL3RvcjY4MC5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y| |N|e|w|s| |T|o|r|o|n|t|o" },
 			{ id: 5, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NDI4L2F1ZGlv", name: ". Hello F|M" },
 			{ id: 5, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NTQzL2F1ZGlv", name: ". M|i|r|c|y F|M" },
 			{ id: 6, url: "aHR0cHM6Ly9zdHJ3My5vcGVuc3RyZWFtLmNvLzEzMTE=", name: ". R|a|d|i|o| |c|i|t|y F|M" },
@@ -319,8 +319,10 @@ var currentStationIndex = 0;
 			{ id: 10, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9ka3hmdGc2azd0enV2", name: ". t|a|m|i|l|-|2|0|2|1|-|l|a|t|e|s|t|-|h|i|t|s" },
 			{ id: 11, url: "aHR0cHM6Ly9wc3JsaXZlMi5saXN0ZW5vbi5pbi9pcmJlYXQ/YWg9MGU4MTc0OWUzNzc4OWU1ZmI4YzI5MDkyNmNlODdlM2Y=", name: ". I|l|a|y|a|r|a|j|a| |S|u|p|e|r| |B|e|a|t|s| |R|a|d|i|o" },
 			{ id: 12, url: "aHR0cHM6Ly9zcHNlcnZlci5zc2Nhc3QydS5pbi9kaW5kaWd1bGNpdHlmbS9zdHJlYW0=", name: ". D|i|n|d|i|g|u|l| |F|M" },
-			{ id: 13, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtLzBjeXMyaDQxdzBodnY=", name: ". A|R|R F|M" }
-		];
+			{ id: 13, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtLzBjeXMyaDQxdzBodnY=", name: ". A|R|R F|M" },
+			{ id: 14, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL3g4YnlxaGE0YjQ4dXY=", name: ". V|i|j|a|y" },
+			{ id: 15, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL3V2ZGJ5Z202YTQ4dXY=", name: ". K|J| |Y|e|s|u|d|a|s" }			
+					];
 
     function decodeBase64Url(base64Url) {
         return atob(base64Url);
@@ -415,6 +417,19 @@ var currentStationIndex = 0;
         });
       }
     }
+	
+	function UpdateSessionNew()
+	{
+		if ("mediaSession" in navigator) {
+		navigator.mediaSession.setActionHandler("previoustrack", function () {
+		playStation((currentStationIndex - 1 + stations.length) % stations.length);
+		});
+		navigator.mediaSession.setActionHandler("nexttrack", function () {
+		playStation((currentStationIndex + 1) % stations.length);
+		});
+		writeOutput("UpdateSessionNew()...");
+		}
+	}
 
     // Update Media Session helper
     function UpdateMediaSession(stationName, msg) {
