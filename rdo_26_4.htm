@@ -262,11 +262,18 @@ var currentStationIndex = 0;
             { id: 5, url: "aHR0cHM6Ly9zdHJ3My5vcGVuc3RyZWFtLmNvLzEzMTE=", name: ". R|a|d|i|o| |c|i|t|y F|M" },
 			{ id: 6, url: "aHR0cDovL2Fpci5wYy5jZG4uYml0Z3Jhdml0eS5jb20vYWlyL2xpdmUvcGJhdWRpbzA3OC9tYXN0ZXIubTN1OA==", name: ". D|h|a|r|a|m|a|p|u|r|i F|M" }	,		
             { id: 7, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9hYWQ0ZTUxcXo3enV2", name: ". KS Chitra FM" },
-            { id: 8, url: "aHR0cDovL3BzcmxpdmUyLmxpc3Rlbm9uLmluL2lybGl0ZT9haD0wZTgxNzQ5ZTM3Nzg5ZTVmYjhjMjkwOTI2Y2U4N2UzZg==", name: ". I|l|a|y|a|r|a|j|a Lite R|a|d|i|o" },
-            { id: 9, url: "aHR0cDovL3BzcmxpdmUyLmxpc3Rlbm9uLmluL2lyYmVhdD9haD0wZTgxNzQ5ZTM3Nzg5ZTVmYjhjMjkwOTI2Y2U4N2UzZg==", name: ". I|l|a|y|a|r|a|j|a R|a|d|i|o" },
-            { id: 10, url: "aHR0cDovL3BzcmxpdmUyLmxpc3Rlbm9uLmluL2FycmxpdGU/YWg9MGU4MTc0OWUzNzc4OWU1ZmI4YzI5MDkyNmNlODdlM2Y=", name: ". A|R| R|a|h|m|a|n Lite" },
-            { id: 11, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtLzBjeXMyaDQxdzBodnY=", name: ". A|R|R F|M" }                
-           
+           // { id: 8, url: "aHR0cDovL3BzcmxpdmUyLmxpc3Rlbm9uLmluL2lybGl0ZT9haD0wZTgxNzQ5ZTM3Nzg5ZTVmYjhjMjkwOTI2Y2U4N2UzZg==", name: ". I|l|a|y|a|r|a|j|a Lite R|a|d|i|o" },
+           // { id: 9, url: "aHR0cDovL3BzcmxpdmUyLmxpc3Rlbm9uLmluL2lyYmVhdD9haD0wZTgxNzQ5ZTM3Nzg5ZTVmYjhjMjkwOTI2Y2U4N2UzZg==", name: ". I|l|a|y|a|r|a|j|a R|a|d|i|o" },
+           // { id: 10, url: "aHR0cDovL3BzcmxpdmUyLmxpc3Rlbm9uLmluL2FycmxpdGU/YWg9MGU4MTc0OWUzNzc4OWU1ZmI4YzI5MDkyNmNlODdlM2Y=", name: ". A|R| R|a|h|m|a|n Lite" },
+            { id: 11, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtLzBjeXMyaDQxdzBodnY=", name: ". A|R|R F|M" },               
+			{ id: 12, url: "aHR0cHM6Ly9wc3JsaXZlMi5saXN0ZW5vbi5pbi9pcmJlYXQ/YWg9MGU4MTc0OWUzNzc4OWU1ZmI4YzI5MDkyNmNlODdlM2Y=", name: ". I|l|a|y|a|r|a|j|a| |S|u|p|e|r| |B|e|a|t|s| |R|a|d|i|o" },
+			{ id: 13, url: "aHR0cHM6Ly9zcHNlcnZlci5zc2Nhc3QydS5pbi9kaW5kaWd1bGNpdHlmbS9zdHJlYW0=", name: ". D|i|n|d|i|g|u|l| |F|M" },
+			{ id: 14, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtLzBjeXMyaDQxdzBodnY=", name: ". A|R|R F|M" },
+			{ id: 15, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL3g4YnlxaGE0YjQ4dXY=", name: ". V|i|j|a|y" },
+			{ id: 16, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL3V2ZGJ5Z202YTQ4dXY=", name: ". K|J| |Y|e|s|u|d|a|s" },
+			{ id: 17, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9hcXA5N2YzejIzOHV2", name: ". R|a|j|i|n|i| |R|a|d|i|o" },
+			{ id: 18, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL2Q1c2t3Y3Q3aHF6dXY=", name: ". G|V|P" },
+			{ id: 19, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9vYjZ0amc4Z3VscHR2", name: ". H|a|r|r|i|s| |J|a|y|a|r|a|j" }           
         ];
 	
 
@@ -300,7 +307,7 @@ var currentStationIndex = 0;
                 audioPlayer.addEventListener("canplaythrough", function () {
 					//writeOutput('canplaythrough-before play-m3u8');
                     audioPlayer.play().catch(handlePlaybackError);
-					writeOutput('canplaythrough-after play');
+					writeOutput('canplaythrough-after play-m3u8');
                 }, { once: true });
 				
 				audioPlayer.addEventListener("loadeddata", function () {
