@@ -325,7 +325,7 @@ var currentStationIndex = 0;
 			{ id: 16, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL3V2ZGJ5Z202YTQ4dXY=", name: ". K|J| |Y|e|s|u|d|a|s" },
 			{ id: 17, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9hcXA5N2YzejIzOHV2", name: ". R|a|j|i|n|i| |R|a|d|i|o" },
 			{ id: 18, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL2Q1c2t3Y3Q3aHF6dXY=", name: ". G|V|P" },
-			{ id: 19, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9vYjZ0amc4Z3VscHR2", name: ". H|a|r|r|i|s| |J|a|y|a|r|a|j" },
+			{ id: 19, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9vYjZ0amc4Z3VscHR2", name: ". H|a|r|r|i|s| |J|a|y|a|r|a|j" }
 
 					];
 
@@ -418,13 +418,16 @@ var currentStationIndex = 0;
         });
         navigator.mediaSession.setActionHandler("play", function () {
           audioPlayer.play();
+		  writeOutput('PLAY');
         });
         navigator.mediaSession.setActionHandler("pause", function () {
           audioPlayer.pause();
+		  writeOutput('PAUSE');
         });
         navigator.mediaSession.setActionHandler("stop", function () {
           audioPlayer.pause();
           audioPlayer.currentTime = 0;
+		  writeOutput('STOP');
         });
       }
     }
