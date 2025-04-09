@@ -9,6 +9,10 @@
       font-family: sans-serif;
       margin: 20px;
       transition: background 0.5s ease;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
     }
     button, select {
       margin: 5px;
@@ -29,6 +33,8 @@
     .theme-default button { background-color: lightgray; }
     .theme-dark button { background-color: #444; color: white; }
     .theme-blue button { background-color: #00f; color: white; }
+    .theme-ocean button { background-color: #2e8b57; color: white; }
+    .theme-nature button { background-color: #8b4513; color: white; }
     a.station-link {
       display: inline-block;
       padding: 10px 20px;
@@ -42,9 +48,23 @@
     a.station-link:hover {
       background-color: #218838;
     }
+    .fav-btn {
+      padding: 5px 10px;
+      font-size: 0.8rem;
+      background-color: #ff8c00;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .active-station {
+      background-color: #FFD700; /* Gold background for active station */
+      color: red; /* Dark yellow text color for active station */
+      font-weight: bold;
+	  font-size: 1.1rem;
+    }
   </style>
 </head>
-<body class="theme-default">
+<body class="theme-ocean">
 
   <!-- Control Buttons -->
   <div class="button-container">
@@ -66,6 +86,8 @@
         <option value="theme-default">Default</option>
         <option value="theme-dark">Dark</option>
         <option value="theme-blue">Blue</option>
+        <option value="theme-ocean">Ocean</option>
+        <option value="theme-nature">Nature</option>
       </select>
     </label>
 
@@ -136,6 +158,7 @@
       audio.play();
       updateMediaSession(station);
       currentIndex = index;
+      highlightActiveStation();
     }
 
     function updateMediaSession(station) {
@@ -157,41 +180,70 @@
       playStation(newIndex);
     }
 
+    function navigateStations(dir) {
+      let newIndex = (currentIndex + dir + stations.length) % stations.length;
+      playStation(newIndex);
+    }
+
+    function highlightActiveStation() {
+      // Remove active class from all stations
+      $('.station-link').removeClass('active-station');
+      // Add active class to the currently playing station
+      $(`.station-link[data-idx="${currentIndex}"]`).addClass('active-station');
+    }
+
     function displayStations() {
       $('.station-list').empty();
+      stations.sort((a, b) => a.id - b.id);
       stations.forEach((station, idx) => {
+        const stationName = `${station.id}. ${station.name.replace(/\|/g, ' ')}`;
         const isFav = favorites.includes(station.id);
         const favText = isFav ? '★' : '☆';
         $('.station-list').append(`
           <div>
-            <a href="#" class="station-link" data-idx="${idx}">${station.name}</a>
+            <a href="#" class="station-link" data-idx="${idx}">${stationName}</a>
             <button class="fav-btn" data-id="${station.id}">${favText}</button>
           </div>
         `);
       });
+      adjustStationButtonWidths();
     }
 
     function displayFavorites() {
       $('.favorite-list').empty();
+      favorites.sort();
       favorites.forEach(id => {
         const station = stations.find(s => s.id === id);
         if (station) {
-          $('.favorite-list').append(`<div>${station.name}</div>`);
+          const stationName = `${station.id}. ${station.name.replace(/\|/g, ' ')}`;
+          $('.favorite-list').append(`<div>${stationName}</div>`);
         }
       });
     }
 
-    $(document).ready(function() {
-      // Set default background to Ocean image
-      $('body').css('background-image', 'url(https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk102_sha.png)');
-      $('body').css('background-size', 'cover');
+    function adjustStationButtonWidths() {
+      let maxWidth = 0;
+      $('.station-link').each(function() {
+        maxWidth = Math.max(maxWidth, $(this).outerWidth());
+      });
+      $('.station-link').each(function() {
+        $(this).css('width', maxWidth);
+      });
+    }
 
+    $(document).ready(function() {
+      $('body').css('background-image', 'url(https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk102_sha.png)');
+      $('#bgImageSelect').val('https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk102_sha.png');
+      $('#themeSelect').val('theme-ocean');
+      
       if (!localStorage.getItem('stations')) saveStations();
       loadStations();
 
+      displayStations();
+
       $('#playFirst').click(() => playStation(0));
-      $('#playPrevious').click(() => playStation(currentIndex - 1 < 0 ? stations.length - 1 : currentIndex - 1));
-      $('#playNext').click(() => playStation(currentIndex + 1 >= stations.length ? 0 : currentIndex + 1));
+      $('#playPrevious').click(() => navigateStations(-1));
+      $('#playNext').click(() => navigateStations(1));
       $('#showStations').click(displayStations);
       $('#showFavorites').click(displayFavorites);
       $('#clearStorage').click(() => {
@@ -206,31 +258,29 @@
       });
 
       $('.station-list').on('click', '.fav-btn', function() {
-        const id = $(this).data('id');
-        if (favorites.includes(id)) {
-          favorites = favorites.filter(f => f !== id);
+        const stationId = $(this).data('id');
+        const index = favorites.indexOf(stationId);
+        if (index === -1) {
+          favorites.push(stationId);
+          $(this).text('★');
         } else {
-          favorites.push(id);
+          favorites.splice(index, 1);
+          $(this).text('☆');
         }
         localStorage.setItem('favorites', JSON.stringify(favorites));
-        displayStations();
-      });
-
-      $('#themeSelect').change(function() {
-        $('body').removeClass().addClass($(this).val());
-      });
-
-      $('#bgImageSelect').change(function() {
-        const url = $(this).val();
-        $('body').css('background-image', url ? `url(${url})` : 'none');
-        $('body').css('background-size', 'cover');
       });
 
       $('#toggleButtons').click(function() {
         $('.button-container').toggle();
-        $('#showStations').toggle();
-        $('#showFavorites').toggle();
-        $('#clearStorage').toggle();
+      });
+
+      $('#bgImageSelect').change(function() {
+        $('body').css('background-image', 'url(' + $(this).val() + ')');
+      });
+
+      $('#themeSelect').change(function() {
+        $('body').removeClass().addClass($(this).val());
+        highlightActiveStation();
       });
     });
   </script>
