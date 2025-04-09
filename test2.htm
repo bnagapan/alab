@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>jQuery Radio Player</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+      transition: background 0.5s ease;
+    }
+    button, select {
+      margin: 5px;
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .station-list, .favorite-list {
+      margin-top: 10px;
+    }
+    .theme-default button { background-color: lightgray; }
+    .theme-dark button { background-color: #444; color: white; }
+    .theme-blue button { background-color: #00f; color: white; }
+    a.station-link {
+      display: inline-block;
+      padding: 10px 20px;
+      margin: 5px;
+      background-color: #28a745;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    a.station-link:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body class="theme-default">
+
+  <!-- Control Buttons -->
+  <div class="button-container">
+    <button id="playFirst">Play First Station</button>
+    <button id="playPrevious">Play Previous Station</button>
+    <button id="playNext">Play Next Station</button>
+  </div>
+
+  <!-- Additional Buttons -->
+  <button id="showStations">Show All Stations</button>
+  <button id="showFavorites">Show Favorite Stations</button>
+  <button id="clearStorage">Clear & Reload Stations</button>
+  <button id="toggleButtons">Hide/Show All Buttons</button>
+
+  <!-- Theme and Background Selector -->
+  <div>
+    <label>Theme:
+      <select id="themeSelect">
+        <option value="theme-default">Default</option>
+        <option value="theme-dark">Dark</option>
+        <option value="theme-blue">Blue</option>
+      </select>
+    </label>
+
+    <label>Background Image:
+      <select id="bgImageSelect">
+        <option value="">None</option>
+        <option value="https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk102_sha.png">Ocean</option>
+        <option value="https://groupbenefits.manulife.ca/gb/member-portal/assets/ciam-sign-in-DWxAuxYg.png">Nature</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="station-list"></div>
+  <div class="favorite-list"></div>
+
+  <audio id="radioPlayer" controls></audio>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script>
+    const rawStations = [
+      { id: 1, url: "aHR0cHM6Ly9yb2dlcnMtaGxzLmxlYW5zdHJlYW0uY28vcm9nZXJzL2hhbDk1Ny5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y N|e|w|s" },
+      { id: 2, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: ". C|B|C R|a|d|i|o" },
+      { id: 3, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQxMDUwL0VTX1IxUFZDL21hc3Rlci5tM3U4", name: ". C|B|C| |T|o|r|o|n|t|o" },
+      { id: 5, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NDI4L2F1ZGlv", name: ". Hello F|M" },
+      { id: 6, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NTQzL2F1ZGlv", name: ". M|i|r|c|y F|M" },
+      { id: 19, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9vYjZ0amc4Z3VscHR2", name: ". H|a|r|r|i|s| |J|a|y|a|r|a|j" }
+    ];
+
+    let stations = [];
+    let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+    let currentIndex = 0;
+
+    function saveStations() {
+      localStorage.setItem('stations', JSON.stringify(rawStations));
+    }
+
+    function loadStations() {
+      stations = JSON.parse(localStorage.getItem('stations')) || rawStations;
+    }
+
+    function decodeUrl(b64) {
+      return atob(b64);
+    }
+
+    function playStation(index) {
+      const station = stations[index];
+      const decodedUrl = decodeUrl(station.url);
+      const audio = document.getElementById('radioPlayer');
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(decodedUrl);
+        hls.attachMedia(audio);
+        hls.on(Hls.Events.ERROR, (event, data) => {
+          if (data.fatal) {
+            console.error("HLS.js fatal error", data);
+            if ('mediaSession' in navigator) {
+              navigator.mediaSession.metadata = new MediaMetadata({
+                title: station.name,
+                artist: `Error: ${data.details || 'Unknown error'}`
+              });
+            }
+          }
+        });
+      } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+        audio.src = decodedUrl;
+      }
+      audio.play();
+      updateMediaSession(station);
+      currentIndex = index;
+    }
+
+    function updateMediaSession(station) {
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: station.name
+        });
+        navigator.mediaSession.setActionHandler('previoustrack', () => navigateFavorites(-1));
+        navigator.mediaSession.setActionHandler('nexttrack', () => navigateFavorites(1));
+      }
+    }
+
+    function navigateFavorites(dir) {
+      if (!favorites.length) return;
+      let currentId = stations[currentIndex].id;
+      let favIndex = favorites.findIndex(id => id === currentId);
+      let nextIndex = (favIndex + dir + favorites.length) % favorites.length;
+      let newIndex = stations.findIndex(s => s.id === favorites[nextIndex]);
+      playStation(newIndex);
+    }
+
+    function displayStations() {
+      $('.station-list').empty();
+      stations.forEach((station, idx) => {
+        const isFav = favorites.includes(station.id);
+        const favText = isFav ? '★' : '☆';
+        $('.station-list').append(`
+          <div>
+            <a href="#" class="station-link" data-idx="${idx}">${station.name}</a>
+            <button class="fav-btn" data-id="${station.id}">${favText}</button>
+          </div>
+        `);
+      });
+    }
+
+    function displayFavorites() {
+      $('.favorite-list').empty();
+      favorites.forEach(id => {
+        const station = stations.find(s => s.id === id);
+        if (station) {
+          $('.favorite-list').append(`<div>${station.name}</div>`);
+        }
+      });
+    }
+
+    $(document).ready(function() {
+      // Set default background to Ocean image
+      $('body').css('background-image', 'url(https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk102_sha.png)');
+      $('body').css('background-size', 'cover');
+
+      if (!localStorage.getItem('stations')) saveStations();
+      loadStations();
+
+      $('#playFirst').click(() => playStation(0));
+      $('#playPrevious').click(() => playStation(currentIndex - 1 < 0 ? stations.length - 1 : currentIndex - 1));
+      $('#playNext').click(() => playStation(currentIndex + 1 >= stations.length ? 0 : currentIndex + 1));
+      $('#showStations').click(displayStations);
+      $('#showFavorites').click(displayFavorites);
+      $('#clearStorage').click(() => {
+        localStorage.clear();
+        saveStations();
+        loadStations();
+        displayStations();
+      });
+
+      $('.station-list').on('click', 'a', function() {
+        playStation($(this).data('idx'));
+      });
+
+      $('.station-list').on('click', '.fav-btn', function() {
+        const id = $(this).data('id');
+        if (favorites.includes(id)) {
+          favorites = favorites.filter(f => f !== id);
+        } else {
+          favorites.push(id);
+        }
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+        displayStations();
+      });
+
+      $('#themeSelect').change(function() {
+        $('body').removeClass().addClass($(this).val());
+      });
+
+      $('#bgImageSelect').change(function() {
+        const url = $(this).val();
+        $('body').css('background-image', url ? `url(${url})` : 'none');
+        $('body').css('background-size', 'cover');
+      });
+
+      $('#toggleButtons').click(function() {
+        $('.button-container').toggle();
+        $('#showStations').toggle();
+        $('#showFavorites').toggle();
+        $('#clearStorage').toggle();
+      });
+    });
+  </script>
+</body>
+</html>
