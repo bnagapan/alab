@@ -5,12 +5,12 @@
   <title>jQuery Radio Player</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-         /* Header */
-        h1 {
-            font-size: 26px;
-            margin-bottom: 20px;
-        }
-		 
+    /* Header */
+    h1 {
+        font-size: 26px;
+        margin-bottom: 20px;
+    }
+
     body {
       font-family: sans-serif;
       margin: 20px;
@@ -66,58 +66,46 @@
       background-color: #FFD700; /* Gold background for active station */
       color: red; /* Dark yellow text color for active station */
       font-weight: bold;
-	  font-size: 1.1rem;
+      font-size: 1.1rem;
     }
   </style>
 </head>
 <body class="theme-ocean">
-     <!--   <h1>R | a | d | i | o<br><br>
-        <p>Test2</p>
-		</h1>-->
- <!-- Additional Buttons -->
-<div id="button-container" class="button-container">
-							 
-	   
-  <button id="showStations">Show All Stations</button>
-  <button id="showFavorites">Show Favorite Stations</button>
-  <button id="clearStorage">Clear & Reload Stations</button>
+   <div id="toggleButtonsGroup" style="display:none" >
+    <button id="showStations">Show All Stations</button>
+    <button id="showFavorites">Show Favorite Stations</button>
+    <button id="clearStorage">Clear & Reload Stations</button>
+	     <!-- Theme and Background Selector inside Toggle Buttons Group -->
+      <div id="themeBgContainer">
+        <label>Theme:
+          <select id="themeSelect">
+            <option value="theme-default">Default</option>
+            <option value="theme-dark">Dark</option>
+            <option value="theme-blue">Blue</option>
+            <option value="theme-ocean">Ocean</option>
+            <option value="theme-nature">Nature</option>
+          </select>
+        </label>
 
-</div>
+        <label style="margin-left: 20px;">Background Image:
+          <select id="bgImageSelect">
+            <option value="">None</option>
+            <option value="https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk102_sha.png">Ocean</option>
+            <option value="https://groupbenefits.manulife.ca/gb/member-portal/assets/ciam-sign-in-DWxAuxYg.png">Nature</option>
+          </select>
+        </label>
+      </div>
+    </div>
+  </div>
   <button id="toggleButtons">Hide/Show All Buttons</button>
-<!-- Theme and Background Selector (Moved Below Buttons) -->
-<div style="margin-top: 10px;">
-  <label>Theme:
-    <select id="themeSelect">
-      <option value="theme-default">Default</option>
-      <option value="theme-dark">Dark</option>
-      <option value="theme-blue">Blue</option>
-      <option value="theme-ocean">Ocean</option>
-      <option value="theme-nature">Nature</option>
-    </select>
-  </label>
-
-  <label style="margin-left: 20px;">Background Image:
-    <select id="bgImageSelect">
-      <option value="">None</option>
-      <option value="https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk102_sha.png">Ocean</option>
-      <option value="https://groupbenefits.manulife.ca/gb/member-portal/assets/ciam-sign-in-DWxAuxYg.png">Nature</option>
-    </select>
-  </label>
-</div>
-		
-
-
-
+ 
   <div>
-      <button id="playPrevious">&nbsp;⏮&nbsp;</button>
-	<button id="playFirst">&nbsp;▶&nbsp;</button>
-    <button id="playNext">&nbsp;⏭&nbsp;</button>
-	<br>
-	  <button id="toggleButtons">Hide/Show All Buttons</button>
+    <button id="playPrevious">&nbsp;&nbsp;⏮&nbsp;&nbsp;</button>
+    <button id="playFirst">&nbsp;&nbsp;▶&nbsp;&nbsp;</button>
+    <button id="playNext">&nbsp;&nbsp;⏭&nbsp;&nbsp;</button>
   </div>
   <div class="station-list"></div>
   <div class="favorite-list"></div>
-
   <audio id="radioPlayer" controls></audio>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -127,7 +115,7 @@
       { id: 1, url: "aHR0cHM6Ly9yb2dlcnMtaGxzLmxlYW5zdHJlYW0uY28vcm9nZXJzL2hhbDk1Ny5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y N|e|w|s" },
       { id: 2, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: ". C|B|C R|a|d|i|o" },
       { id: 3, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQxMDUwL0VTX1IxUFZDL21hc3Rlci5tM3U4", name: ". C|B|C| |T|o|r|o|n|t|o" },
-		{ id: 4, url: "aHR0cHM6Ly9oZWwtYWlzLWVkZ2UxLmxlYW5zdHJlYW0uY28vcm9nZXJzL3RvcjY4MC5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y| |N|e|w|s| |T|o|r|o|n|t|o" },	  
+      { id: 4, url: "aHR0cHM6Ly9oZWwtYWlzLWVkZ2UxLmxlYW5zdHJlYW0uY28vcm9nZXJzL3RvcjY4MC5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y| |N|e|w|s| |T|o|r|o|n|t|o" },	  
       { id: 5, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NDI4L2F1ZGlv", name: ". Hello F|M" },
       { id: 6, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NTQzL2F1ZGlv", name: ". M|i|r|c|y F|M" },
       { id: 19, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9vYjZ0amc4Z3VscHR2", name: ". H|a|r|r|i|s| |J|a|y|a|r|a|j" }
@@ -150,103 +138,99 @@
     }
 
     function playStation(index) {
-  const station = stations[index];
-  const decodedUrl = decodeUrl(station.url);
-  const audio = document.getElementById('radioPlayer');
+      const station = stations[index];
+      const decodedUrl = decodeUrl(station.url);
+      const audio = document.getElementById('radioPlayer');
 
-  // Cleanup previous HLS instance if exists
-  if (audio.hlsInstance) {
-    audio.hlsInstance.destroy();
-    audio.hlsInstance = null;
-  }
+      // Cleanup previous HLS instance if exists
+      if (audio.hlsInstance) {
+        audio.hlsInstance.destroy();
+        audio.hlsInstance = null;
+      }
 
-  // Remove any previous 'error' event handlers to avoid stacking
-  audio.onerror = null;
+      // Remove any previous 'error' event handlers to avoid stacking
+      audio.onerror = null;
 
-  // Error handler for native audio playback issues
-  audio.onerror = function () {
-    let errorMessage = "Unknown audio error.";
-    switch (audio.error?.code) {
-      case MediaError.MEDIA_ERR_ABORTED:
-        errorMessage = "You aborted the audio playback.";
-        break;
-      case MediaError.MEDIA_ERR_NETWORK:
-        errorMessage = "A network error caused the audio download to fail.";
-        break;
-      case MediaError.MEDIA_ERR_DECODE:
-        errorMessage = "Audio playback was aborted due to a corruption or unsupported features.";
-        break;
-      case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
-        errorMessage = "Audio format or source not supported.";
-        break;
-    }
-    console.error(`Audio error for station "${station.name}":`, errorMessage);
-    if ('mediaSession' in navigator) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: station.name,
-        artist: `Error: ${errorMessage}`
-      });
-    }
-  };
+      // Error handler for native audio playback issues
+      audio.onerror = function () {
+        let errorMessage = "Unknown audio error.";
+        switch (audio.error?.code) {
+          case MediaError.MEDIA_ERR_ABORTED:
+            errorMessage = "You aborted the audio playback.";
+            break;
+          case MediaError.MEDIA_ERR_NETWORK:
+            errorMessage = "A network error caused the audio download to fail.";
+            break;
+          case MediaError.MEDIA_ERR_DECODE:
+            errorMessage = "Audio playback was aborted due to a corruption or unsupported features.";
+            break;
+          case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+            errorMessage = "Audio format or source not supported.";
+            break;
+        }
+        console.error(`Audio error for station "${station.name}":`, errorMessage);
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: station.name,
+            artist: `Error: ${errorMessage}`
+          });
+        }
+      };
 
-  // Determine whether to use HLS.js or native playback
-  if (decodedUrl.endsWith('.m3u8')) {
-    if (Hls.isSupported()) {
-      const hls = new Hls();
-      hls.loadSource(decodedUrl);
-      hls.attachMedia(audio);
-      hls.on(Hls.Events.ERROR, (event, data) => {
-        if (data.fatal) {
-          console.error("HLS.js fatal error", data);
-          if ('mediaSession' in navigator) {
-            navigator.mediaSession.metadata = new MediaMetadata({
-              title: station.name,
-              artist: `HLS error: ${data.details || 'Unknown error'}`
-            });
-          }
+      // Determine whether to use HLS.js or native playback
+      if (decodedUrl.endsWith('.m3u8')) {
+        if (Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(decodedUrl);
+          hls.attachMedia(audio);
+          hls.on(Hls.Events.ERROR, (event, data) => {
+            if (data.fatal) {
+              console.error("HLS.js fatal error", data);
+              if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                  title: station.name,
+                  artist: `HLS error: ${data.details || 'Unknown error'}`
+                });
+              }
+            }
+          });
+          audio.hlsInstance = hls;
+        } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+          audio.src = decodedUrl;
+        } else {
+          console.error('HLS not supported on this device/browser.');
+          return;
+        }
+      } else {
+        // Fallback for direct MP3/AAC streams
+        audio.src = decodedUrl;
+      }
+
+      audio.play().catch(err => {
+        console.error(`Playback failed for "${station.name}":`, err.message);
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: station.name,
+            artist: `Playback error: ${err.message}`
+          });
         }
       });
-      audio.hlsInstance = hls;
-    } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
-      audio.src = decodedUrl;
-    } else {
-      console.error('HLS not supported on this device/browser.');
-      return;
-    }
-  } else {
-    // Fallback for direct MP3/AAC streams
-    audio.src = decodedUrl;
-  }
 
-  audio.play().catch(err => {
-    console.error(`Playback failed for "${station.name}":`, err.message);
-    if ('mediaSession' in navigator) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: station.name,
-        artist: `Playback error: ${err.message}`
+      // Detect page visibility using visibilitychange
+      document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'hidden') {
+          console.log('Page is hidden');
+          audio.pause();
+        } else {
+          console.log('Page is visible');
+          audio.play();
+        }
       });
+
+      updateMediaSession(station);
+      currentIndex = index;
+      highlightActiveStation();
     }
-  });
-
-
-// Detect page visibility using visibilitychange
-  document.addEventListener('visibilitychange', function () {
-	if (document.visibilityState === 'hidden') {
-	  console.log('Page is hidden');
-	  // Optional: pause audio when hidden
-	   audio.pause();
-	} else {
-	  console.log('Page is visible');
-	  // Optional: resume playback if needed
-	   audio.play();
-	}
-  });
-
-  updateMediaSession(station);
-  currentIndex = index;
-  highlightActiveStation();
-}
-
 
     function updateMediaSession(station) {
       if ('mediaSession' in navigator) {
@@ -283,7 +267,7 @@
       $('.station-list').empty();
       stations.sort((a, b) => a.id - b.id);
       stations.forEach((station, idx) => {
-        const stationName = `${station.id}. ${station.name.replace(/\|/g, ' ')}`;
+        const stationName = `${station.id} ${station.name.replace(/\|/g, ' ')}`;
         const isFav = favorites.includes(station.id);
         const favText = isFav ? '★' : '☆';
         $('.station-list').append(`
@@ -302,7 +286,7 @@
       favorites.forEach(id => {
         const station = stations.find(s => s.id === id);
         if (station) {
-          const stationName = `${station.id}. ${station.name.replace(/\|/g, ' ')}`;
+          const stationName = `${station.id} ${station.name.replace(/\|/g, ' ')}`;
           $('.favorite-list').append(`<div>${stationName}</div>`);
         }
       });
@@ -357,8 +341,9 @@
         localStorage.setItem('favorites', JSON.stringify(favorites));
       });
 
+      // Toggle visibility of the buttons
       $('#toggleButtons').click(function() {
-        $('.button-container').toggle();
+        $('#toggleButtonsGroup').toggle(); // Toggle the visibility of the group
       });
 
       $('#bgImageSelect').change(function() {
