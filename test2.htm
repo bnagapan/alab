@@ -5,6 +5,12 @@
   <title>jQuery Radio Player</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+         /* Header */
+        h1 {
+            font-size: 26px;
+            margin-bottom: 20px;
+        }
+		 
     body {
       font-family: sans-serif;
       margin: 20px;
@@ -65,17 +71,19 @@
   </style>
 </head>
 <body class="theme-ocean">
-
+     <!--   <h1>R | a | d | i | o<br><br>
+        <p>Test2</p>
+		</h1>-->
  <!-- Additional Buttons -->
-<div class="button-container">
+<div id="button-container" class="button-container">
 							 
 	   
   <button id="showStations">Show All Stations</button>
   <button id="showFavorites">Show Favorite Stations</button>
   <button id="clearStorage">Clear & Reload Stations</button>
-  <button id="toggleButtons">Hide/Show All Buttons</button>
-</div>
 
+</div>
+  <button id="toggleButtons">Hide/Show All Buttons</button>
 <!-- Theme and Background Selector (Moved Below Buttons) -->
 <div style="margin-top: 10px;">
   <label>Theme:
