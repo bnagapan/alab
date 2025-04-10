@@ -66,40 +66,47 @@
 </head>
 <body class="theme-ocean">
 
-  <!-- Control Buttons -->
-  <div class="button-container">
-    <button id="playFirst">Play First Station</button>
-    <button id="playPrevious">Play Previous Station</button>
-    <button id="playNext">Play Next Station</button>
-  </div>
-
-  <!-- Additional Buttons -->
+ <!-- Additional Buttons -->
+<div class="button-container">
+							 
+	   
   <button id="showStations">Show All Stations</button>
   <button id="showFavorites">Show Favorite Stations</button>
   <button id="clearStorage">Clear & Reload Stations</button>
   <button id="toggleButtons">Hide/Show All Buttons</button>
+</div>
 
-  <!-- Theme and Background Selector -->
+<!-- Theme and Background Selector (Moved Below Buttons) -->
+<div style="margin-top: 10px;">
+  <label>Theme:
+    <select id="themeSelect">
+      <option value="theme-default">Default</option>
+      <option value="theme-dark">Dark</option>
+      <option value="theme-blue">Blue</option>
+      <option value="theme-ocean">Ocean</option>
+      <option value="theme-nature">Nature</option>
+    </select>
+  </label>
+
+  <label style="margin-left: 20px;">Background Image:
+    <select id="bgImageSelect">
+      <option value="">None</option>
+      <option value="https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk102_sha.png">Ocean</option>
+      <option value="https://groupbenefits.manulife.ca/gb/member-portal/assets/ciam-sign-in-DWxAuxYg.png">Nature</option>
+    </select>
+  </label>
+</div>
+		
+
+
+
   <div>
-    <label>Theme:
-      <select id="themeSelect">
-        <option value="theme-default">Default</option>
-        <option value="theme-dark">Dark</option>
-        <option value="theme-blue">Blue</option>
-        <option value="theme-ocean">Ocean</option>
-        <option value="theme-nature">Nature</option>
-      </select>
-    </label>
-
-    <label>Background Image:
-      <select id="bgImageSelect">
-        <option value="">None</option>
-        <option value="https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk102_sha.png">Ocean</option>
-        <option value="https://groupbenefits.manulife.ca/gb/member-portal/assets/ciam-sign-in-DWxAuxYg.png">Nature</option>
-      </select>
-    </label>
+      <button id="playPrevious">&nbsp;⏮&nbsp;</button>
+	<button id="playFirst">&nbsp;▶&nbsp;</button>
+    <button id="playNext">&nbsp;⏭&nbsp;</button>
+	<br>
+	  <button id="toggleButtons">Hide/Show All Buttons</button>
   </div>
-
   <div class="station-list"></div>
   <div class="favorite-list"></div>
 
@@ -135,32 +142,103 @@
     }
 
     function playStation(index) {
-      const station = stations[index];
-      const decodedUrl = decodeUrl(station.url);
-      const audio = document.getElementById('radioPlayer');
-      if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(decodedUrl);
-        hls.attachMedia(audio);
-        hls.on(Hls.Events.ERROR, (event, data) => {
-          if (data.fatal) {
-            console.error("HLS.js fatal error", data);
-            if ('mediaSession' in navigator) {
-              navigator.mediaSession.metadata = new MediaMetadata({
-                title: station.name,
-                artist: `Error: ${data.details || 'Unknown error'}`
-              });
-            }
-          }
-        });
-      } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
-        audio.src = decodedUrl;
-      }
-      audio.play();
-      updateMediaSession(station);
-      currentIndex = index;
-      highlightActiveStation();
+  const station = stations[index];
+  const decodedUrl = decodeUrl(station.url);
+  const audio = document.getElementById('radioPlayer');
+
+  // Cleanup previous HLS instance if exists
+  if (audio.hlsInstance) {
+    audio.hlsInstance.destroy();
+    audio.hlsInstance = null;
+  }
+
+  // Remove any previous 'error' event handlers to avoid stacking
+  audio.onerror = null;
+
+  // Error handler for native audio playback issues
+  audio.onerror = function () {
+    let errorMessage = "Unknown audio error.";
+    switch (audio.error?.code) {
+      case MediaError.MEDIA_ERR_ABORTED:
+        errorMessage = "You aborted the audio playback.";
+        break;
+      case MediaError.MEDIA_ERR_NETWORK:
+        errorMessage = "A network error caused the audio download to fail.";
+        break;
+      case MediaError.MEDIA_ERR_DECODE:
+        errorMessage = "Audio playback was aborted due to a corruption or unsupported features.";
+        break;
+      case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+        errorMessage = "Audio format or source not supported.";
+        break;
     }
+    console.error(`Audio error for station "${station.name}":`, errorMessage);
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: station.name,
+        artist: `Error: ${errorMessage}`
+      });
+    }
+  };
+
+  // Determine whether to use HLS.js or native playback
+  if (decodedUrl.endsWith('.m3u8')) {
+    if (Hls.isSupported()) {
+      const hls = new Hls();
+      hls.loadSource(decodedUrl);
+      hls.attachMedia(audio);
+      hls.on(Hls.Events.ERROR, (event, data) => {
+        if (data.fatal) {
+          console.error("HLS.js fatal error", data);
+          if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+              title: station.name,
+              artist: `HLS error: ${data.details || 'Unknown error'}`
+            });
+          }
+        }
+      });
+      audio.hlsInstance = hls;
+    } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+      audio.src = decodedUrl;
+    } else {
+      console.error('HLS not supported on this device/browser.');
+      return;
+    }
+  } else {
+    // Fallback for direct MP3/AAC streams
+    audio.src = decodedUrl;
+  }
+
+  audio.play().catch(err => {
+    console.error(`Playback failed for "${station.name}":`, err.message);
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: station.name,
+        artist: `Playback error: ${err.message}`
+      });
+    }
+  });
+
+
+// Detect page visibility using visibilitychange
+  document.addEventListener('visibilitychange', function () {
+	if (document.visibilityState === 'hidden') {
+	  console.log('Page is hidden');
+	  // Optional: pause audio when hidden
+	   audio.pause();
+	} else {
+	  console.log('Page is visible');
+	  // Optional: resume playback if needed
+	   audio.play();
+	}
+  });
+
+  updateMediaSession(station);
+  currentIndex = index;
+  highlightActiveStation();
+}
+
 
     function updateMediaSession(station) {
       if ('mediaSession' in navigator) {
