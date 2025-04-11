@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>jQuery Radio Player</title>
+ <title>P l a y || R a d i o || S t r e a m</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     /* Header */
@@ -106,7 +106,7 @@
   </div>
   <div class="station-list"></div>
   <div class="favorite-list"></div>
-  <audio id="radioPlayer" controls></audio>
+  <audio id="radioPlayer" controls playsinline>></audio>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
@@ -217,7 +217,7 @@
       });
 
       // Detect page visibility using visibilitychange
-      document.addEventListener('visibilitychange', function () {
+      /*document.addEventListener('visibilitychange', function () {
         if (document.visibilityState === 'hidden') {
           console.log('Page is hidden');
           audio.pause();
@@ -225,7 +225,7 @@
           console.log('Page is visible');
           audio.play();
         }
-      });
+      });*/
 
       updateMediaSession(station);
       currentIndex = index;
