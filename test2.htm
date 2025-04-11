@@ -68,6 +68,11 @@
       font-weight: bold;
       font-size: 1.1rem;
     }
+	#playFirst, #playPrevious, #playNext {
+  height: 60px;         /* Increase height */
+  padding: 0 20px;      /* Optional: add horizontal padding */
+  font-size: 1.5rem;    /* Optional: increase icon/text size */
+}
   </style>
 </head>
 <body class="theme-ocean">
@@ -171,7 +176,7 @@
         console.error(`Audio error for station "${station.name}":`, errorMessage);
         if ('mediaSession' in navigator) {
           navigator.mediaSession.metadata = new MediaMetadata({
-            title: station.name,
+            title: station.name.replace(/\|/g, ' '),
             artist: `Error: ${errorMessage}`
           });
         }
@@ -188,7 +193,7 @@
               console.error("HLS.js fatal error", data);
               if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
-                  title: station.name,
+                  title: station.name.replace(/\|/g, ' '),
                   artist: `HLS error: ${data.details || 'Unknown error'}`
                 });
               }
@@ -210,7 +215,7 @@
         console.error(`Playback failed for "${station.name}":`, err.message);
         if ('mediaSession' in navigator) {
           navigator.mediaSession.metadata = new MediaMetadata({
-            title: station.name,
+            title: station.name.replace(/\|/g, ' '),
             artist: `Playback error: ${err.message}`
           });
         }
@@ -232,15 +237,31 @@
       highlightActiveStation();
     }
 
-    function updateMediaSession(station) {
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-          title: station.name
-        });
-        navigator.mediaSession.setActionHandler('previoustrack', () => navigateFavorites(-1));
-        navigator.mediaSession.setActionHandler('nexttrack', () => navigateFavorites(1));
-      }
-    }
+	function updateMediaSession(station) {
+		if ('mediaSession' in navigator) {
+		navigator.mediaSession.metadata = new MediaMetadata({
+		  title: station.name.replace(/\|/g, ' '),
+		  artist: "Live Radio"
+		});
+
+		navigator.mediaSession.setActionHandler('previoustrack', () => {
+		  if (favorites.length) {
+			navigateFavorites(-1);
+		  } else {
+			navigateStations(-1);
+		  }
+		});
+
+		navigator.mediaSession.setActionHandler('nexttrack', () => {
+		  if (favorites.length) {
+			navigateFavorites(1);
+		  } else {
+			navigateStations(1);
+		  }
+		});
+		}
+	}
+
 
     function navigateFavorites(dir) {
       if (!favorites.length) return;
