@@ -201,7 +201,19 @@
           });
           audio.hlsInstance = hls;
         } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
-          audio.src = decodedUrl;
+			audio.src = decodedUrl;
+			audio.load();
+			audio.oncanplay = () => {
+			audio.play().catch(err => {
+			console.error(`Playback failed for "${station.name}":`, err.message);
+			if ('mediaSession' in navigator) {
+			navigator.mediaSession.metadata = new MediaMetadata({
+			title: station.name,
+			artist: 'Playback error: ${err.message}'
+			});
+			}
+			});
+			};
         } else {
           console.error('HLS not supported on this device/browser.');
           return;
