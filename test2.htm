@@ -116,6 +116,7 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <script>
+ // var audioPlayer = document.getElementById("radioPlayer");
     const rawStations = [
       { id: 1, url: "aHR0cHM6Ly9yb2dlcnMtaGxzLmxlYW5zdHJlYW0uY28vcm9nZXJzL2hhbDk1Ny5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y N|e|w|s" },
       { id: 2, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: ". C|B|C R|a|d|i|o" },
@@ -203,19 +204,28 @@
           audio.hlsInstance = hls;
         } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
 			audio.src = decodedUrl;
-			audio.load();
+			//audio.load();
 			//audio.oncanplay = () => {
 			//audio.oncanplay().catch(err => handlePlaybackError(station.name, err.message));
 			console.log('Non-HLS');
-	
-						
-			 audio.addEventListener("loadeddata", function () {
-                audio.play().catch(handlePlaybackError(station.name, err.message));
-            }, { once: true });
 
-			for (let i = 1; i <= 25; i++) {
+			for (let i = 1; i <= 26; i++) {
 			MakeActiveSession("Buffering..."+i);
-			}			
+
+			}
+		
+			audio.addEventListener("canplaythrough",err =>  function () {
+			audio.play().catch(handlePlaybackError(station.name, err.message));
+			});
+			audio.addEventListener("loadstart", err => function () {
+				audio.play().catch(handlePlaybackError(station.name, err.message));
+			  UpdateMediaSession(stationName, "Loading...");
+			});
+						
+			 audio.addEventListener("loadeddata",err =>  function () {
+				audio.play().catch(handlePlaybackError(station.name, err.message));
+			}, { once: true });
+			
 
 			
         } else {
@@ -226,20 +236,28 @@
         // Fallback for direct MP3/AAC streams
         audio.src = decodedUrl;
 		
-		audio.load();
+		//audio.load();
 		//audio.oncanplay = () => {
 		//audio.oncanplay().catch(err => handlePlaybackError(station.name, err.message));
 		console.log('Non-HLS');
 
-					
-		 audio.addEventListener("loadeddata", function () {
-			audio.play().catch(handlePlaybackError(station.name, err.message));
-		}, { once: true });
-		
 		for (let i = 1; i <= 25; i++) {
 		MakeActiveSession("Buffering..."+i);
 
 		}
+		audio.addEventListener("canplaythrough",err =>  function () {
+			audio.play().catch(handlePlaybackError(station.name, err.message));
+		});
+        audio.addEventListener("loadstart", err => function () {
+			audio.play().catch(handlePlaybackError(station.name, err.message));
+          UpdateMediaSession(stationName, "Loading...");
+        });
+					
+		 audio.addEventListener("loadeddata",err =>  function () {
+			audio.play().catch(handlePlaybackError(station.name, err.message));
+		}, { once: true });
+		
+
 			
       }
 
