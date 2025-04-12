@@ -209,11 +209,7 @@
 			//audio.oncanplay().catch(err => handlePlaybackError(station.name, err.message));
 			console.log('Non-HLS');
 
-			for (let i = 1; i <= 26; i++) {
-			MakeActiveSession("Buffering..."+i);
-
-			}
-		
+	
 			audio.addEventListener("canplaythrough",err =>  function () {
 			audio.play().catch(handlePlaybackError(station.name, err.message));
 			});
@@ -221,6 +217,11 @@
 				audio.play().catch(handlePlaybackError(station.name, err.message));
 			  UpdateMediaSession(stationName, "Loading...");
 			});
+			
+			for (let i = 1; i <= 26; i++) {
+			MakeActiveSession("Buffering..."+i);
+
+			}
 						
 			 audio.addEventListener("loadeddata",err =>  function () {
 				audio.play().catch(handlePlaybackError(station.name, err.message));
@@ -241,10 +242,7 @@
 		//audio.oncanplay().catch(err => handlePlaybackError(station.name, err.message));
 		console.log('Non-HLS');
 
-		for (let i = 1; i <= 25; i++) {
-		MakeActiveSession("Buffering..."+i);
 
-		}
 		audio.addEventListener("canplaythrough",err =>  function () {
 			audio.play().catch(handlePlaybackError(station.name, err.message));
 		});
@@ -252,6 +250,11 @@
 			audio.play().catch(handlePlaybackError(station.name, err.message));
           UpdateMediaSession(stationName, "Loading...");
         });
+		
+		for (let i = 1; i <= 27; i++) {
+		MakeActiveSession("Buffering..."+i);
+
+		}
 					
 		 audio.addEventListener("loadeddata",err =>  function () {
 			audio.play().catch(handlePlaybackError(station.name, err.message));
