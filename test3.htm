@@ -220,9 +220,10 @@
 			audio.play().catch(handlePlaybackError(station.name, err.message));
 			});
 			
-						delayLoad(station.name,cnt);
+						
 						
 			audio.addEventListener("loadstart", err => function () {
+			delayLoad(station.name,cnt);
 				audio.play().catch(handlePlaybackError(station.name, err.message));
 			  UpdateMediaSession(stationName, "Loading...");
 			});
@@ -252,9 +253,10 @@
 		});
 		
 		
-		delayLoad(station.name,11);
+		
 		
         audio.addEventListener("loadstart", err => function () {
+		delayLoad(station.name,cnt);
 			audio.play().catch(handlePlaybackError(station.name, err.message));
           UpdateMediaSession(stationName, "Loading...");
         });
@@ -312,6 +314,22 @@
 				//actuallyPlay();
 			  }
 			}, 1000);	
+		navigator.mediaSession.setActionHandler('previoustrack', () => {
+		  if (favorites.length) {
+			navigateFavorites(-1);
+		  } else {
+			navigateStations(-1);
+		  }
+		});
+
+		navigator.mediaSession.setActionHandler('nexttrack', () => {
+		  if (favorites.length) {
+			navigateFavorites(1);
+		  } else {
+			navigateStations(1);
+		  }
+		});	
+			
 	}
 
 	function updateMediaSession(station) {
