@@ -209,6 +209,7 @@
 			//audio.oncanplay().catch(err => handlePlaybackError(station.name, err.message));
 			console.log('Non-HLS');
 
+			delayLoad(station.name);
 	
 			audio.addEventListener("canplaythrough",err =>  function () {
 			audio.play().catch(handlePlaybackError(station.name, err.message));
@@ -219,7 +220,7 @@
 			});
 			
 // Delay playback for 30 seconds on non-.m3u8 URLs
-			let countdown = 20;
+		/*	let countdown = 20;
 
 			const countdownInterval = setInterval(() => {
 			console.log('Loading...'+countdown);
@@ -235,7 +236,7 @@
 				clearInterval(countdownInterval);
 				//actuallyPlay();
 			  }
-			}, 1000);	
+			}, 1000);	*/
 						
 			 audio.addEventListener("loadeddata",err =>  function () {
 				audio.play().catch(handlePlaybackError(station.name, err.message));
@@ -256,7 +257,7 @@
 		//audio.oncanplay().catch(err => handlePlaybackError(station.name, err.message));
 		console.log('Non-HLS');
 
-
+		delayLoad(station.name);
 		audio.addEventListener("canplaythrough",err =>  function () {
 			audio.play().catch(handlePlaybackError(station.name, err.message));
 		});
@@ -266,7 +267,7 @@
         });
 		
 		// Delay playback for 30 seconds on non-.m3u8 URLs
-			let countdown = 20;
+		/*	let countdown = 20;
 
 			const countdownInterval = setInterval(() => {
 			console.log('Loading...'+countdown);
@@ -281,7 +282,7 @@
 				clearInterval(countdownInterval);
 				//actuallyPlay();
 			  }
-			}, 1000);		
+			}, 1000);	*/	
 			
 		 audio.addEventListener("loadeddata",err =>  function () {
 			audio.play().catch(handlePlaybackError(station.name, err.message));
@@ -308,6 +309,34 @@
       currentIndex = index;
       highlightActiveStation();
     }
+	
+	function delayLoad(station_name)
+	{
+	// Delay playback for 30 seconds on non-.m3u8 URLs
+			let countdown = 10;
+
+			const countdownInterval = setInterval(() => {
+			console.log('Loading...'+countdown);
+			
+			  if ('mediaSession' in navigator) {
+				navigator.mediaSession.metadata = new MediaMetadata({
+				  title: station_name.replace(/\|/g, ' '),
+				  artist: `Loading in ${countdown--} sec...`
+				});
+			  }
+
+			  if (countdown < 0) {
+				clearInterval(countdownInterval);
+					 if ('mediaSession' in navigator) {
+					navigator.mediaSession.metadata = new MediaMetadata({
+					  title: station_name.replace(/\|/g, ' '),
+					  artist: `Loaded`
+					});
+				  }
+				//actuallyPlay();
+			  }
+			}, 1000);	
+	}
 
 	function updateMediaSession(station) {
 		if ('mediaSession' in navigator) {
