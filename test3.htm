@@ -187,7 +187,7 @@
           });
         }
       };
-
+		UpdateMediaSession(station.name, "Init...");
       // Determine whether to use HLS.js or native playback
       if (decodedUrl.endsWith('.m3u8')) {
         if (Hls.isSupported()) {
@@ -209,27 +209,31 @@
           audio.hlsInstance = hls;
         } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
 			audio.src = decodedUrl;
-			//audio.load();
+      console.log('load...');
+			audio.load();
+      delayLoad(station.name,11);
 			//audio.oncanplay = () => {
 			//audio.oncanplay().catch(err => handlePlaybackError(station.name, err.message));
 			console.log('Non-HLS');
 
 
 	
-			audio.addEventListener("canplaythrough",err =>  function () {
+			/*audio.addEventListener("canplaythrough",err =>  function () {
+      console.log('canplaythrough');
 			audio.play().catch(handlePlaybackError(station.name, err.message));
-			});
+			});*/
 			
 						
 						
 			audio.addEventListener("loadstart", err => function () {
-			delayLoad(station.name,11);
+        console.log('loadstart');			
 				audio.play().catch(handlePlaybackError(station.name, err.message));
-			  UpdateMediaSession(stationName, "Loading...");
+			  UpdateMediaSession(station.name, "Loading...");
 			});
 			
 						
 			 audio.addEventListener("loadeddata",err =>  function () {
+      console.log('loadeddata');
 				audio.play().catch(handlePlaybackError(station.name, err.message));
 			}, { once: true });
 			
@@ -242,27 +246,32 @@
       } else {
         // Fallback for direct MP3/AAC streams
         audio.src = decodedUrl;
-		
+        console.log('load###');
+        audio.load();
+        delayLoad(station.name,11);
 		//audio.load();
 		//audio.oncanplay = () => {
 		//audio.oncanplay().catch(err => handlePlaybackError(station.name, err.message));
 		console.log('Non-HLS');
 
-		audio.addEventListener("canplaythrough",err =>  function () {
+		/*audio.addEventListener("canplaythrough",err =>  function () {
+      console.log('canplaythrough-else');
 			audio.play().catch(handlePlaybackError(station.name, err.message));
-		});
+		});*/
 		
 		
 		
 		
         audio.addEventListener("loadstart", err => function () {
-		delayLoad(station.name,15);
+          console.log('loadstart-else');
+		
 			audio.play().catch(handlePlaybackError(station.name, err.message));
-          UpdateMediaSession(stationName, "Loading...");
+          UpdateMediaSession(station.name, "Loading...");
         });
 		
 			
 		 audio.addEventListener("loadeddata",err =>  function () {
+      console.log('loadeddata-else');
 			audio.play().catch(handlePlaybackError(station.name, err.message));
 		}, { once: true });
 		
@@ -283,7 +292,7 @@
         }
       });*/
 
-      updateMediaSession(station);
+      UpdateMediaSession(station.name,"");
       currentIndex = index;
       highlightActiveStation();
     }
@@ -332,11 +341,11 @@
 			
 	}
 
-	function updateMediaSession(station) {
+	function UpdateMediaSession(station,msg) {
 		if ('mediaSession' in navigator) {
 		navigator.mediaSession.metadata = new MediaMetadata({
-		  title: station.name.replace(/\|/g, ' '),
-		  artist: "Live Radio"
+//		  title: station.name.replace(/\|/g, ' '),
+		  artist: "Live Radio " +msg
 		});
 
 		navigator.mediaSession.setActionHandler('previoustrack', () => {
