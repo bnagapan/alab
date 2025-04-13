@@ -102,9 +102,14 @@
       </div>
     </div>
   </div>
+  <div style="text-align:center">
+     <h1>R | a | d | i | o</h1>
+        test3.0<br><br>
+  </div>
   <button id="toggleButtons">Hide/Show All Buttons</button>
  
   <div>
+
     <button id="playPrevious">&nbsp;&nbsp;⏮&nbsp;&nbsp;</button>
     <button id="playFirst">&nbsp;&nbsp;▶&nbsp;&nbsp;</button>
     <button id="playNext">&nbsp;&nbsp;⏭&nbsp;&nbsp;</button>
@@ -209,34 +214,19 @@
 			//audio.oncanplay().catch(err => handlePlaybackError(station.name, err.message));
 			console.log('Non-HLS');
 
-			delayLoad(station.name);
+
 	
 			audio.addEventListener("canplaythrough",err =>  function () {
 			audio.play().catch(handlePlaybackError(station.name, err.message));
 			});
+			
+						delayLoad(station.name,cnt);
+						
 			audio.addEventListener("loadstart", err => function () {
 				audio.play().catch(handlePlaybackError(station.name, err.message));
 			  UpdateMediaSession(stationName, "Loading...");
 			});
 			
-// Delay playback for 30 seconds on non-.m3u8 URLs
-		/*	let countdown = 20;
-
-			const countdownInterval = setInterval(() => {
-			console.log('Loading...'+countdown);
-			
-			  if ('mediaSession' in navigator) {
-				navigator.mediaSession.metadata = new MediaMetadata({
-				  title: station.name.replace(/\|/g, ' '),
-				  artist: `Loading in ${countdown--} sec...`
-				});
-			  }
-
-			  if (countdown < 0) {
-				clearInterval(countdownInterval);
-				//actuallyPlay();
-			  }
-			}, 1000);	*/
 						
 			 audio.addEventListener("loadeddata",err =>  function () {
 				audio.play().catch(handlePlaybackError(station.name, err.message));
@@ -257,32 +247,18 @@
 		//audio.oncanplay().catch(err => handlePlaybackError(station.name, err.message));
 		console.log('Non-HLS');
 
-		delayLoad(station.name);
 		audio.addEventListener("canplaythrough",err =>  function () {
 			audio.play().catch(handlePlaybackError(station.name, err.message));
 		});
+		
+		
+		delayLoad(station.name,11);
+		
         audio.addEventListener("loadstart", err => function () {
 			audio.play().catch(handlePlaybackError(station.name, err.message));
           UpdateMediaSession(stationName, "Loading...");
         });
 		
-		// Delay playback for 30 seconds on non-.m3u8 URLs
-		/*	let countdown = 20;
-
-			const countdownInterval = setInterval(() => {
-			console.log('Loading...'+countdown);
-			  if ('mediaSession' in navigator) {
-				navigator.mediaSession.metadata = new MediaMetadata({
-				  title: station.name.replace(/\|/g, ' '),
-				  artist: `Loading in ${countdown--} sec...`
-				});
-			  }
-
-			  if (countdown < 0) {
-				clearInterval(countdownInterval);
-				//actuallyPlay();
-			  }
-			}, 1000);	*/	
 			
 		 audio.addEventListener("loadeddata",err =>  function () {
 			audio.play().catch(handlePlaybackError(station.name, err.message));
@@ -310,10 +286,10 @@
       highlightActiveStation();
     }
 	
-	function delayLoad(station_name)
+	function delayLoad(station_name,cnt)
 	{
 	// Delay playback for 30 seconds on non-.m3u8 URLs
-			let countdown = 10;
+			let countdown = cnt;
 
 			const countdownInterval = setInterval(() => {
 			console.log('Loading...'+countdown);
