@@ -152,7 +152,23 @@
       const station = stations[index];
       const decodedUrl = decodeUrl(station.url);
       const audio = document.getElementById('radioPlayer');
+      console.log('index:', index);
+   
 
+    console.log('Station ID:', station.id);
+    console.log('Station Name:', station.name);
+		localStorage.setItem('currentStation', JSON.stringify({
+		  id: station.id,
+		  name: station.name.replace(/\|/g, ' ')
+		}));
+
+  print_localStorage();
+	
+	const { s_id, s_name } = getCurrentStation();
+  console.log('Playing station Id:   ', s_id, '\n Name :', s_name);
+
+	
+		
       // Cleanup previous HLS instance if exists
       if (audio.hlsInstance) {
         audio.hlsInstance.destroy();
@@ -187,7 +203,7 @@
           });
         }
       };
-		UpdateMediaSession(station.id,station.name, "Init...");
+		UpdateMediaSession(s_id,s_name, "Init...");
       // Determine whether to use HLS.js or native playback
       if (decodedUrl.endsWith('.m3u8')) {
         if (Hls.isSupported()) {
@@ -211,7 +227,7 @@
 			audio.src = decodedUrl;
       console.log('load...');
 			audio.load();
-      delayLoad(station.id,station.name,6);
+      delayLoad(station.id,station.name,10);
 			//audio.oncanplay = () => {
 			//audio.oncanplay().catch(err => handlePlaybackError(station.name, err.message));
 			console.log('Non-HLS');
@@ -228,7 +244,9 @@
 			audio.addEventListener("loadstart", err => function () {
         console.log('loadstart');			
 				audio.play().catch(handlePlaybackError(station.name, err.message));
-			  UpdateMediaSession(station.id,station.name, "Loading...");
+        console.log('loadstart-elsif');
+        console.log(s_id,s_name);
+			  UpdateMediaSession(s_id,s_name, "Loading...");
 			});
 			
 						
@@ -249,7 +267,7 @@
         audio.src = decodedUrl;
         console.log('load###');
         audio.load();
-        delayLoad(station.id,station.name,6);
+        delayLoad(station.id,station.name,10);
 		//audio.load();
 		//audio.oncanplay = () => {
 		//audio.oncanplay().catch(err => handlePlaybackError(station.name, err.message));
@@ -267,7 +285,9 @@
           console.log('loadstart-else');
 		
 			audio.play().catch(handlePlaybackError(station.name, err.message));
-          UpdateMediaSession(station.id,station.name, "Loading...");
+      console.log('loadstart-else');
+      console.log(s_id,s_name);
+          UpdateMediaSession(s_id,s_name, "Loading...");
         });
 		
 			
@@ -346,7 +366,7 @@
 	function UpdateMediaSession(id,station,msg) {
 		if ('mediaSession' in navigator) {
 		navigator.mediaSession.metadata = new MediaMetadata({
-		  title: id + " " + station.replace(/\|/g, ' '),
+		  title: id + " " + station,
 		  artist: "Live Radio " +msg
 		});
 
@@ -517,6 +537,45 @@ function handlePlaybackError(stationName, errorMessage) {
       artist: `Playback error: ${errorMessage}`
     });
   }
+}
+
+function getCurrentStation() {
+  return JSON.parse(localStorage.getItem('currentStation')) || { id: 0, name: "Unknown" };
+}
+
+function print_localStorage() {
+  // Log the 'stations' list from localStorage
+const storedStations = localStorage.getItem('stations');
+
+if (storedStations) {
+  const stations = JSON.parse(storedStations);
+  console.log(`🎵 You have ${stations.length} station(s) saved:\n`);
+
+  stations.forEach((station, index) => {
+    console.log(`📻 Station ${index + 1}:`);
+    console.log(`   Name:  ${station.name}`);
+    console.log(`   URL:   ${station.url}`);
+    console.log(`   Image: ${station.image}`);
+    console.log('-----------------------------');
+  });
+} else {
+  console.log('⚠️ No stations found in localStorage.');
+}
+
+// Log the 'currentStation' from localStorage
+const currentStation = localStorage.getItem('currentStation');
+
+if (currentStation) {
+  const parsedCurrent = JSON.parse(currentStation);
+  console.log(parsedCurrent);
+  console.log('-----------------------------');
+  console.log('🎯 Current Station:');
+  console.log(`   Name:  ${parsedCurrent.name}`);
+  console.log(`   URL:   ${parsedCurrent.url}`);
+  console.log(`   Image: ${parsedCurrent.image}`);
+} else {
+  console.log('⚠️ No currentStation found in localStorage.');
+}
 }
 	
   </script>
