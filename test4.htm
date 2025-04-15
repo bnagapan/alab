@@ -322,10 +322,11 @@ if (currentStation) {
         audio.load();
         //delayLoad(station.id,station.name,10);
 		//audio.load();
-		//audio.oncanplay = () => {
-		//audio.oncanplay().catch(err => handlePlaybackError(station.name, err.message));
+		audio.oncanplay = () => {
+		audio.oncanplay().catch(err => handlePlaybackError(station.name, err.message + ' - oncanplay'));
+    } ;
 		console.log('Non-HLS#2');
-
+        /*
     audio.addEventListener("loadstart",err =>  function () {
       console.log('loadstart-else');
       UpdateMediaSession(s_id,s_name, "Loading...2");			
@@ -376,9 +377,9 @@ if (currentStation) {
     console.log("Station is ready to play.");
     } else {
     console.log("Station is not ready yet." + audio.readyState);
-    }
+    } */
 
-      audio.play().catch(err => handlePlaybackError(station.name, err.message));
+      audio.play().catch(err => handlePlaybackError(station.name, err.message+' -play error'));
 
       // Detect page visibility using visibilitychange
       /*document.addEventListener('visibilitychange', function () {
