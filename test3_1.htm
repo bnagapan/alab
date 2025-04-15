@@ -104,7 +104,7 @@
   </div>
   <div style="text-align:center">
      <h1>R | a | d | i | o</h1>
-        test 3.1.0<br><br>
+        test 3.1.1<br><br>
   </div>
   <button id="toggleButtons">Hide/Show All Buttons</button>
  
@@ -122,6 +122,8 @@
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <script>
  // var audioPlayer = document.getElementById("radioPlayer");
+   var s_id = -1;
+  var s_name = ''
     const rawStations = [
       { id: 1, url: "aHR0cHM6Ly9yb2dlcnMtaGxzLmxlYW5zdHJlYW0uY28vcm9nZXJzL2hhbDk1Ny5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y N|e|w|s" },
       { id: 2, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: ". C|B|C R|a|d|i|o" },
@@ -149,23 +151,36 @@
     }
 
     function playStation(index) {
+      //console.log('playStation called with index:', index);
       const station = stations[index];
       const decodedUrl = decodeUrl(station.url);
       const audio = document.getElementById('radioPlayer');
-      console.log('index:', index);
+      //console.log('index:', index);
    
 
-    console.log('Station ID:', station.id);
-    console.log('Station Name:', station.name);
-		localStorage.setItem('currentStation', JSON.stringify({
-		  id: station.id,
-		  name: station.name.replace(/\|/g, ' ')
-		}));
+      console.log('Station ID:', station.id);
+      console.log('Station Name:', station.name);
+      localStorage.setItem('currentStation', JSON.stringify({
+        id: station.id,
+        name: station.name.replace(/\|/g, ' ')
+      }));
 
-  print_localStorage();
-	
-	const { s_id, s_name } = getCurrentStation();
-  console.log('Playing station Id:   ', s_id, '\n Name :', s_name);
+    //print_localStorage();
+    
+    const currentStation = localStorage.getItem('currentStation');
+
+if (currentStation) {
+  const parsedCurrent = JSON.parse(currentStation);
+  s_id = parseInt(parsedCurrent.id);
+  s_name = parsedCurrent.name;
+  //console.log(parsedCurrent);
+  // console.log('-----------------------------');
+  // console.log(`   Name:  ${parsedCurrent.name}`);
+  // console.log(`   Id:   ${parsedCurrent.id}`);
+  // console.log('-----------------------------');
+}
+	//const { s_id, s_name } = JSON.parse(currentStation);
+  //console.log('Playing station Id:   ', s_id, '\n Name :', s_name);
 
 	
 		
@@ -194,6 +209,8 @@
           case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
             errorMessage = "Audio format or source not supported.";
             break;
+
+          
         }
         console.error(`Audio error for station "${station.name}":`, errorMessage);
         if ('mediaSession' in navigator) {
@@ -201,6 +218,22 @@
             title: station.name.replace(/\|/g, ' '),
             artist: `Error: ${errorMessage}`
           });
+
+          navigator.mediaSession.setActionHandler('previoustrack', () => {
+          if (favorites.length) {
+          navigateFavorites(-1);
+          } else {
+          navigateStations(-1);
+          }
+        });
+
+        navigator.mediaSession.setActionHandler('nexttrack', () => {
+          if (favorites.length) {
+          navigateFavorites(1);
+          } else {
+          navigateStations(1);
+          }
+        });	 
         }
       };
 		UpdateMediaSession(s_id,s_name, "Init...");
@@ -485,7 +518,17 @@
 
       displayStations();
 
-      $('#playFirst').click(() => playStation(0));
+      playStation(0);
+
+      $('#playFirst').click(() => 
+      {      
+        playStation(0);
+        //alert('hi');
+        localStorage.setItem('currentStation', JSON.stringify({
+		    id: stations[0].id,
+		    name: stations[0].name.replace(/\|/g, ' ')
+		    }));
+      });
       $('#playPrevious').click(() => navigateStations(-1));
       $('#playNext').click(() => navigateStations(1));
       $('#showStations').click(displayStations);
@@ -537,8 +580,25 @@ function handlePlaybackError(stationName, errorMessage) {
       artist: `Playback error: ${errorMessage}`
     });
   }
+
+  navigator.mediaSession.setActionHandler('previoustrack', () => {
+		  if (favorites.length) {
+			navigateFavorites(-1);
+		  } else {
+			navigateStations(-1);
+		  }
+		});
+
+		navigator.mediaSession.setActionHandler('nexttrack', () => {
+		  if (favorites.length) {
+			navigateFavorites(1);
+		  } else {
+			navigateStations(1);
+		  }
+		});
 }
 
+// getCurrentStation() : Function to get the current station from localStorage
 function getCurrentStation() {
   return JSON.parse(localStorage.getItem('currentStation')) || { id: 0, name: "Unknown" };
 }
