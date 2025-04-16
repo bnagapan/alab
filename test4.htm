@@ -76,6 +76,10 @@
   </style>
 </head>
 <body class="theme-ocean">
+  <div style="text-align:center">
+    <h1>R | a | d | i | o</h1>
+       test 3.1.1<br><br>
+ </div>
    <div id="toggleButtonsGroup" style="display:none" >
     <button id="showStations">Show All Stations</button>
     <button id="showFavorites">Show Favorite Stations</button>
@@ -100,13 +104,18 @@
             <option value="https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk105_beach.png">Beach</option>
           </select>
         </label>
+
+        <div style="margin-top: 10px;">
+          <label for="excludeInput">Exclude Station IDs (comma-separated):</label>
+          <input type="text" id="excludeInput" placeholder="e.g. 2, 12"
+          style="padding:5px; border-radius: 5px; width: 50px;" maxlength="20">
+        
+            </div>
+
       </div>
     </div>
   </div>
-  <div style="text-align:center">
-     <h1>R | a | d | i | o</h1>
-        test 3.1.1<br><br>
-  </div>
+ 
   <button id="toggleButtons">Hide/Show All Buttons</button>
  
   <div>
@@ -466,31 +475,6 @@ if (currentStation) {
 		}
 	}
 
-	function MakeActiveSession(msg) {
-	//alert('hi');
-					console.log(msg);
-		if ('mediaSession' in navigator) {
-		navigator.mediaSession.metadata = new MediaMetadata({
-		  artist: msg
-		});
-
-		navigator.mediaSession.setActionHandler('previoustrack', () => {
-		  if (favorites.length) {
-			navigateFavorites(-1);
-		  } else {
-			navigateStations(-1);
-		  }
-		});
-
-		navigator.mediaSession.setActionHandler('nexttrack', () => {
-		  if (favorites.length) {
-			navigateFavorites(1);
-		  } else {
-			navigateStations(1);
-		  }
-		});
-		}
-	}
 
     function navigateFavorites(dir) {
       if (!favorites.length) return;
@@ -514,21 +498,36 @@ if (currentStation) {
     }
 
     function displayStations() {
-      $('.station-list').empty();
-      stations.sort((a, b) => a.id - b.id);
-      stations.forEach((station, idx) => {
-        const stationName = `${station.id} ${station.name.replace(/\|/g, ' ')}`;
-        const isFav = favorites.includes(station.id);
-        const favText = isFav ? '★' : '☆';
-        $('.station-list').append(`
-          <div>
-            <a href="#" class="station-link" data-idx="${idx}">${stationName}</a>
-            <button class="fav-btn" data-id="${station.id}">${favText}</button>
-          </div>
-        `);
-      });
-      adjustStationButtonWidths();
-    }
+  $('.station-list').empty();
+  stations.sort((a, b) => a.id - b.id);
+
+  // Get list of excluded IDs from the text box
+  const excludeValue = $('#excludeInput').val() || '';
+  const excludeIds = excludeValue
+    .split(',')
+    .map(id => parseInt(id.trim()))
+    .filter(id => !isNaN(id));
+
+  stations.forEach((station, idx) => {
+    // Skip if this station ID is in the exclude list
+    if (excludeIds.includes(station.id)) return;
+
+    const stationName = `${station.id} ${station.name.replace(/\|/g, ' ')}`;
+    const isFav = favorites.includes(station.id);
+    const favText = isFav ? '★' : '☆';
+
+    $('.station-list').append(`
+      <div>
+        <a href="#" class="station-link" data-idx="${idx}">${stationName}</a>
+        <button class="fav-btn" data-id="${station.id}">${favText}</button>
+      </div>
+    `);
+  });
+
+  adjustStationButtonWidths();
+}
+
+
 
     function displayFavorites() {
       $('.favorite-list').empty();
@@ -615,6 +614,8 @@ if (currentStation) {
         $('body').removeClass().addClass($(this).val());
         highlightActiveStation();
       });
+
+      $('#excludeInput').on('input', displayStations);
     });
 
 function handlePlaybackError(stationName, errorMessage) {
