@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+ <title>P l a y || R a d i o || S t r e a m</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Header */
+    h1 {
+        font-size: 26px;
+        margin-bottom: 20px;
+    }
+
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+      transition: background 0.5s ease;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
+    button, select {
+      margin: 5px;
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .station-list, .favorite-list {
+      margin-top: 10px;
+    }
+    .theme-default button { background-color: lightgray; }
+    .theme-dark button { background-color: #444; color: white; }
+    .theme-blue button { background-color: #00f; color: white; }
+    .theme-ocean button { background-color: #2e8b57; color: white; }
+    .theme-nature button { background-color: #8b4513; color: white; }
+    a.station-link {
+      display: inline-block;
+      padding: 10px 20px;
+      margin: 5px;
+      background-color: #28a745;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    a.station-link:hover {
+      background-color: #218838;
+    }
+    .fav-btn {
+      padding: 5px 10px;
+      font-size: 0.8rem;
+      background-color: #ff8c00;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .active-station {
+      background-color: #FFD700; /* Gold background for active station */
+      color: red; /* Dark yellow text color for active station */
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+	#playFirst, #playPrevious, #playNext {
+  height: 60px;         /* Increase height */
+  padding: 0 20px;      /* Optional: add horizontal padding */
+  font-size: 1.5rem;    /* Optional: increase icon/text size */
+}
+  </style>
+</head>
+<body class="theme-ocean">
+  <div style="text-align:center">
+    <h1>R | a | d | i | o</h1>
+       test 3.1.1<br><br>
+ </div>
+   <div id="toggleButtonsGroup" style="display:none" >
+    <button id="showStations">Show All Stations</button>
+    <button id="showFavorites">Show Favorite Stations</button>
+    <button id="clearStorage">Clear & Reload Stations</button>
+	     <!-- Theme and Background Selector inside Toggle Buttons Group -->
+      <div id="themeBgContainer">
+        <label>Theme:
+          <select id="themeSelect">
+            <option value="theme-default">Default</option>
+            <option value="theme-dark">Dark</option>
+            <option value="theme-blue">Blue</option>
+            <option value="theme-ocean">Ocean</option>
+            <option value="theme-nature">Nature</option>
+          </select>
+        </label>
+
+        <label style="margin-left: 20px;">Background Image:
+          <select id="bgImageSelect">
+            <option value="">None</option>
+            <option value="https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk102_sha.png">Ocean</option>
+            <option value="https://groupbenefits.manulife.ca/gb/member-portal/assets/ciam-sign-in-DWxAuxYg.png">Nature</option>
+            <option value="https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk105_beach.png">Beach</option>
+          </select>
+        </label>
+
+        <div style="margin-top: 10px;">
+          <label for="excludeInput">Exclude Station IDs (comma-separated):</label>
+          <input type="text" id="excludeInput" placeholder="e.g. 2, 12"
+          style="padding:5px; border-radius: 5px; width: 50px;" maxlength="20">
+        
+            </div>
+
+      </div>
+    </div>
+  </div>
+ 
+  <button id="toggleButtons">Hide/Show All Buttons</button>
+ 
+  <div>
+
+    <button id="playPrevious">&nbsp;&nbsp;⏮&nbsp;&nbsp;</button>
+    <button id="playFirst">&nbsp;&nbsp;▶&nbsp;&nbsp;</button>
+    <button id="playNext">&nbsp;&nbsp;⏭&nbsp;&nbsp;</button>
+  </div>
+  <audio id="radioPlayer" controls playsinline>></audio>
+  <div class="station-list"></div>
+  <div class="favorite-list"></div>
+  
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script>
+ // var audioPlayer = document.getElementById("radioPlayer");
+   var s_id = -1;
+  var s_name = ''
+
+  var isStationLoaded = false;
+    const rawStations = [
+      { id: 1, url: "aHR0cHM6Ly9yb2dlcnMtaGxzLmxlYW5zdHJlYW0uY28vcm9nZXJzL2hhbDk1Ny5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y N|e|w|s" },
+      { id: 2, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: ". C|B|C R|a|d|i|o" },
+      { id: 3, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQxMDUwL0VTX1IxUFZDL21hc3Rlci5tM3U4", name: ". C|B|C| |T|o|r|o|n|t|o" },
+      { id: 4, url: "aHR0cHM6Ly9oZWwtYWlzLWVkZ2UxLmxlYW5zdHJlYW0uY28vcm9nZXJzL3RvcjY4MC5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y| |T|o|r|o|n|t|o" },	  
+      { id: 5, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NDI4L2F1ZGlv", name: ". Hello F|M" },
+      { id: 6, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NTQzL2F1ZGlv", name: ". M|i|r|c|y F|M" },
+      { id: 7, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9vYjZ0amc4Z3VscHR2", name: ". H|a|r|r|i|s| |J|a|y|a|r|a|j" },
+     // { id: 7, url: "aHR0cHM6Ly9wc3JsaXZlMi5saXN0ZW5vbi5pbi9hbmlydWQ/YWg9MGU4MTc0OWUzNzc4OWU1ZmI4YzI5MDkyNmNlODdlM2Y=", name: "A|n|i|r|u|d|h| |R|a|d|i|o" },
+      { id: 8, url: "aHR0cHM6Ly9wc3JsaXZlMy5saXN0ZW5vbi5pbi9pbGF5YW0/c3RhdGlvbj1pbGF5YW1hYW5yYWRpbw==", name: ". I|l|a|y|a|r|a|j|a" },
+      { id: 9, url: "aHR0cHM6Ly9wc3JsaXZlMy5saXN0ZW5vbi5pbi9wb3A/c3RhdGlvbj10YW1pbHBvcHJhZGlv", name: ". T|a|m|i|l| |P|o|p|" },
+      { id: 10, url: "aHR0cHM6Ly9wc3JsaXZlMy5saXN0ZW5vbi5pbi9hbmlydWQ/c3RhdGlvbj1hbmlydWRocmFkaW8=", name: ". A|n|i|r|u|d|h" },
+      { id: 11, url: "aHR0cHM6Ly9wc3JsaXZlMy5saXN0ZW5vbi5pbi9hdj9zdGF0aW9uPXRoYWxhdGhhbGFwYXRoeXJhZGlv", name: ". |T|h|a|l|a|p|a|t|h|y" },
+      { id: 12, url: "aHR0cHM6Ly9wc3JsaXZlMy5saXN0ZW5vbi5pbi95c3I/c3RhdGlvbj15c3JyYWRpbw==", name: ". Y|u|v|a|n" }
+    ];
+
+    let stations = [];
+    let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+    let currentIndex = 0;
+
+    function saveStations() {
+      localStorage.setItem('stations', JSON.stringify(rawStations));
+    }
+
+    function loadStations() {
+      stations = JSON.parse(localStorage.getItem('stations')) || rawStations;
+    }
+
+    function decodeUrl(b64) {
+      return atob(b64);
+    }
+
+    function playStation(index) {
+        isStationLoaded = false;
+      //console.log('playStation called with index:', index);
+      const station = stations[index];
+      const decodedUrl = decodeUrl(station.url);
+      const audio = document.getElementById('radioPlayer');
+      //console.log('index:', index);
+   
+
+      console.log('Station ID:', station.id);
+      console.log('Station Name:', station.name);
+      localStorage.setItem('currentStation', JSON.stringify({
+        id: station.id,
+        name: station.name.replace(/\|/g, ' ')
+      }));
+
+    //print_localStorage();
+    
+    const currentStation = localStorage.getItem('currentStation');
+
+if (currentStation) {
+  const parsedCurrent = JSON.parse(currentStation);
+  s_id = parseInt(parsedCurrent.id);
+  s_name = parsedCurrent.name;
+  //console.log(parsedCurrent);
+  // console.log('-----------------------------');
+  // console.log(`   Name:  ${parsedCurrent.name}`);
+  // console.log(`   Id:   ${parsedCurrent.id}`);
+  // console.log('-----------------------------');
+}
+	//const { s_id, s_name } = JSON.parse(currentStation);
+  //console.log('Playing station Id:   ', s_id, '\n Name :', s_name);
+
+	
+		
+      // Cleanup previous HLS instance if exists
+      if (audio.hlsInstance) {
+        audio.hlsInstance.destroy();
+        audio.hlsInstance = null;
+      }
+
+      // Remove any previous 'error' event handlers to avoid stacking
+      audio.onerror = null;
+
+      // Error handler for native audio playback issues
+      audio.onerror = function () {
+        let errorMessage = "Unknown audio error.";
+        switch (audio.error?.code) {
+          case MediaError.MEDIA_ERR_ABORTED:
+            errorMessage = "You aborted the audio playback.";
+            break;
+          case MediaError.MEDIA_ERR_NETWORK:
+            errorMessage = "A network error caused the audio download to fail.";
+            break;
+          case MediaError.MEDIA_ERR_DECODE:
+            errorMessage = "Audio playback was aborted due to a corruption or unsupported features.";
+            break;
+          case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+            errorMessage = "Audio format or source not supported.";
+            break;
+
+          
+        }
+        console.error(`Audio error for station "${station.name}":`, errorMessage);
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: station.name.replace(/\|/g, ' '),
+            artist: `Error: ${errorMessage}`
+          });
+
+          navigator.mediaSession.setActionHandler('previoustrack', () => {
+          if (favorites.length) {
+          navigateFavorites(-1);
+          } else {
+          navigateStations(-1);
+          }
+        });
+
+        navigator.mediaSession.setActionHandler('nexttrack', () => {
+          if (favorites.length) {
+          navigateFavorites(1);
+          } else {
+          navigateStations(1);
+          }
+        });	 
+        }
+      };
+
+      if (audio)
+      {
+        audio.pause();
+        audio.src = ""; // Clear the source before setting a new one
+        console.log('Audio paused and source cleared.');
+      }
+      
+		UpdateMediaSession(s_id,s_name, "Init...");
+      // Determine whether to use HLS.js or native playback
+      if (decodedUrl.endsWith('.m3u8')) {
+        if (Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(decodedUrl);
+          hls.attachMedia(audio);
+          hls.on(Hls.Events.ERROR, (event, data) => {
+            if (data.fatal) {
+              console.error("HLS.js fatal error", data);
+              if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                  title: station.id +' ' + station.name.replace(/\|/g, ' '),
+                  artist: `HLS error: ${data.details || 'Unknown error'}`
+                });
+              }
+            }
+            else {isStationLoaded = true;}
+          });
+		  console.log('HLS');
+          audio.hlsInstance = hls;
+        } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+			audio.src = decodedUrl;
+      console.log('load...');
+			audio.load();
+      delayLoad(station.id,station.name,8);
+			//audio.oncanplay = () => {
+			//audio.oncanplay().catch(err => handlePlaybackError(station.name, err.message));
+			console.log('Non-HLS.#1');
+
+
+	
+			/*audio.addEventListener("canplaythrough",err =>  function () {
+      console.log('canplaythrough');
+			audio.play().catch(handlePlaybackError(station.name, err.message));
+			});*/
+			
+						
+						
+			audio.addEventListener("loadstart", err => function () {
+        console.log('loadstart-first-elsif');			
+				audio.play().catch(handlePlaybackError(station.name, err.message));
+        console.log('loadstart-elsif');
+        console.log(s_id,s_name);
+			  UpdateMediaSession(s_id,s_name, "Loading...");
+			});
+			
+						
+			 audio.addEventListener("loadeddata",err =>  function () {
+      console.log('loadeddata');
+				audio.play().catch(handlePlaybackError(station.name, err.message));
+			}, { once: true });
+			
+
+			
+        } else {
+          console.error('HLS not supported on this device/browser.');
+          return;
+        }
+      } else {
+		    //audio.pause();
+        // Fallback for direct MP3/AAC streams
+        audio.src = decodedUrl;
+        console.log('load###@@');
+        UpdateMediaSession(s_id,s_name, "Loading...1");
+        audio.load();
+        delayLoad(station.id,station.name,8);
+		//audio.load();
+		//audio.oncanplay = () => {
+		//audio.oncanplay().catch(err => handlePlaybackError(station.name, err.message));
+		console.log('Non-HLS#2');
+
+    audio.addEventListener("loadstart",err =>  function () {
+      console.log('loadstart-else');
+      UpdateMediaSession(s_id,s_name, "Loading...2");			
+		});
+		
+
+    audio.addEventListener("loadedmetadata",err =>  function () {
+      console.log('loadedmetadata-else');
+      UpdateMediaSession(s_id,s_name, "Loading...3");			
+		});
+
+    audio.addEventListener("canplay",err =>  function () {
+      console.log('canplay-else');
+			audio.play().catch(handlePlaybackError(station.name, err.message));
+      UpdateMediaSession(s_id,s_name, "Loaded...1");
+		});
+		
+
+		audio.addEventListener("canplaythrough",err =>  function () {
+      console.log('canplaythrough-else');
+			audio.play().catch(handlePlaybackError(station.name, err.message));
+      UpdateMediaSession(s_id,s_name, "Loaded...2");
+		});
+
+
+		
+		
+		
+        audio.addEventListener("loadstart", err => function () {
+          console.log('loadstart-else');
+		
+			audio.play().catch(handlePlaybackError(station.name, err.message));
+      console.log('loadstart-else');
+      console.log(s_id,s_name);
+          UpdateMediaSession(s_id,s_name, "Loading...4");
+        });
+		
+			
+		 audio.addEventListener("loadeddata",err =>  function () {
+      console.log('loadeddata-else');
+			audio.play().catch(handlePlaybackError(station.name, err.message));
+		}, { once: true });
+		
+
+			
+      }
+    if (audio.readyState >= 3) { // HAVE_FUTURE_DATA
+    console.log("Station is ready to play.");
+    } else {
+    console.log("Station is not ready yet." + audio.readyState);
+    }
+
+    audio.play()
+  .then(() => {
+    console.log('Playback started successfully');
+    isStationLoaded = true;
+    UpdateMediaSession(s_id, s_name, "Playing");
+  })
+  .catch(err => handlePlaybackError(station.name, err.message));
+
+      //audio.play().catch(err => handlePlaybackError(station.name, err.message));
+
+      // Detect page visibility using visibilitychange
+      document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'hidden') {
+          console.log('Page is hidden');
+          //audio.pause();
+        } else {
+          console.log('Page is visible');
+          //audio.play();
+          UpdateMediaSession(s_id, s_name, "Playing..");
+
+        }
+      });
+
+      UpdateMediaSession(s_id,s_name,"Loaded");
+      currentIndex = index;
+      highlightActiveStation();
+    }
+	
+	function delayLoad(id,station_name,cnt)
+	{
+	// Delay playback for 30 seconds on non-.m3u8 URLs
+			let countdown = cnt;
+
+			const countdownInterval = setInterval(() => {
+			console.log('Loading...'+countdown);
+			console.log('Title...' +id + ' ' + station_name.replace(/\|/g, ' '));
+			
+			  if ('mediaSession' in navigator) {
+				navigator.mediaSession.metadata = new MediaMetadata({
+				  title:  id + " " + station_name.replace(/\|/g, ' '),
+				  artist: `Loading in ${countdown--} sec...`
+				});
+			  }
+
+			  if (countdown < 0 || isStationLoaded) {
+				clearInterval(countdownInterval);
+					 if ('mediaSession' in navigator) {
+					navigator.mediaSession.metadata = new MediaMetadata({
+					  title: station_name.replace(/\|/g, ' '),
+					  artist: `Loaded`
+					});
+				  }
+
+                  
+				//actuallyPlay();
+			  }
+			}, 1000);	
+		navigator.mediaSession.setActionHandler('previoustrack', () => {
+		  if (favorites.length) {
+			navigateFavorites(-1);
+		  } else {
+			navigateStations(-1);
+		  }
+		});
+
+		navigator.mediaSession.setActionHandler('nexttrack', () => {
+		  if (favorites.length) {
+			navigateFavorites(1);
+		  } else {
+			navigateStations(1);
+		  }
+		});	
+			
+	}
+
+	function UpdateMediaSession(id,station,msg) {
+		if ('mediaSession' in navigator) {
+		navigator.mediaSession.metadata = new MediaMetadata({
+		  title: id + " " + station,
+		  artist: "Live Radio " +msg
+		});
+
+		navigator.mediaSession.setActionHandler('previoustrack', () => {
+		  if (favorites.length) {
+			navigateFavorites(-1);
+		  } else {
+			navigateStations(-1);
+		  }
+		});
+
+		navigator.mediaSession.setActionHandler('nexttrack', () => {
+		  if (favorites.length) {
+			navigateFavorites(1);
+		  } else {
+			navigateStations(1);
+		  }
+		});
+		}
+	}
+
+
+    function navigateFavorites(dir) {
+      if (!favorites.length) return;
+      let currentId = stations[currentIndex].id;
+      let favIndex = favorites.findIndex(id => id === currentId);
+      let nextIndex = (favIndex + dir + favorites.length) % favorites.length;
+      let newIndex = stations.findIndex(s => s.id === favorites[nextIndex]);
+      playStation(newIndex);
+    }
+
+    function navigateStations(dir) {
+  const excludeValue = $('#excludeInput').val() || '';
+  const excludeIds = excludeValue
+    .split(',')
+    .map(id => parseInt(id.trim()))
+    .filter(id => !isNaN(id));
+
+  let attempts = 0;
+  let newIndex = currentIndex;
+
+  do {
+    newIndex = (newIndex + dir + stations.length) % stations.length;
+    attempts++;
+    // Stop if we've tried all stations (to avoid infinite loop)
+    if (attempts > stations.length) {
+      console.warn("All stations are excluded.");
+      return;
+    }
+  } while (excludeIds.includes(stations[newIndex].id));
+
+  playStation(newIndex);
+}
+
+
+    function highlightActiveStation() {
+      // Remove active class from all stations
+      $('.station-link').removeClass('active-station');
+      // Add active class to the currently playing station
+      $(`.station-link[data-idx="${currentIndex}"]`).addClass('active-station');
+    }
+
+    function displayStations() {
+  $('.station-list').empty();
+  stations.sort((a, b) => a.id - b.id);
+
+  // Get list of excluded IDs from the text box
+  const excludeValue = $('#excludeInput').val() || '';
+  const excludeIds = excludeValue
+    .split(',')
+    .map(id => parseInt(id.trim()))
+    .filter(id => !isNaN(id));
+
+  stations.forEach((station, idx) => {
+    // Skip if this station ID is in the exclude list
+    if (excludeIds.includes(station.id)) return;
+
+    const stationName = `${station.id} ${station.name.replace(/\|/g, ' ')}`;
+    const isFav = favorites.includes(station.id);
+    const favText = isFav ? '★' : '☆';
+
+    $('.station-list').append(`
+      <div>
+        <a href="#" class="station-link" data-idx="${idx}">${stationName}</a>
+        <button class="fav-btn" data-id="${station.id}">${favText}</button>
+      </div>
+    `);
+  });
+
+  adjustStationButtonWidths();
+}
+
+
+
+    function displayFavorites() {
+      $('.favorite-list').empty();
+      favorites.sort();
+      favorites.forEach(id => {
+        const station = stations.find(s => s.id === id);
+        if (station) {
+          const stationName = `${station.id} ${station.name.replace(/\|/g, ' ')}`;
+          $('.favorite-list').append(`<div>${stationName}</div>`);
+        }
+      });
+    }
+
+    function adjustStationButtonWidths() {
+      let maxWidth = 0;
+      $('.station-link').each(function() {
+        maxWidth = Math.max(maxWidth, $(this).outerWidth());
+      });
+      $('.station-link').each(function() {
+        $(this).css('width', maxWidth);
+      });
+    }
+
+    $(document).ready(function() {
+      $('body').css('background-image', 'url(https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk104_ipl.png)');
+      //$('body').css('background-image', 'url(https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk102_sha.png)');
+		$('#bgImageSelect').val('https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk102_sha.png');
+      $('#themeSelect').val('theme-ocean');
+      
+      if (!localStorage.getItem('stations')) saveStations();
+      loadStations();
+
+      displayStations();
+
+      playStation(0);
+
+      $('#playFirst').click(() => {
+  const excludeValue = $('#excludeInput').val() || '';
+  const excludeIds = excludeValue
+    .split(',')
+    .map(id => parseInt(id.trim()))
+    .filter(id => !isNaN(id));
+
+  let firstIndex = stations.findIndex(st => !excludeIds.includes(st.id));
+  if (firstIndex !== -1) {
+    playStation(firstIndex);
+  } else {
+    alert("All stations are excluded!");
+  }
+});
+
+
+      $('#playPrevious').click(() => navigateStations(-1));
+      $('#playNext').click(() => navigateStations(1));
+      $('#showStations').click(displayStations);
+      $('#showFavorites').click(displayFavorites);
+      $('#clearStorage').click(() => {
+        localStorage.clear();
+        saveStations();
+        loadStations();
+        displayStations();
+      });
+
+      $('.station-list').on('click', 'a', function() {
+        playStation($(this).data('idx'));
+      });
+
+      $('.station-list').on('click', '.fav-btn', function() {
+        const stationId = $(this).data('id');
+        const index = favorites.indexOf(stationId);
+        if (index === -1) {
+          favorites.push(stationId);
+          $(this).text('★');
+        } else {
+          favorites.splice(index, 1);
+          $(this).text('☆');
+        }
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+      });
+
+      // Toggle visibility of the buttons
+      $('#toggleButtons').click(function() {
+        $('#toggleButtonsGroup').toggle(); // Toggle the visibility of the group
+      });
+
+      $('#bgImageSelect').change(function() {
+        $('body').css('background-image', 'url(' + $(this).val() + ')');
+      });
+
+      $('#themeSelect').change(function() {
+        $('body').removeClass().addClass($(this).val());
+        highlightActiveStation();
+      });
+
+      $('#excludeInput').on('input', displayStations);
+    });
+
+function handlePlaybackError(stationName, errorMessage) {
+  console.error(`Playback failed for "${stationName}":`, errorMessage);
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: stationName.replace(/\|/g, ' '),
+      artist: `Playback error: ${errorMessage}`
+    });
+  }
+
+  navigator.mediaSession.setActionHandler('previoustrack', () => {
+		  if (favorites.length) {
+			navigateFavorites(-1);
+		  } else {
+			navigateStations(-1);
+		  }
+		});
+
+		navigator.mediaSession.setActionHandler('nexttrack', () => {
+		  if (favorites.length) {
+			navigateFavorites(1);
+		  } else {
+			navigateStations(1);
+		  }
+		});
+}
+
+// getCurrentStation() : Function to get the current station from localStorage
+function getCurrentStation() {
+  return JSON.parse(localStorage.getItem('currentStation')) || { id: 0, name: "Unknown" };
+}
+
+function print_localStorage() {
+  // Log the 'stations' list from localStorage
+const storedStations = localStorage.getItem('stations');
+
+if (storedStations) {
+  const stations = JSON.parse(storedStations);
+  console.log(`🎵 You have ${stations.length} station(s) saved:\n`);
+
+  stations.forEach((station, index) => {
+    console.log(`📻 Station ${index + 1}:`);
+    console.log(`   Name:  ${station.name}`);
+    console.log(`   URL:   ${station.url}`);
+    console.log(`   Image: ${station.image}`);
+    console.log('-----------------------------');
+  });
+} else {
+  console.log('⚠️ No stations found in localStorage.');
+}
+
+// Log the 'currentStation' from localStorage
+const currentStation = localStorage.getItem('currentStation');
+
+if (currentStation) {
+  const parsedCurrent = JSON.parse(currentStation);
+  console.log(parsedCurrent);
+  console.log('-----------------------------');
+  console.log('🎯 Current Station:');
+  console.log(`   Name:  ${parsedCurrent.name}`);
+  console.log(`   URL:   ${parsedCurrent.url}`);
+  console.log(`   Image: ${parsedCurrent.image}`);
+} else {
+  console.log('⚠️ No currentStation found in localStorage.');
+}
+}
+	
+  </script>
+</body>
+</html>
