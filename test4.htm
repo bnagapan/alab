@@ -387,18 +387,27 @@ if (currentStation) {
     console.log("Station is not ready yet." + audio.readyState);
     }
 
-      audio.play().catch(err => handlePlaybackError(station.name, err.message));
+    audio.play()
+  .then(() => {
+    console.log('Playback started successfully');
+    UpdateMediaSession(s_id, s_name, "Playing");
+  })
+  .catch(err => handlePlaybackError(station.name, err.message));
+
+      //audio.play().catch(err => handlePlaybackError(station.name, err.message));
 
       // Detect page visibility using visibilitychange
-      /*document.addEventListener('visibilitychange', function () {
+      document.addEventListener('visibilitychange', function () {
         if (document.visibilityState === 'hidden') {
           console.log('Page is hidden');
-          audio.pause();
+          //audio.pause();
         } else {
           console.log('Page is visible');
-          audio.play();
+          //audio.play();
+          UpdateMediaSession(s_id, s_name, "Playing..");
+
         }
-      });*/
+      });
 
       UpdateMediaSession(s_id,s_name,"Loaded");
       currentIndex = index;
