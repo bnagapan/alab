@@ -78,7 +78,7 @@
 <body class="theme-ocean">
   <div style="text-align:center">
     <h1>R | a | d | i | o</h1>
-       test 3.1.1<br><br>
+       test 5.0.2<br><br>
  </div>
    <div id="toggleButtonsGroup" style="display:none" >
     <button id="showStations">Show All Stations</button>
@@ -102,6 +102,7 @@
             <option value="https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk102_sha.png">Ocean</option>
             <option value="https://groupbenefits.manulife.ca/gb/member-portal/assets/ciam-sign-in-DWxAuxYg.png">Nature</option>
             <option value="https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk105_beach.png">Beach</option>
+            <option value="https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk106_house.png">Row House</option>
           </select>
         </label>
 
@@ -441,7 +442,11 @@ if (currentStation) {
 					});
 				  }
 
-                  
+          document.getElementById('radioPlayer').play().onerror = function () {
+            console.error(`Audio error for station "${station_name}":`, errorMessage);
+            }
+            
+                 
 				//actuallyPlay();
 			  }
 			}, 1000);	
