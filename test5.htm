@@ -437,8 +437,8 @@ if (currentStation) {
 				clearInterval(countdownInterval);
 					 if ('mediaSession' in navigator) {
 					navigator.mediaSession.metadata = new MediaMetadata({
-					  title: station_name.replace(/\|/g, ' '),
-					  artist: `Loaded`
+            title:  id + " " + station_name.replace(/\|/g, ' '),
+					  artist: `Live Radio - Loaded`
 					});
 				  }
 
