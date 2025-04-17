@@ -78,7 +78,7 @@
 <body class="theme-ocean">
   <div style="text-align:center">
     <h1>R | a | d | i | o</h1>
-       test 5.0.3<br><br>
+       test 5.0.2<br><br>
  </div>
    <div id="toggleButtonsGroup" style="display:none" >
     <button id="showStations">Show All Stations</button>
@@ -136,7 +136,6 @@
  // var audioPlayer = document.getElementById("radioPlayer");
    var s_id = -1;
   var s_name = ''
-  var cntLoad = 0;
 
   var isStationLoaded = false;
     const rawStations = [
@@ -436,27 +435,11 @@ if (currentStation) {
 
 			  if (countdown < 0 || isStationLoaded) {
 				clearInterval(countdownInterval);
-        cntLoad = cntLoad +1;
-        if (cntLoad >= 1){
-          cntLoad = 0;
-          isStationLoaded = true;
-          if ('mediaSession' in navigator) {
+					 if ('mediaSession' in navigator) {
 					navigator.mediaSession.metadata = new MediaMetadata({
             title:  id + " " + station_name.replace(/\|/g, ' '),
 					  artist: `Live Radio - Loaded`
 					});
-        }
-        else
-        {
-          delayLoad(station.id,station.name,3);
-          UpdateMediaSession(id,station_name, "Retry loading...");
-          audio.play().catch(handlePlaybackError(station.name, err.message));
-          console.log('delayLoad-else');   
-          
-        
-        }
-
-					
 				  }
 
           document.getElementById('radioPlayer').play().onerror = function () {
