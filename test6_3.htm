@@ -187,6 +187,11 @@
     audio.hlsInstance = null;
   }
 
+    // Preload and update readiness
+    audio.addEventListener('canplaythrough', () => {
+    isStationLoaded = true;
+    }, { once: true });
+    
   audio.pause();
   audio.src = '';
   audio.load();
@@ -226,13 +231,9 @@
     // Non-m3u8 stream
     audio.src = decodedUrl;
     audio.load();
-    // Preload and update readiness
-    audio.addEventListener('canplaythrough', () => {
-        isStationLoaded = true;
-        }, { once: true });
-        
+
     // Countdown before playing
-    let countdown = 0;
+    let countdown = 5;
     const interval = setInterval(() => {
       if (isStationLoaded || countdown <= 0) {
         clearInterval(interval);
@@ -245,7 +246,7 @@
       }
     }, 1000);
 
-    
+
   }
 
   highlightActiveStation();
