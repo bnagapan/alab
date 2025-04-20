@@ -255,12 +255,11 @@
     audio.src = decodedUrl;
     //audio.load();
     // Usage:
-loadAudioAsync(audio).then(() => {
+    UpdateMediaSession(stationId, stationName, "Loading#2");
+    loadAudioAsync(audio).then(() => {
     console.log('Audio loaded and ready to play');
     audio.play(); //play#2
-    UpdateMediaSession(stationId, stationName, "Playing#2");
-})
-;
+    UpdateMediaSession(stationId, stationName, "Playing#2");});
 
     // Add error handling for audio.load()
     // Attach the listener using the new function
