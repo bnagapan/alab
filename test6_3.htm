@@ -145,7 +145,7 @@
       { id: 2, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: ". C|B|C R|a|d|i|o" },
       { id: 3, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQxMDUwL0VTX1IxUFZDL21hc3Rlci5tM3U4", name: ". C|B|C| |T|o|r|o|n|t|o" },
       { id: 4, url: "aHR0cHM6Ly9oZWwtYWlzLWVkZ2UxLmxlYW5zdHJlYW0uY28vcm9nZXJzL3RvcjY4MC5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y| |T|o|r|o|n|t|o" },	  
-      { id: 5, url: "BRR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NDI4L2F1ZGlv", name: ". Hello F|M" },
+      { id: 5, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NDI4L2F1ZGlv", name: ". Hello F|M" },
       { id: 6, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NTQzL2F1ZGlv", name: ". M|i|r|c|y F|M" },
       { id: 7, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9vYjZ0amc4Z3VscHR2", name: ". H|a|r|r|i|s| |J|a|y|a|r|a|j" },
      // { id: 7, url: "aHR0cHM6Ly9wc3JsaXZlMi5saXN0ZW5vbi5pbi9hbmlydWQ/YWg9MGU4MTc0OWUzNzc4OWU1ZmI4YzI5MDkyNmNlODdlM2Y=", name: "A|n|i|r|u|d|h| |R|a|d|i|o" },
@@ -230,30 +230,37 @@
     }
   } else {
     // Non-m3u8 stream
-    audio.addEventListener('canplaythrough', () => {
-        audio.play().then(() => {
-          isStationLoaded = true;
-          audio.play(); //play#1
-          UpdateMediaSession(stationId, stationName, "Playing#1");
-        });
-      }, { once: true });
+    // audio.addEventListener('canplaythrough', () => {
+    //     audio.play().then(() => {
+    //       isStationLoaded = true;
+    //       audio.play(); //play#1
+    //       UpdateMediaSession(stationId, stationName, "Playing#1");
+    //     });
+    //   }, { once: true });
 
-      audio.addEventListener('loadeddata', () => {
-        audio.play().then(() => {
-          isStationLoaded = true;
-          audio.play(); //play#2
-          UpdateMediaSession(stationId, stationName, "Playing#2");
-        });
-      }, { once: true });
+    //   audio.addEventListener('loadeddata', () => {
+    //     audio.play().then(() => {
+    //       isStationLoaded = true;
+    //       audio.play(); //play#2
+    //       UpdateMediaSession(stationId, stationName, "Playing#2");
+    //     });
+    //   }, { once: true });
 
-      audio.addEventListener('loadstart', () => {
-        audio.play().then(() => {
-          UpdateMediaSession(stationId, stationName, "Loading...");
-        });
-      }, { once: true });
+    //   audio.addEventListener('loadstart', () => {
+    //     audio.play().then(() => {
+    //       UpdateMediaSession(stationId, stationName, "Loading...");
+    //     });
+    //   }, { once: true });
 
     audio.src = decodedUrl;
-    audio.load();
+    //audio.load();
+    // Usage:
+loadAudioAsync(audio).then(() => {
+    console.log('Audio loaded and ready to play');
+    audio.play(); //play#2
+    UpdateMediaSession(stationId, stationName, "Playing#2");
+})
+;
 
     // Add error handling for audio.load()
     // Attach the listener using the new function
@@ -281,6 +288,13 @@ audio.addEventListener('error', function(e) {
   highlightActiveStation();
 }
 
+function loadAudioAsync(audio) {
+    return new Promise((resolve, reject) => {
+        audio.addEventListener('canplaythrough', () => resolve(), { once: true });
+        audio.addEventListener('error', () => reject('Audio failed to load'), { once: true });
+        audio.load();
+    });
+}
 function handleAudioError(e, stationName) {
     console.log("Audio load error:");
     let errorMessage = '';
@@ -381,6 +395,19 @@ function handleAudioError(e, stationName) {
     if (isShowingFavorites && favorites.length) navigateFavorites(1);
     else                                        navigateStations(1);
   });
+
+  navigator.mediaSession.setActionHandler("play", function () {
+			audioPlayer.play();
+			});
+
+			navigator.mediaSession.setActionHandler("pause", function () {
+			audioPlayer.pause();
+			});
+			
+			navigator.mediaSession.setActionHandler("stop", function () {
+			audioPlayer.pause();
+			audioPlayer.currentTime = 0;
+			});
     }
 
 	function UpdateMediaSession(id,station,msg) {
