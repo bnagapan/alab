@@ -191,7 +191,7 @@
     audio.addEventListener('canplaythrough', () => {
     isStationLoaded = true;
     }, { once: true });
-    
+
   audio.pause();
   audio.src = '';
   audio.load();
@@ -233,7 +233,7 @@
     audio.load();
 
     // Countdown before playing
-    let countdown = 5;
+    let countdown = 8;
     const interval = setInterval(() => {
       if (isStationLoaded || countdown <= 0) {
         clearInterval(interval);
