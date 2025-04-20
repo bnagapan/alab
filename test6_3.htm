@@ -145,7 +145,7 @@
       { id: 2, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: ". C|B|C R|a|d|i|o" },
       { id: 3, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQxMDUwL0VTX1IxUFZDL21hc3Rlci5tM3U4", name: ". C|B|C| |T|o|r|o|n|t|o" },
       { id: 4, url: "aHR0cHM6Ly9oZWwtYWlzLWVkZ2UxLmxlYW5zdHJlYW0uY28vcm9nZXJzL3RvcjY4MC5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y| |T|o|r|o|n|t|o" },	  
-      { id: 5, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NDI4L2F1ZGlv", name: ". Hello F|M" },
+      { id: 5, url: "BRR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NDI4L2F1ZGlv", name: ". Hello F|M" },
       { id: 6, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NTQzL2F1ZGlv", name: ". M|i|r|c|y F|M" },
       { id: 7, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9vYjZ0amc4Z3VscHR2", name: ". H|a|r|r|i|s| |J|a|y|a|r|a|j" },
      // { id: 7, url: "aHR0cHM6Ly9wc3JsaXZlMi5saXN0ZW5vbi5pbi9hbmlydWQ/YWg9MGU4MTc0OWUzNzc4OWU1ZmI4YzI5MDkyNmNlODdlM2Y=", name: "A|n|i|r|u|d|h| |R|a|d|i|o" },
@@ -205,6 +205,7 @@
 
   // Handle m3u8 with HLS.js or native
   if (decodedUrl.endsWith('.m3u8')) {
+    console.log("HLS stream detected.");
     if (Hls.isSupported()) {
       const hls = new Hls();
       hls.loadSource(decodedUrl);
@@ -232,42 +233,33 @@
     audio.addEventListener('canplaythrough', () => {
         audio.play().then(() => {
           isStationLoaded = true;
-          UpdateMediaSession(stationId, stationName, "Playing");
-        }).catch(err => handlePlaybackError(stationName, err.message));
+          audio.play(); //play#1
+          UpdateMediaSession(stationId, stationName, "Playing#1");
+        });
+      }, { once: true });
+
+      audio.addEventListener('loadeddata', () => {
+        audio.play().then(() => {
+          isStationLoaded = true;
+          audio.play(); //play#2
+          UpdateMediaSession(stationId, stationName, "Playing#2");
+        });
+      }, { once: true });
+
+      audio.addEventListener('loadstart', () => {
+        audio.play().then(() => {
+          UpdateMediaSession(stationId, stationName, "Loading...");
+        });
       }, { once: true });
 
     audio.src = decodedUrl;
     audio.load();
 
     // Add error handling for audio.load()
-    audio.addEventListener('error', (e) => {
-            let errorMessage = '';
-            switch (e.target.error.code) {
-                case e.target.error.MEDIA_ERR_ABORTED:
-                    errorMessage = 'You aborted the audio playback.';
-                    break;
-                case e.target.error.MEDIA_ERR_NETWORK:
-                    errorMessage = 'A network error caused the audio download to fail.';
-                    break;
-                case e.target.error.MEDIA_ERR_DECODE:
-                    errorMessage = 'The audio playback was aborted due to a corruption problem or because the media used features your browser did not support.';
-                    break;
-                case e.target.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
-                    errorMessage = 'The audio could not be loaded, either because the server or network failed or because the format is not supported.';
-                    break;
-                default:
-                    errorMessage = 'An unknown error occurred.';
-                    break;
-            }
-            console.error(`Playback failed for "${stationName}": ${errorMessage}`);
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: stationName.replace(/\\n/g, ' '),
-                    artist: `Playback error: ${errorMessage}`
-                });
-            }
-            setNavigationHandlers();
-        });
+    // Attach the listener using the new function
+audio.addEventListener('error', function(e) {
+    handleAudioError(e, stationName);
+});
 
     // Countdown before playing
     let countdown = 8;
@@ -289,6 +281,44 @@
   highlightActiveStation();
 }
 
+function handleAudioError(e, stationName) {
+    console.log("Audio load error:");
+    let errorMessage = '';
+
+    switch (e.target.error.code) {
+        case e.target.error.MEDIA_ERR_ABORTED:
+            console.log("error#1");
+            errorMessage = 'You aborted the audio playback.';
+            break;
+        case e.target.error.MEDIA_ERR_NETWORK:
+            console.log("error#2");
+            errorMessage = 'A network error caused the audio download to fail.';
+            break;
+        case e.target.error.MEDIA_ERR_DECODE:
+            console.log("error#3");
+            errorMessage = 'The audio playback was aborted due to a corruption problem or because the media used features your browser did not support.';
+            break;
+        case e.target.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+            console.log("error#4");
+            errorMessage = 'The audio could not be loaded, either because the server or network failed or because the format is not supported.';
+            break;
+        default:
+            console.log("error#5");
+            errorMessage = 'An unknown error occurred.';
+            break;
+    }
+
+    console.error(`Playback failed for "${stationName}": ${errorMessage}`);
+
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: stationName.replace(/\\n/g, ' '),
+            artist: `Playback error: ${errorMessage}`
+        });
+    }
+
+    setNavigationHandlers();
+}
 	
 	function delayLoad(id,station_name,cnt)
 	{
@@ -354,6 +384,7 @@
     }
 
 	function UpdateMediaSession(id,station,msg) {
+        console.log(msg)
 		if ('mediaSession' in navigator) {
 		navigator.mediaSession.metadata = new MediaMetadata({
 		  title: id + " " + station,
@@ -361,21 +392,7 @@
 		});
 
         setNavigationHandlers();
-		// navigator.mediaSession.setActionHandler('previoustrack', () => {
-		//   if (favorites.length) {
-		// 	navigateFavorites(-1);
-		//   } else {
-		// 	navigateStations(-1);
-		//   }
-		// });
 
-		// navigator.mediaSession.setActionHandler('nexttrack', () => {
-		//   if (favorites.length) {
-		// 	navigateFavorites(1);
-		//   } else {
-		// 	navigateStations(1);
-		//   }
-		// });
 		}
 	}
 
