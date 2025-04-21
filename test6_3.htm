@@ -78,7 +78,8 @@
 <body class="theme-ocean">
   <div style="text-align:center">
     <h1>R | a | d | i | o</h1>
-       test 6.2.0<br><br>
+    <span id="versionDisplay"></span><br><br>
+    <br><br>
  </div>
    <div id="toggleButtonsGroup" style="display:none" >
     <button id="showStations">Show All Stations</button>
@@ -133,7 +134,9 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <script>
- // var audioPlayer = document.getElementById("radioPlayer");
+  const appVersion = "test 6.3.0";
+
+  var audioPlayer = document.getElementById("radioPlayer");
    var s_id = -1;
   var s_name = ''
   let isShowingFavorites = false;
@@ -333,7 +336,7 @@ function handleAudioError(e, stationName) {
     setNavigationHandlers();
 }
 	
-	function delayLoad(id,station_name,cnt)
+/*	function delayLoad(id,station_name,cnt)
 	{
 	// Delay playback for 30 seconds on non-.m3u8 URLs
 			let countdown = cnt;
@@ -365,25 +368,10 @@ function handleAudioError(e, stationName) {
                  
 				//actuallyPlay();
 			  }
-			}, 1000);	
-		// navigator.mediaSession.setActionHandler('previoustrack', () => {
-		//   if (favorites.length) {
-		// 	navigateFavorites(-1);
-		//   } else {
-		// 	navigateStations(-1);
-		//   }
-		// });
-
-		// navigator.mediaSession.setActionHandler('nexttrack', () => {
-		//   if (favorites.length) {
-		// 	navigateFavorites(1);
-		//   } else {
-		// 	navigateStations(1);
-		//   }
-		// });	
+			}, 1000);		
         setNavigationHandlers();
 			
-	}
+	}*/
 
     function setNavigationHandlers() {
         navigator.mediaSession.setActionHandler('previoustrack', () => {
@@ -414,7 +402,7 @@ function handleAudioError(e, stationName) {
 		if ('mediaSession' in navigator) {
 		navigator.mediaSession.metadata = new MediaMetadata({
 		  title: id + " " + station,
-		  artist: "Live Radio " +msg
+		   artist: `Live Radio ${appVersion} - ${msg}`
 		});
 
         setNavigationHandlers();
@@ -536,6 +524,7 @@ function displayFavorites() {
     }
 
     $(document).ready(function() {
+      $('#versionDisplay').text(`Version: ${appVersion}`);
       $('body').css('background-image', 'url(https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk104_ipl.png)');
       //$('body').css('background-image', 'url(https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk102_sha.png)');
 		$('#bgImageSelect').val('https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk102_sha.png');
@@ -653,21 +642,7 @@ function handlePlaybackError(stationName, errorMessage) {
 
   setNavigationHandlers();
 
-//   navigator.mediaSession.setActionHandler('previoustrack', () => {
-// 		  if (favorites.length) {
-// 			navigateFavorites(-1);
-// 		  } else {
-// 			navigateStations(-1);
-// 		  }
-// 		});
 
-// 		navigator.mediaSession.setActionHandler('nexttrack', () => {
-// 		  if (favorites.length) {
-// 			navigateFavorites(1);
-// 		  } else {
-// 			navigateStations(1);
-// 		  }
-// 		});
 }
 
 // getCurrentStation() : Function to get the current station from localStorage
