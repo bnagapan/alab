@@ -149,7 +149,7 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <script>
-  const appVersion = "6.4.3";
+  const appVersion = "6.4.4";
 
   var audioPlayer = document.getElementById("radioPlayer");
    var s_id = -1;
@@ -254,7 +254,7 @@
     audio.src = decodedUrl;
     console.log("URL: " + decodedUrl);
     console.log("Station: " + stationName.replace(/\|/g, ' '));
-     audio.load();
+    //audio.load();
     audio.addEventListener('canplaythrough', () => {
         audio.play().then(() => {
           isStationLoaded = true;
@@ -270,6 +270,11 @@
           UpdateMediaSession(stationId, stationName, "Playing#2");
         });
       }, { once: true });
+
+      for (let i = 1; i <= 26; i++) {
+			console.log("Buffering..."+i);
+
+			}
 
       audio.addEventListener('loadstart', () => {
         audio.play(); //play#0
@@ -549,6 +554,7 @@ function displayFavorites() {
     }
 
     $(document).ready(function() {
+      console.clear();
       $('#versionDisplay').text(`Version: ${appVersion}`);
       $('body').css('background-image', 'url(https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk104_ipl.png)');
       //$('body').css('background-image', 'url(https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk102_sha.png)');
