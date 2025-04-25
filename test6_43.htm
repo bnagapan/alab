@@ -149,7 +149,7 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <script>
-  const appVersion = "6.4.2";
+  const appVersion = "6.4.3";
 
   var audioPlayer = document.getElementById("radioPlayer");
    var s_id = -1;
@@ -252,6 +252,8 @@
   } else {
     // Non-m3u8 stream
     audio.src = decodedUrl;
+    console.log("URL: " + decodedUrl);
+    console.log("Station: " + stationName.replace(/\|/g, ' '));
      audio.load();
     audio.addEventListener('canplaythrough', () => {
         audio.play().then(() => {
