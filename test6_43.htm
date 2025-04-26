@@ -149,7 +149,7 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <script>
-  const appVersion = "6.4.4";
+  const appVersion = "6.4.5";
 
   var audioPlayer = document.getElementById("radioPlayer");
    var s_id = -1;
@@ -215,11 +215,11 @@
 
   audio.pause();
   audio.src = '';
-  audio.load();
+  //audio.load();
 
   // Clear existing listeners to avoid stacking
   audio.removeAttribute("src");
-  audio.load();
+  //audio.load();
   audio.onerror = null;
 
   UpdateMediaSession(stationId, stationName, "Initializing...");
@@ -251,70 +251,20 @@
     }
   } else {
     // Non-m3u8 stream
-    audio.src = decodedUrl;
-    console.log("URL: " + decodedUrl);
-    console.log("Station: " + stationName.replace(/\|/g, ' '));
-    //audio.load();
-    audio.addEventListener('canplaythrough', () => {
-        audio.play().then(() => {
-          isStationLoaded = true;
-          audio.play(); //play#1
-          UpdateMediaSession(stationId, stationName, "Playing#1");
-        });
+    audioPlayer.src = decodedUrl;
+    audioPlayer.addEventListener("canplaythrough", function () {
+          audioPlayer.play().catch(handlePlaybackError);
+          UpdateMediaSession(stationId, stationName, "Loading#1...");
       }, { once: true });
 
-      audio.addEventListener('loadeddata', () => {
-        audio.play().then(() => {
-          isStationLoaded = true;
-          audio.play(); //play#2
-          UpdateMediaSession(stationId, stationName, "Playing#2");
-        });
+    audioPlayer.addEventListener("loadeddata", function () {
+          audioPlayer.play().catch(handlePlaybackError);
+          UpdateMediaSession(stationId, stationName, "Loading#2...");
       }, { once: true });
 
-      for (let i = 1; i <= 26; i++) {
-			console.log("Buffering..."+i);
-
-			}
-
-      audio.addEventListener('loadstart', () => {
-        audio.play(); //play#0
-        UpdateMediaSession(stationId, stationName, "Loading...");
-        // audio.play().then(() => {
-        //   UpdateMediaSession(stationId, stationName, "Loading...");
-        // });
+    audioPlayer.addEventListener("loadstart", function () {
+        UpdateMediaSession(stationId, stationName, "Init#2");
       }, { once: true });
-
-
-   
-    /*
-    // Usage:
-    UpdateMediaSession(stationId, stationName, "Loading#2");
-    loadAudioAsync(audio).then(() => {
-    console.log('Audio loaded and ready to play');
-    audio.play(); //play#2
-    UpdateMediaSession(stationId, stationName, "Playing#2");});
-
-    // Add error handling for audio.load()
-    // Attach the listener using the new function
-audio.addEventListener('error', function(e) {
-    handleAudioError(e, stationName);
-});*/
-
-    // Countdown before playing
-   /* let countdown = 8;
-    const interval = setInterval(() => {
-      if (isStationLoaded || countdown <= 0) {
-        clearInterval(interval);
-        audio.play().then(() => {
-          isStationLoaded = true;
-          UpdateMediaSession(stationId, stationName, "Playing");
-        }).catch(err => handlePlaybackError(stationName, err.message));
-      } else {
-        UpdateMediaSession(stationId, stationName, `Loading in ${countdown--} sec...`);
-      }
-    }, 1000);*/
-
-
   }
 
   highlightActiveStation();
