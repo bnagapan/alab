@@ -155,7 +155,7 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <script>
-  const appVersion = "6.4.5";
+  const appVersion = "6.4.6";
 
   var audioPlayer = document.getElementById("radioPlayer");
    var s_id = -1;
@@ -260,12 +260,12 @@
     audioPlayer.src = decodedUrl;
     audioPlayer.addEventListener("canplaythrough", function () {
           audioPlayer.play().catch(handlePlaybackError);
-          UpdateMediaSession(stationId, stationName, "Loading#1...");
+          UpdateMediaSession(stationId, stationName, "Loading#1");
       }, { once: true });
 
     audioPlayer.addEventListener("loadeddata", function () {
           audioPlayer.play().catch(handlePlaybackError);
-          UpdateMediaSession(stationId, stationName, "Loading#2...");
+          UpdateMediaSession(stationId, stationName, "Loading#2");
       }, { once: true });
 
     audioPlayer.addEventListener("loadstart", function () {
