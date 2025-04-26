@@ -51,6 +51,12 @@
     .theme-snow a.station-link { background-color: #01497A; color: white; }
     .theme-snow a.station-link:hover { background-color: #01497A; color: white; }
 
+    body.theme-nature {
+      background-image: url('https://groupbenefits.manulife.ca/gb/member-portal/assets/ciam-sign-in-DWxAuxYg.png');
+    }
+    body.theme-snow {
+      background-image: url('https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk109_snow.png');
+    } 
 
 
     a.station-link {
@@ -506,7 +512,10 @@ function displayFavorites() {
     $(document).ready(function() {
       console.clear();
       $('#versionDisplay').text(`Version: ${appVersion}`);
-      $('body').css('background-image', 'url(https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk104_ipl.png)');
+      $('body').removeClass().addClass('theme-snow');
+      $('#bgImageSelect').val('https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk109_snow.png');
+      $('#themeSelect').val('theme-snow');
+     // $('body').css('background-image', 'url(https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk104_ipl.png)');
       //$('body').css('background-image', 'url(https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk102_sha.png)');
 		$('#bgImageSelect').val('https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk102_sha.png');
       $('#themeSelect').val('theme-ocean');
