@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Generic Radio Player</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      letter-spacing: 8px; /* space between characters */
+      margin-bottom: 40px;
+    }
+    #stationUrlInput {
+      width: 60%;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+    #loadStationBtn {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #17a2b8;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    #playPauseBtn {
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 20px;
+      display: none; /* hidden at first */
+    }
+    #now-playing {
+      margin-top: 20px;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🎶 GENERIC RADIO PLAYER</h1>
+
+<!-- Textbox to capture Station URL -->
+<input type="text" id="stationUrlInput" placeholder="Enter Station Stream URL (or leave empty for default)">
+<button id="loadStationBtn">Load Station</button>
+
+<br>
+
+<!-- Audio element -->
+<audio id="radioPlayer" preload="none"></audio>
+
+<!-- Play/Pause Button -->
+<button id="playPauseBtn">▶️ Play</button>
+
+<!-- Now Playing Info -->
+<div id="now-playing">Loading current track...</div>
+
+<script>
+$(document).ready(function() {
+
+    const defaultStreamUrl = 'http://stream.zeno.fm/tqnws2eafwzuv.aac';
+    const audio = document.getElementById('radioPlayer');
+    const playPauseBtn = $('#playPauseBtn');
+    let nowPlayingInterval;
+
+    // 🔍 Extract the station ID from the URL
+    function getStationId(url) {
+        const parts = url.split('/');
+        return parts[parts.length - 1].split('.')[0]; // remove .aac if present
+    }
+
+    // Load station function
+    function loadStation(streamUrl) {
+        const stationId = getStationId(streamUrl);
+        const nowPlayingApiUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(`https://api.zeno.fm/station/${stationId}.json`);
+
+        $('#radioPlayer').attr('src', streamUrl);
+
+        playPauseBtn.show();
+
+        // Reset previous click handlers to avoid duplicates
+        playPauseBtn.off('click').on('click', function() {
+            if (audio.paused) {
+                audio.play();
+                playPauseBtn.text('⏸️ Pause');
+            } else {
+                audio.pause();
+                playPauseBtn.text('▶️ Play');
+            }
+        });
+
+        // Fetch Now Playing Info
+        function fetchNowPlaying() {
+            $.getJSON(nowPlayingApiUrl, function(response) {
+                let data = JSON.parse(response.contents);
+                if (data && data.now_playing) {
+                    $('#now-playing').html(`<strong>Now Playing:</strong> ${data.now_playing.song}`);
+                } else {
+                    $('#now-playing').html('No now playing information available.');
+                }
+            }).fail(function() {
+                $('#now-playing').html('Could not load now playing info.');
+            });
+        }
+
+        // First fetch immediately
+        fetchNowPlaying();
+
+        // Clear previous interval if exists
+        if (nowPlayingInterval) clearInterval(nowPlayingInterval);
+
+        // Then update every 30 seconds
+        nowPlayingInterval = setInterval(fetchNowPlaying, 30000);
+    }
+
+    // When Load Station button clicked
+    $('#loadStationBtn').click(function() {
+        let enteredUrl = $('#stationUrlInput').val().trim();
+        if (enteredUrl === '') {
+            enteredUrl = defaultStreamUrl; // fallback to default
+        }
+        loadStation(enteredUrl);
+    });
+
+    // Automatically load default station when page loads
+    loadStation(defaultStreamUrl);
+
+});
+</script>
+
+</body>
+</html>
