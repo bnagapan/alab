@@ -108,6 +108,11 @@
     <button id="showStations">Show All Stations</button>
     <button id="showFavorites">Show Favorite Stations</button>
     <button id="clearStorage">Clear & Reload Stations</button>
+    <!-- Button with icon -->
+<button id="clearFavoritesBtn">
+  <i class="bi bi-trash"></i> Clear Favorites
+</button>
+    <!-- <button id="clearFavoritesBtn">🗑️ Clear Favorites</button> -->
 	     <!-- Theme and Background Selector inside Toggle Buttons Group -->
       <div id="themeBgContainer">
         <label>Theme:
@@ -165,6 +170,9 @@
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <!-- Bootstrap Icons CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
   <script>
   const appVersion = "7.0.0";
 
@@ -440,6 +448,13 @@ function handleAudioError(e, stationName) {
   playStation(newIndex);
 }
 
+function clearFavorites() {
+  favorites = [];
+  localStorage.setItem('favorites', JSON.stringify(favorites));
+  displayStations(); // Update UI
+  $('.favorite-list').empty().hide(); // Clear and hide favorite list
+}
+
 
     function highlightActiveStation() {
       // Remove active class from all stations
@@ -591,6 +606,9 @@ $('#playNext').click(() => {
         loadStations();
         displayStations();
       });
+
+      $('#clearFavoritesBtn').click(clearFavorites);
+
 
       $(document).on('click', 'a.station-link', function(e) {
   e.preventDefault();
