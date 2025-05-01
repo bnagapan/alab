@@ -265,6 +265,19 @@
 
   UpdateMediaSession(stationId, stationName, "Initializing...");
 
+   // Check stream URL before trying to play
+   checkStreamUrl(stationName,decodedUrl).then(isValid => {
+    if (!isValid) {
+      handlePlaybackError(stationName, "Station unavailable (404 or blocked)");
+      return;
+    }
+
+
+}).catch(error => {
+  // Handle fetch or network error
+  handlePlaybackError(stationName, "Error checking stream: " + error.message);
+});
+
   // Handle m3u8 with HLS.js or native
   if (decodedUrl.endsWith('.m3u8')) {
     console.log("HLS stream detected.");
@@ -721,6 +734,23 @@ $('#categoryButtons button').click(function () {
   loadStations();
   displayStations();
 });
+
+function checkStreamUrl(stationName,url) {
+  return fetch(url, { method: 'HEAD', mode: 'no-cors' }) // 'no-cors' may be needed to avoid CORS errors
+    .then(response => {
+      if (!response.ok && response.type !== 'opaque') {
+        //throw new Error(`HTTP error ${response.status}`);
+        console.error(`Stream URL check failed for "${stationName}": HTTP error ${response.status}`);
+        handlePlaybackError(stationName, `HTTP error ${response.status}`);
+      }
+      return true;
+    })
+    .catch(err => {
+      console.error("Stream URL check failed:", err.message || err);
+      return false;
+    });
+}
+
 
 
 
