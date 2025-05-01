@@ -177,7 +177,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
   <script>
-  const appVersion = "7.2.1";
+  const appVersion = "7.2.2";
 
   var audioPlayer = document.getElementById("radioPlayer");
    var s_id = -1;
@@ -265,18 +265,16 @@
 
   UpdateMediaSession(stationId, stationName, "Initializing...");
 
+
    // Check stream URL before trying to play
-   checkStreamUrl(stationName,decodedUrl).then(isValid => {
-    if (!isValid) {
-      handlePlaybackError(stationName, "Station unavailable (404 or blocked)");
-      return;
-    }
+   checkStreamUrl(decodedUrl)
+        .then(isValid => {
+          if (!isValid) {
+   
+            handlePlaybackError(stationName, '404 Not found')
+          }
+        });
 
-
-}).catch(error => {
-  // Handle fetch or network error
-  handlePlaybackError(stationName, "Error checking stream: " + error.message);
-});
 
   // Handle m3u8 with HLS.js or native
   if (decodedUrl.endsWith('.m3u8')) {
@@ -735,24 +733,26 @@ $('#categoryButtons button').click(function () {
   displayStations();
 });
 
-async function checkStreamUrl(url) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 4000); // 4 sec timeout
+function checkStreamUrl(url) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 4000); // 4s timeout
 
-  try {
-    const response = await fetch(url, {
-      method: 'GET',
-      signal: controller.signal,
-      headers: {
-        'Range': 'bytes=0-1' // only request a small chunk if server supports it
-      }
-    });
-    clearTimeout(timeout);
-    return response.ok;
-  } catch (e) {
-    return false;
-  }
-}
+      return fetch(url, {
+        method: 'GET',
+        signal: controller.signal,
+        headers: {
+          'Range': 'bytes=0-1' // Only fetch a small part
+        }
+      })
+      .then(response => {
+        clearTimeout(timeout);
+        return response.ok;
+      })
+      .catch(e => {
+        clearTimeout(timeout);
+        return false;
+      });
+    }
 
 
 
