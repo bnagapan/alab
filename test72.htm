@@ -177,7 +177,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
   <script>
-  const appVersion = "7.2.0";
+  const appVersion = "7.2.1";
 
   var audioPlayer = document.getElementById("radioPlayer");
    var s_id = -1;
@@ -735,20 +735,23 @@ $('#categoryButtons button').click(function () {
   displayStations();
 });
 
-function checkStreamUrl(stationName,url) {
-  return fetch(url, { method: 'HEAD', mode: 'no-cors' }) // 'no-cors' may be needed to avoid CORS errors
-    .then(response => {
-      if (!response.ok && response.type !== 'opaque') {
-        //throw new Error(`HTTP error ${response.status}`);
-        console.error(`Stream URL check failed for "${stationName}": HTTP error ${response.status}`);
-        handlePlaybackError(stationName, `HTTP error ${response.status}`);
+async function checkStreamUrl(url) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 4000); // 4 sec timeout
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      signal: controller.signal,
+      headers: {
+        'Range': 'bytes=0-1' // only request a small chunk if server supports it
       }
-      return true;
-    })
-    .catch(err => {
-      console.error("Stream URL check failed:", err.message || err);
-      return false;
     });
+    clearTimeout(timeout);
+    return response.ok;
+  } catch (e) {
+    return false;
+  }
 }
 
 
