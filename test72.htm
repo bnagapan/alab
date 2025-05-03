@@ -249,6 +249,10 @@
     audio.hlsInstance = null;
   }
 
+  audioPlayer.addEventListener("error", function (e) {
+    handlePlaybackError(stationName, e.message);
+}, { once: true });
+
     // Preload and update readiness
     audio.addEventListener('canplaythrough', () => {
     isStationLoaded = true;
@@ -261,6 +265,7 @@
   // Clear existing listeners to avoid stacking
   audio.removeAttribute("src");
   //audio.load();
+  
   audio.onerror = null;
 
   UpdateMediaSession(stationId, stationName, "Initializing...");
