@@ -699,7 +699,9 @@ function handlePlaybackError(stationName, errorMessage) {
 
   // Clear error metadata after 5 seconds
   setTimeout(() => {
-      navigator.mediaSession.metadata = null;
+      //navigator.mediaSession.metadata = null;
+      if (isShowingFavorites && favorites.length) navigateFavorites(-1);
+    else                                        navigateStations(-1);
     }, 3000);
   
 
