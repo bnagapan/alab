@@ -177,7 +177,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
   <script>
-  const appVersion = "7.2.2";
+  const appVersion = "7.2.3";
 
   var audioPlayer = document.getElementById("radioPlayer");
    var s_id = -1;
@@ -211,11 +211,13 @@
   { id: 22, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL2U5aHNiYmJleTR6dXY=", name: ". M|e|l|l|i|s|a|i F|M", category: "mp3_2" },
   { id: 23, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL3RxbndzMmVhZnd6dXYuYWFj", name: ". 9|0|s T|a|m|i|l Melodies", category: "mp3_2" },
   { id: 24, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtLzBjeXMyaDQxdzBodnY=", name: ". A|R|R F|M", category: "mp3_2" },
-  { id: 25, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL25na3ViZGk4b2Y0dXY=", name: ". A|j|i|t|h F|M", category: "mp3_2" },
+  
   { id: 26, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtLzlmcDEzODNmMGQwdXY=", name: ". E|r|o|d|e", category: "mp3_2" },
-  { id: 27, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL3NzbmY0eWE0NGQw", name: ". P|o|z|h|i|l F|M", category: "mp3_2" },
+
   { id: 28, url: "aHR0cHM6Ly9zdHJlYW0tMTY0Lnplbm8uZm0vb3NiZ212aGp5cTd1dg==", name: ". A|R|R| |H|i|g|h", category: "mp3_2" },
-  { id: 29, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS90N241Ynl3ZXhlc3R2", name: ". A|T|L|A|N|T|I|C", category: "mp3_2" }
+  { id: 29, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS90N241Ynl3ZXhlc3R2", name: ". A|T|L|A|N|T|I|C", category: "mp3_2" },
+  { id: 30, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQxMDM5L0VTX1IxTUNHL2FkYXB0aXZlXzQ4L2YwdHZ2M3M1LzAwMDAwMjA4L21lZGlhXzM5NTMwNi5hYWM=", name: ". |C|B|C| |C|a|l|g|a|r|y", category: "english" },
+  { id: 31, url: "aHR0cHM6Ly9yYWRpby1kYWkucm9nZXJzZGlnaXRhbG1lZGlhLmNvbS9obHMvY2hpL3JvZ2Vycy9jYWw2NjAuc3RyZWFtLzQ4ay9kdWJMUUVWZ21TYy0xNzQ2NzU0ODUtMTAwMzEuYWFj", name: ". |C|i|t|y| |C|a|l|g|a|r|y", category: "english" }  
   ];
 
 
@@ -277,7 +279,7 @@
         .then(isValid => {
           if (!isValid) {
    
-            handlePlaybackError(stationName, '404 Not found')
+            handlePlaybackError(stationName, '#404 Not found')
           }
         });
 
@@ -362,7 +364,7 @@ function handleAudioError(e, stationName) {
             break;
     }
 
-    console.error(`Playback failed for "${stationName}": ${errorMessage}`);
+    console.log(`Playback failed for "${stationName}": ${errorMessage}`);
 
     if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -684,7 +686,8 @@ $(document).on('click', '.fav-btn', function(e) {
     });
 
 function handlePlaybackError(stationName, errorMessage) {
-  console.error(`Playback failed for "${stationName}":`, errorMessage);
+  setNavigationHandlers();
+  console.log(`Playback failed for "${stationName}":`, errorMessage);
   if ('mediaSession' in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
       title: stationName.replace(/\|/g, ' '),
@@ -692,7 +695,13 @@ function handlePlaybackError(stationName, errorMessage) {
     });
   }
 
-  setNavigationHandlers();
+
+
+  // Clear error metadata after 5 seconds
+  setTimeout(() => {
+      navigator.mediaSession.metadata = null;
+    }, 3000);
+  
 
 
 }
