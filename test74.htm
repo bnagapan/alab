@@ -437,11 +437,11 @@ function handleAudioError(e, stationName) {
       document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'hidden') {
         console.log('Page is now hidden (tab not active or minimized)');
-        UpdateMediaSession(currentIndex, stations[currentIndex].name, "Paused###");
+        UpdateMediaSession(index+1, stations[index].name, "Paused###");
         // You might want to pause media or reduce volume here
     } else if (document.visibilityState === 'visible') {
         console.log('Page is now visible (tab active)');
-        UpdateMediaSession(currentIndex, stations[currentIndex].name, "Playing###");
+        UpdateMediaSession(index+1, stations[index].name, "Playing###");
         // Resume media or adjust UI
     }
 });
