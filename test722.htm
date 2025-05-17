@@ -181,7 +181,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
   <script>
-  const appVersion = "7.2#2";
+  const appVersion = "7.2#3";
 
   var audioPlayer = document.getElementById("radioPlayer");
    var s_id = -1;
@@ -318,12 +318,20 @@
     audioPlayer.src = decodedUrl;
     audioPlayer.addEventListener("canplaythrough", function () {
           audioPlayer.play();
+          isStationLoaded = true;
           //.catch(err => handlePlaybackError(stationName, err.message));
           UpdateMediaSession(stationId, stationName, "Loading#1");
       }, { once: true });
 
-    audioPlayer.addEventListener("loadeddata", function () {
+       audioPlayer.addEventListener("canplay", function () {
           audioPlayer.play();
+          isStationLoaded = true;
+          //.catch(err => handlePlaybackError(stationName, err.message));
+          UpdateMediaSession(stationId, stationName, "Loading#3");
+      }, { once: true });
+
+    audioPlayer.addEventListener("loadeddata", function () {
+          //audioPlayer.play();
           //.catch(err => handlePlaybackError(stationName,'**' +err.message));
           UpdateMediaSession(stationId, stationName, "Loading#2");
       }, { once: true });
@@ -448,7 +456,7 @@ function handleAudioError(e, stationName) {
 		if ('mediaSession' in navigator) {
 		navigator.mediaSession.metadata = new MediaMetadata({
 		  title: id + " " + station,
-		   artist: `Live Radio ${appVersion} - ${msg}`
+		   artist: `Live Radio ${appVersion} - ${msg} - ${isStationLoaded}`
 		});
 
         setNavigationHandlers();
