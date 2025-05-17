@@ -177,7 +177,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
   <script>
-  const appVersion = "7.5.0";
+  const appVersion = "7.5.1";
 
   var audioPlayer = document.getElementById("radioPlayer");
    var s_id = -1;
@@ -710,7 +710,7 @@ function handlePlaybackError(stationName, errorMessage) {
       title: stationName.replace(/\|/g, ' '),
       artist: `Playback error: ${errorMessage}`
     });
-
+    delayLoad(s_id,stationName,20);
 
   }
 
