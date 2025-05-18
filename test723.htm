@@ -181,7 +181,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
   <script>
-  const appVersion = "7.2.3.0";
+  const appVersion = "7.2.3.1";
 
   var audioPlayer = document.getElementById("radioPlayer");
   var s_id = -1;
@@ -291,11 +291,11 @@
     };
 
     // Validate stream URL
-    checkStreamUrl(decodedUrl).then(isValid => {
-      if (!isValid) {
-        handlePlaybackError(stationName, 'Stream not available (#404)');
-        return;
-      }
+    // checkStreamUrl(decodedUrl).then(isValid => {
+    //   if (!isValid) {
+    //     handlePlaybackError(stationName, 'Stream not available (#404)');
+    //     return;
+    //   }
 
       if (decodedUrl.endsWith('.m3u8')) {
         console.log("HLS stream detected.");
@@ -315,7 +315,7 @@
         audio.src = decodedUrl;
         audio.addEventListener('canplaythrough', onCanPlay, { once: true });
       }
-    });
+   // });
 
     highlightActiveStation();
   }
@@ -470,14 +470,23 @@
     adjustStationButtonWidths();
   }
 
-  function adjustStationButtonWidths() {
-    let maxWidth = 0;
-    $('.station-link').each(function() {
-      const width = $(this).outerWidth();
-      maxWidth = Math.max(maxWidth, width);
-      $(this).css('width', maxWidth);
-    });
-  }
+function adjustStationButtonWidths() {
+  let maxWidth = 0;
+
+  // First pass: find max width among visible station buttons
+  $('.station-link:visible').each(function () {
+    const width = $(this).outerWidth();
+    maxWidth = Math.max(maxWidth, width);
+  });
+
+  // Reduce width by 25%
+  const reducedWidth = maxWidth * 0.85;
+
+  // Apply reduced width to visible station buttons
+  $('.station-link:visible').css('width', reducedWidth);
+}
+
+
 
   $(document).ready(function() {
     console.clear();
@@ -589,6 +598,7 @@
         stations = category === 'all' ? rawStations : rawStations.filter(st => st.category === category);
       }
       displayStations();
+      adjustStationButtonWidths();
     });
   });
 
