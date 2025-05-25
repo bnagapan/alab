@@ -115,6 +115,23 @@
       min-width: 220px;
       max-width: 340px;
     }
+    /* Tooltip-style message box */
+    #msg {
+      display: inline-block;
+      background: #fffbe6;
+      color: #bfa100;
+      border: 1px solid #ffe066;
+      border-radius: 6px;
+      padding: 8px 18px;
+      margin: 10px 0 10px 0;
+      font-size: 1.05rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      min-width: 180px;
+      max-width: 90vw;
+      word-break: break-word;
+      font-weight: 600;
+      z-index: 10;
+    }
   </style>
 </head>
 <body class="theme-ocean">
@@ -194,6 +211,9 @@
   </div>
 
   <audio id="radioPlayer" controls playsinline></audio>
+  <div>
+    <span id="msg"></span>
+  </div>
   <div class="station-list"></div>
   <div class="favorite-list"></div>
   
@@ -540,7 +560,7 @@ function adjustStationButtonWidths() {
       if (firstIndex !== -1) {
         playStation(firstIndex);
       } else {
-        alert("All stations are excluded!");
+        $('#msg').text('All stations are excluded!');
       }
     });
 
@@ -565,10 +585,11 @@ function adjustStationButtonWidths() {
     });
 
     $('#clearStorage').off('click').on('click', async function() {
+      $('#msg').text(''); // Clear message
       if ($('#useRemoteStations').is(':checked')) {
         const url = $('#remoteStationsUrl').val().trim();
         if (!url) {
-          alert('Please enter a remote stations URL.');
+          $('#msg').text('Please enter a remote stations URL.');
           return;
         }
         try {
@@ -578,15 +599,16 @@ function adjustStationButtonWidths() {
           localStorage.setItem('stations', JSON.stringify(remoteStations));
           loadStations();
           displayStations();
-          alert('Stations loaded from remote URL!');
+          $('#msg').text('Stations loaded from remote URL!');
         } catch (e) {
-          alert('Error loading stations from remote URL: ' + e.message);
+          $('#msg').text('Error loading stations from remote URL: ' + e.message);
         }
       } else {
         localStorage.clear();
         saveStations();
         loadStations();
         displayStations();
+        $('#msg').text('Stations loaded from default list.');
       }
     });
 
