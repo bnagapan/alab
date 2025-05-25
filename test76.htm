@@ -224,7 +224,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
   <script>
-  const appVersion = "7.6.0.0";
+  const appVersion = "7.6.2";
 
   var audioPlayer = document.getElementById("radioPlayer");
   var s_id = -1;
@@ -243,7 +243,7 @@
     { id: 8, url: "aHR0cHM6Ly9yYWRpb3MuY3JhYmRhbmNlLmNvbTo4MDAyLzI=", name: ". S|u|r|y|a|n| 9|3|.|5", category: "live" },
     { id: 9, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9yMmduMXBnbTRxcnV2", name: ". B|I|G| |F|M", category: "live" },
     { id: 10, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9vYjZ0amc4Z3VscHR2", name: ". H|a|r|r|i|s| |J|a|y|a|r|a|j", category: "mp3" },
-    { id: 11, url: "aHR0cHM6Ly9wc3JsaXZlMy5saXN0ZW5vbi5pbi9pbGF5YW0/c3RhdGlvbj1pbGF5YW1hYW5yYWRpbw==", name: ". I|l|a|y|a|r|a|j|a", category: "mp3" },
+    { id: 11, url: "aHR0cHM6Ly9wc3JsaXZlMy5saXN0ZW5vbi9pbGF5YW0/c3RhdGlvbj1pbGF5YW1hYW5yYWRpbw==", name: ". I|l|a|y|a|r|a|j|a", category: "mp3" },
     { id: 12, url: "aHR0cHM6Ly9wc3JsaXZlMy5saXN0ZW5vbi5pbi9wb3A/c3RhdGlvbj10YW1pbHBvcHJhZGlv", name: ". T|a|m|i|l| |P|o|p|", category: "mp3" },
     { id: 13, url: "aHR0cHM6Ly9wc3JsaXZlMy5saXN0ZW5vbi5pbi9hbmlydWQ/c3RhdGlvbj1hbmlydWRocmFkaW8=", name: ". A|n|i|r|u|d|h", category: "mp3" },
     { id: 14, url: "aHR0cHM6Ly9wc3JsaXZlMy5saXN0ZW5vbi5pbi95c3I/c3RhdGlvbj15c3JyYWRpbw==", name: ". Y|u|v|a|n", category: "mp3" },
@@ -309,6 +309,7 @@
     const stationName = station.name.replace(/\|/g, ' ');
     const stationId = station.id;
 
+    $('#msg').text(stationId + ' ' + stationName); // Show currently playing station with id and name only
     $('.station-list').addClass('loading'); // Assumes CSS .loading class
     UpdateMediaSession(stationId, stationName, "Initializing...");
 
@@ -452,6 +453,7 @@
     localStorage.setItem('favorites', JSON.stringify(favorites));
     displayStations();
     $('.favorite-list').empty().hide();
+    $('#msg').text('Favorites cleared!'); // Show message in msg div
   }
 
   function highlightActiveStation() {
@@ -549,20 +551,50 @@ function adjustStationButtonWidths() {
     // Set navigation handlers once
     setNavigationHandlers();
 
-    $('#playFirst').click(() => {
-      const excludeValue = $('#excludeInput').val() || '';
-      const excludeIds = excludeValue
-        .split(',')
-        .map(id => parseInt(id.trim()))
-        .filter(id => !isNaN(id));
+    let isPlaying = false;
+    const $playFirst = $('#playFirst');
+    const audio = document.getElementById('radioPlayer');
 
-      let firstIndex = stations.findIndex(st => !excludeIds.includes(st.id));
-      if (firstIndex !== -1) {
-        playStation(firstIndex);
+    function updatePlayPauseIcon() {
+      if (audio.paused) {
+        $playFirst.html('&nbsp;&nbsp;▶&nbsp;&nbsp;');
+        isPlaying = false;
       } else {
-        $('#msg').text('All stations are excluded!');
+        $playFirst.html('&nbsp;&nbsp;⏸&nbsp;&nbsp;');
+        isPlaying = true;
+      }
+    }
+
+    $playFirst.off('click').on('click', function() {
+      if (isPlaying) {
+        audio.pause();
+        // Icon will update on pause event
+      } else {
+        // Play first non-excluded station
+        const excludeValue = $('#excludeInput').val() || '';
+        const excludeIds = excludeValue
+          .split(',')
+          .map(id => parseInt(id.trim()))
+          .filter(id => !isNaN(id));
+        let firstIndex = stations.findIndex(st => !excludeIds.includes(st.id));
+        if (firstIndex !== -1) {
+          playStation(firstIndex);
+          setTimeout(() => {
+            audio.play();
+            // Also update msg with id and name, no 'Now playing:'
+            const st = stations[firstIndex];
+            if (st) $('#msg').text(st.id + ' ' + st.name.replace(/\|/g, ' '));
+          }, 100); // Ensure play is called after station loads
+        } else {
+          $('#msg').text('All stations are excluded!');
+        }
       }
     });
+
+    // Sync play/pause icon with audio events
+    audio.addEventListener('play', updatePlayPauseIcon);
+    audio.addEventListener('pause', updatePlayPauseIcon);
+    updatePlayPauseIcon(); // Set initial icon
 
     $('#playPrevious').click(() => {
       if (isShowingFavorites) navigateFavorites(-1);
@@ -585,6 +617,9 @@ function adjustStationButtonWidths() {
     });
 
     $('#clearStorage').off('click').on('click', async function() {
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = null;
+      }
       $('#msg').text(''); // Clear message
       if ($('#useRemoteStations').is(':checked')) {
         const url = $('#remoteStationsUrl').val().trim();
