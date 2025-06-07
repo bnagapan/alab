@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>L o c a l  R a d i o</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    .stationBtn {
+      margin: 12px 0 12px 0;
+      padding: 12px 28px;
+      font-size: 1.08rem;
+      border-radius: 8px;
+      background: #1976d2;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      display: block;
+    }
+    .stationBtn:hover {
+      background: #0d47a1;
+      color: #fff;
+    }
+    #stationList {
+      background: none;
+      padding: 18px 0 18px 0;
+      border-radius: 10px;
+      margin-bottom: 18px;
+    }
+  </style>
+</head>
+<body>
+  <h2>L o c a l  R a d i o</h2>
+  <div id="stationList"></div>
+  <p id="nowPlaying"></p>
+
+  <div style="margin: 18px 0; display: flex; gap: 18px; align-items: center; justify-content: flex-start;">
+    <button id="prevBtn" class="stationBtn" title="Previous">⏮</button>
+    <button id="playPauseBtn" class="stationBtn" title="Play/Pause">▶</button>
+    <button id="nextBtn" class="stationBtn" title="Next">⏭</button>
+  </div>
+  <audio id="radioPlayer" controls autoplay style="margin-bottom: 24px; display: block;"></audio>
+
+  <div style="margin-bottom:16px;">
+    <input type="text" id="stationUrlInput" placeholder="Stream URL" style="width:260px;">
+    <input type="text" id="stationNameInput" placeholder="Station Name" style="width:140px;">
+    <button id="addStationBtn">Add Station</button>
+  </div>
+
+  <script>
+    $(document).ready(function () {
+      // Raw station data
+      const stationData = `
+        https://18683.live.streamtheworld.com/CBR1FM_CBC.mp3?DIST=TuneIn&TGT=TuneIn&maxServers=2&gdpr=|CBC Calgary
+        http://stream.revma.ihrhls.com/zc6043?|NBC News
+        https://tunein.cdnstream1.com/4424_96.mp3?|ABC News
+      `.trim();
+
+      // Parse and display station links
+      const stations = stationData.split("\n").map(line => {
+        const [url, name] = line.trim().split("|");
+        return { url: url.trim(), name: name.trim() };
+      });
+
+      let currentIndex = 0;
+      function playStation(idx) {
+        if (idx < 0) idx = stations.length - 1;
+        if (idx >= stations.length) idx = 0;
+        currentIndex = idx;
+        const station = stations[currentIndex];
+        const audio = $("#radioPlayer")[0];
+        audio.src = station.url;
+        audio.load();
+        audio.play().catch(() => {});
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.metadata = new window.MediaMetadata({
+            title: station.name,
+            artist: 'Internet Radio',
+            album: 'Radio Player',
+            artwork: [
+              { src: 'https://upload.wikimedia.org/wikipedia/commons/6/6a/Internet_radio_icon.png', sizes: '192x192', type: 'image/png' }
+            ]
+          });
+        }
+        $("#nowPlaying").text(station.name);
+        updatePlayPauseBtn();
+      }
+
+      function updatePlayPauseBtn() {
+        const audio = $("#radioPlayer")[0];
+        if (audio.paused) {
+          $('#playPauseBtn').text('▶');
+        } else {
+          $('#playPauseBtn').text('⏸');
+        }
+      }
+
+      function renderStations(stations) {
+        $('#stationList').empty();
+        stations.forEach((station, index) => {
+          const button = $(`<button class=\"stationBtn\">${station.name}</button>`);
+          button.on("click", function () {
+            playStation(index);
+          });
+          $("#stationList").append(button);
+        });
+      }
+
+      renderStations(stations);
+      playStation(0);
+
+      // Add station handler
+      $('#addStationBtn').on('click', function() {
+        const url = $('#stationUrlInput').val().trim();
+        const name = $('#stationNameInput').val().trim();
+        if (!url || !name) {
+          alert('Please enter both URL and Station Name.');
+          return;
+        }
+        stations.push({ url, name });
+        renderStations(stations);
+        playStation(stations.length - 1);
+        $('#stationUrlInput').val('');
+        $('#stationNameInput').val('');
+      });
+
+      // UI next/prev/play-pause
+      $('#nextBtn').on('click', function() {
+        playStation(currentIndex + 1);
+      });
+      $('#prevBtn').on('click', function() {
+        playStation(currentIndex - 1);
+      });
+      $('#playPauseBtn').on('click', function() {
+        const audio = $('#radioPlayer')[0];
+        if (audio.paused) audio.play();
+        else audio.pause();
+      });
+      $('#radioPlayer').onplay = updatePlayPauseBtn;
+      $('#radioPlayer').onpause = updatePlayPauseBtn;
+
+      // Media Session API for iOS native controls
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.setActionHandler('nexttrack', function() {
+          playStation(currentIndex + 1);
+        });
+        navigator.mediaSession.setActionHandler('previoustrack', function() {
+          playStation(currentIndex - 1);
+        });
+        navigator.mediaSession.setActionHandler('play', function() {
+          $('#radioPlayer')[0].play();
+        });
+        navigator.mediaSession.setActionHandler('pause', function() {
+          $('#radioPlayer')[0].pause();
+        });
+      }
+    });
+  </script>
+</body>
+</html>
