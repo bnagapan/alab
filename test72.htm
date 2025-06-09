@@ -33,6 +33,15 @@
       gap: 10px;
       margin-bottom: 20px;
     }
+
+    .button-container2 {
+      display: flex;
+      justify-content: left;
+      gap: 10px;
+      margin-bottom: 20px;
+      width: 100%;
+    }
+
     .station-list, .favorite-list {
       margin-top: 10px;
     }
@@ -161,9 +170,11 @@
     <button data-cat="all">All</button>
     <button data-cat="english">English</button>
     <button data-cat="live">Live</button>
+    <div class="button-container2">
     <button data-cat="mp3">MP3</button>
-    <button data-cat="mp3_2">MP3 2</button>    
-
+    <button data-cat="mp3_2">MP3 2</button>  
+    <button data-cat="pod">POD</button>    
+    </div>
   </div>
 
   <audio id="radioPlayer" controls playsinline></audio>

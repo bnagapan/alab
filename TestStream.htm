@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Stream URL Check Test</title>
+</head>
+<body>
+  <h2>Stream URL Test</h2>
+  <button id="checkBtn">Check Stream URL</button>
+  <p id="result"></p>
+
+  <script>
+    function checkStreamUrl(url) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 4000); // 4s timeout
+
+      return fetch(url, {
+        method: 'GET',
+        signal: controller.signal,
+        headers: {
+          'Range': 'bytes=0-1' // Only fetch a small part
+        }
+      })
+      .then(response => {
+        clearTimeout(timeout);
+        return response.ok;
+      })
+      .catch(e => {
+        clearTimeout(timeout);
+        return false;
+      });
+    }
+
+    document.getElementById("checkBtn").addEventListener("click", function() {
+      const testUrl = "https://hel-ais-edge1.leanstream.co/rogers/tor680.stream/playlist.m3u8";
+      //http://stream.zeno.fm/ngkubdi8of4uv"; // Replace with any valid stream
+      const resultElement = document.getElementById("result");
+
+      checkStreamUrl(testUrl)
+        .then(isValid => {
+          if (isValid) {
+            resultElement.textContent = "✅ Stream is valid and reachable.";
+          } else {
+            resultElement.textContent = "❌ Stream is NOT reachable or failed.";
+          }
+        });
+    });
+  </script>
+</body>
+</html>

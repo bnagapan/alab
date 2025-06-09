@@ -48,18 +48,31 @@
 
   <script>
     $(document).ready(function () {
-      // Raw station data
+      // Raw station data (Base64-encoded URLs, station names with spaces between each letter)
       const stationData = `
-        https://18683.live.streamtheworld.com/CBR1FM_CBC.mp3?DIST=TuneIn&TGT=TuneIn&maxServers=2&gdpr=|CBC Calgary
-        http://stream.revma.ihrhls.com/zc6043?|NBC News
-        https://tunein.cdnstream1.com/4424_96.mp3?|ABC News
+        aHR0cHM6Ly8xODY4My5saXZlLnN0cmVhbXRoZXdvcmxkLmNvbS9DQlIxRk1fQ0JDLm1wMz9ESVNUPVR1bmVJbiZUR1Q9VHVuZUluJm1heFNlcnZlcnM9MiZnZHByPQ==|C B C   C a l g a r y
+        aHR0cDovL3N0cmVhbS5yZXZtYS5paHJobHMuY29tL3pjNjA0Mz8=|N B C   N e w s
+        aHR0cHM6Ly90dW5laW4uY2Ruc3RyZWFtMS5jb20vNDQyNF85Ni5tcDM/|A B C   N e w s
       `.trim();
 
       // Parse and display station links
       const stations = stationData.split("\n").map(line => {
-        const [url, name] = line.trim().split("|");
-        return { url: url.trim(), name: name.trim() };
+        const [b64url, name] = line.trim().split("|");
+        return { url: b64url.trim(), name: name.trim() };
       });
+
+      function decodeUrl(b64) {
+        try {
+          return atob(b64);
+        } catch {
+          return b64;
+        }
+      }
+
+      function formatStationName(spacedName) {
+        // Remove all spaces to display normally
+        return spacedName.replace(/\s+/g, '');
+      }
 
       let currentIndex = 0;
       function playStation(idx) {
@@ -68,7 +81,7 @@
         currentIndex = idx;
         const station = stations[currentIndex];
         const audio = $("#radioPlayer")[0];
-        audio.src = station.url;
+        audio.src = decodeUrl(station.url);
         audio.load();
         audio.play().catch(() => {});
         if ('mediaSession' in navigator) {
@@ -81,7 +94,7 @@
             ]
           });
         }
-        $("#nowPlaying").text(station.name);
+        $("#nowPlaying").text(formatStationName(station.name));
         updatePlayPauseBtn();
       }
 
@@ -97,7 +110,7 @@
       function renderStations(stations) {
         $('#stationList').empty();
         stations.forEach((station, index) => {
-          const button = $(`<button class=\"stationBtn\">${station.name}</button>`);
+          const button = $(`<button class=\"stationBtn\">${formatStationName(station.name)}</button>`);
           button.on("click", function () {
             playStation(index);
           });
@@ -116,7 +129,11 @@
           alert('Please enter both URL and Station Name.');
           return;
         }
-        stations.push({ url, name });
+        // Encode user input URL to Base64
+        const b64url = btoa(url);
+        // Insert a space between each letter for new stations
+        const spacedName = name.split('').join(' ');
+        stations.push({ url: b64url, name: spacedName });
         renderStations(stations);
         playStation(stations.length - 1);
         $('#stationUrlInput').val('');

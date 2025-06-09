@@ -346,13 +346,6 @@
   highlightActiveStation();
 }
 
-function loadAudioAsync(audio) {
-    return new Promise((resolve, reject) => {
-        audio.addEventListener('canplaythrough', () => resolve(), { once: true });
-        audio.addEventListener('error', () => reject('Audio failed to load'), { once: true });
-        audio.load();
-    });
-}
 function handleAudioError(e, stationName) {
     console.log("Audio load error:");
     let errorMessage = '';
@@ -715,21 +708,6 @@ function handlePlaybackError(stationName, errorMessage) {
 
 }
 
-/*$('#categoryButtons button').click(function () {
-  const category = $(this).data('cat');
-  let filtered = [];
-
-  if (category === 'all') {
-    filtered = rawStations;
-  } else {
-    filtered = rawStations.filter(st => st.category === category);
-  }
-
-  localStorage.setItem('stations', JSON.stringify(filtered));
-  loadStations();
-  displayStations();
-});*/
-
 $('#categoryButtons button').click(function () {
   const $btn = $(this);
   const category = $btn.data('cat');
@@ -777,10 +755,6 @@ function checkStreamUrl(url) {
         return false;
       });
     }
-
-
-
-	
   </script>
 </body>
 </html>
