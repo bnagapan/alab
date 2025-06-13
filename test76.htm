@@ -148,7 +148,7 @@
         <input type="checkbox" id="useRemoteStations">
         Load from remote URL:
       </label>
-      <input type="text" id="remoteStationsUrl" style="width:320px;" placeholder="https://example.com/stations.json" value="https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/ref/stations.json">
+      <input type="text" id="remoteStationsUrl" style="width:320px;" placeholder="https://example.com/stations.json" value="https://////raw.githubusercontent.com/bnagapan/alab/refs/heads/main/ref/stations.json">
       <button id="clearStorage">Clear & Reload Stations</button>
       <button id="clearFavoritesBtn">
         <i class="bi bi-trash"></i> Clear Favorites
@@ -224,7 +224,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
   <script>
-  const appVersion = "7.6.6";
+  const appVersion = "7.6.8";
 
   var audioPlayer = document.getElementById("radioPlayer");
   var s_id = -1;
@@ -265,10 +265,8 @@
     { id: 30, url: "aHR0cHM6Ly8xODY4My5saXZlLnN0cmVhbXRoZXdvcmxkLmNvbS9DQlUyRk1fQ0JDLm1wMw==", name: ". C|B|C |V|A|N|C|O|V|E|R", category: "english" },
     { id: 31, url: "aHR0cHM6Ly9wbGF5ZXJzZXJ2aWNlcy5zdHJlYW10aGV3b3JsZC5jb20vYXBpL2xpdmVzdHJlYW0tcmVkaXJlY3QvQ0JVMkZNX0NCQ19TQw==", name: ". C|B|C |V|A|N|", category: "english" },
     { id: 32, url: "aHR0cHM6Ly9wb2RjYXN0LTM1Lnplbm8uZm0vcG9kY2FzdD9wb2RjYXN0S2V5PWFneHpmbnBsYm04dGMzUmhkSE55S3dzU0NrRjFkR2hGYm5ScGRIa1lnSUNROWR5bl9Ba01DeElIVUc5a1kyRnpkQmlBZ0xETjk4SHhDQXlpQVFkc2FXSnlZWEo1DQomZXBpc29kZUtleT1hZ3h6Zm5wbGJtOHRjM1JoZEhOeUZnc1NDVTFsWkdsaFNYUmxiUmlBZ0xEZDlyS1hDQXlpQVFkc2FXSnlZWEo1Jnp0PWV5SmhiR2NpT2lKSVV6STFOaUo5LmV5SnpkSEpsWVcwaU9pSmhaM2g2Wm01d2JHSnRPSFJqTTFKb1pFaE9lVXQzYzFORGEwWXhaRWRvUm1KdVVuQmtTR3RaWjBsRFVUbGtlVzVmUVd0TlEzaEpTRlZIT1d0Wk1rWjZaRUpwUVdkTVJFNDVPRWg0UTBGNWFVRlJaSE5oVjBwNVdWaEtOV0ZuZUhwbWJuQnNZbTA0ZEdNelVtaGtTRTU1Um1kelUwTlZNV3hhUjJ4b1UxaFNiR0pTYVVGblRFUmtPWEpMV0VOQmVXbEJVV1J6WVZkS2VWbFlTalVpTENKb2IzTjBJam9pY0c5a1kyRnpkQzB6TlM1NlpXNXZMbVp0SWl3aWFuUnBJam9pWkRCallqUmxOVEEwTkdJeE1UQTROVEppTldFNE5EazFOek13TVRnek5UZGhNelV4TjJFM1ltWTJZVEkxWWpnNFlUUTNNamd3WXpsbE5EWTVaV0psTXlJc0ltbGhkQ0k2TVRjME56UTRNVFl6T1N3aVpYaHdJam94TnpRM05EZ3hOams1ZlEuUGRCZXl1TlkybF9NSnVraWl6UjBZTEw5dERrNThTR3FZMFhOWEtuSHJUSQ==", name: ". |I|l|a|y|a|r|a|j|a Pod", category: "pod" },
-    { id: 33, url: "aHR0cHM6Ly9wb2RjYXN0LTM1Lnplbm8uZm0vcG9kY2FzdD9wb2RjYXN0S2V5PWFneHpmbnBsYm04dGMzUmhkSE55S3dzU0NrRjFkR2hGYm5ScGRIa1lnSUNROWR5bl9Ba01DeElIVUc5a1kyRnpkQmlBZ0xETjk4SHhDQXlpQVFkc2FXSnlZWEo1DQomZXBpc29kZUtleT1hZ3h6Zm5wbGJtOHRjM1JoZEhOeUZnc1NDVTFsWkdsaFNYUmxiUmlBZ0xEZDlyS1hDQXlpQVFkc2FXSnlZWEo1Jnp0PWV5SmhiR2NpT2lKSVV6STFOaUo5LmV5SnpkSEpsWVcwaU9pSmhaM2g2Wm01d2JHSnRPSFJqTTFKb1pFaE9lVXQzYzFORGEwWXhaRWRvUm1KdVVuQmtTR3RaWjBsRFVUbGtlVzVmUVd0NlEzaEpTRlZIT1d0Wk1rWjZaRUpwUVdkTVJFNDVPRWg0UTBGNWFVRlJaSE5oVjBwNVdWaEtOV0ZuZUhwbWJuQnNZbTA0ZEdNelVtaGtTRTU1Um1kelUwTlZNV3hhUjJ4b1UxaFNiR0pTYVVGblRFUmtPWEpMV0VOQmVXbEJVV1J6WVZkS2VWbFlTalVpTENKb2IzTjBJam9pY0c5a1kyRnpkQzB6TlM1NlpXNXZMbVp0SWl3aWFuUnBJam9pWkRCallqUmxOVEEwTkdJeE1UQTROVEppTldFNE5EazFOek13TVRnek5UZGhNelV4TjJFM1ltWTJZVEkxWWpnNFlUUTNNamd3WXpsbE5EWTVaV0psTXlJc0ltbGhkQ0k2TVRjME56UTRNVFl6T1N3aVpYaHdJam94TnpRM05EZ3hOams1ZlEuUGRCZXl1TlkybF9NSnVraWl6UjBZTEw5dERrNThTR3FZMFhOWEtuSHJUSQ==", name: ". |I|l|a|y|a Gold", category: "pod" },
-    { id: 34, url: "aHR0cDovL2ZsMS5tb3Zlb25qb3kuY29tL0FCQ19FQVNUL2luZGV4Lm0zdTg=", name: ". |A|B|C| |East", category: "english" },
-    { id: 35, url: "aHR0cDovL2ZsMy5tb3Zlb25qb3kuY29tL0NNVC9pbmRleC5tM3U4", name: ". |C|M|T| ", category: "english" }
-    ];
+    { id: 33, url: "aHR0cHM6Ly9wb2RjYXN0LTM1Lnplbm8uZm0vcG9kY2FzdD9wb2RjYXN0S2V5PWFneHpmbnBsYm04dGMzUmhkSE55S3dzU0NrRjFkR2hGYm5ScGRIa1lnSUNROWR5bl9Ba01DeElIVUc5a1kyRnpkQmlBZ0xETjk4SHhDQXlpQVFkc2FXSnlZWEo1DQomZXBpc29kZUtleT1hZ3h6Zm5wbGJtOHRjM1JoZEhOeUZnc1NDVTFsWkdsaFNYUmxiUmlBZ0xEZDlyS1hDQXlpQVFkc2FXSnlZWEo1Jnp0PWV5SmhiR2NpT2lKSVV6STFOaUo5LmV5SnpkSEpsWVcwaU9pSmhaM2g2Wm01d2JHSnRPSFJqTTFKb1pFaE9lVXQzYzFORGEwWXhaRWRvUm1KdVVuQmtTR3RaWjBsRFVUbGtlVzVmUVd0NlEzaEpTRlZIT1d0Wk1rWjZaRUpwUVdkTVJFNDVPRWg0UTBGNWFVRlJaSE5oVjBwNVdWaEtOV0ZuZUhwbWJuQnNZbTA0ZEdNelVtaGtTRTU1Um1kelUwTlZNV3hhUjJ4b1UxaFNiR0pTYVVGblRFUmtPWEpMV0VOQmVXbEJVV1J6WVZkS2VWbFlTalVpTENKb2IzTjBJam9pY0c5a1kyRnpkQzB6TlM1NlpXNXZMbVp0SWl3aWFuUnBJam9pWkRCallqUmxOVEEwTkdJeE1UQTROVEppTldFNE5EazFOek13TVRnek5UZGhNelV4TjJFM1ltWTJZVEkxWWpnNFlUUTNNamd3WXpsbE5EWTVaV0psTXlJc0ltbGhkQ0k2TVRjME56UTRNVFl6T1N3aVpYaHdJam94TnpRM05EZ3hOams1ZlEuUGRCZXl1TlkybF9NSnVraWl6UjBZTEw5dERrNThTR3FZMFhOWEtuSHJUSQ==", name: ". |I|l|a|y|a Gold", category: "pod" }
+      ];
 
   let stations = [];
   let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
