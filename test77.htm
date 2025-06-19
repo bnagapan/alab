@@ -224,7 +224,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
   <script>
-  const appVersion = "7.6.9";
+  const appVersion = "7.7.0";
 
   var audioPlayer = document.getElementById("radioPlayer");
   var s_id = -1;
@@ -233,7 +233,7 @@
 
   var isStationLoaded = false;
  const rawStations = [
-    { id: 1, url: "aHR0cHM6Ly9yb2dlcnMtaGxzLmxlYW5zdHJlYW0uY28vcm9nZXJzL2hhbDk1Ny5zdHJlYW0vcGxheUxpc3QubTN1OA==", name: ". C|i|t|y N|e|w|s", category: "english" },
+    { id: 1, url: "aHR0cHM6Ly9yb2dlcnMtaGxzLmxlYW5zdHJlYW0uY28vcm9nZXJzL2hhbDk1Ny5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y N|e|w|s", category: "english" },
     { id: 2, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: ". C|B|C R|a|d|i|o", category: "english" },
     { id: 3, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQxMDUwL0VTX1IxUFZDL21hc3Rlci5tM3U4", name: ". C|B|C| |T|o|r|o|n|t|o", category: "english" },
     { id: 4, url: "aHR0cHM6Ly9oZWwtYWlzLWVkZ2UxLmxlYW5zdHJlYW0uY28vcm9nZXJzL3RvcjY4MC5zdHJlYW0vcGxheUxpc3QubTN1OA==", name: ". C|i|t|y| |T|o|r|o|n|t|o", category: "english" },
@@ -386,23 +386,42 @@
     handlePlaybackError(stationName, errorMessage);
   }
 
-  let pauseCountdownTimer = null;
+  // --- Pause Countdown Logic for Media Session (Retain Existing Message) ---
+let pauseCountdownTimer = null;
 let pauseCountdownRemaining = 0;
+let pauseCountdownOriginalMeta = null;
 
 function startPauseCountdown() {
   clearPauseCountdown();
   pauseCountdownRemaining = 120; // 2 minutes in seconds
+  // Store the current metadata (if any)
+  if ('mediaSession' in navigator && navigator.mediaSession.metadata) {
+    pauseCountdownOriginalMeta = {
+      title: navigator.mediaSession.metadata.title,
+      artist: navigator.mediaSession.metadata.artist
+    };
+  } else {
+    pauseCountdownOriginalMeta = null;
+  }
   updatePauseCountdown();
   pauseCountdownTimer = setInterval(() => {
     pauseCountdownRemaining--;
     updatePauseCountdown();
     if (pauseCountdownRemaining <= 0) {
       clearPauseCountdown();
+      // After 2 minutes, show original message or a static paused message
       if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-          title: 'Paused',
-          artist: 'Playback paused for 2 minutes.'
-        });
+        if (pauseCountdownOriginalMeta) {
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: pauseCountdownOriginalMeta.title,
+            artist: pauseCountdownOriginalMeta.artist + ' (Paused for 2 minutes)'
+          });
+        } else {
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: 'Paused',
+            artist: 'Playback paused for 2 minutes.'
+          });
+        }
       }
     }
   }, 1000);
@@ -413,9 +432,15 @@ function updatePauseCountdown() {
     const min = Math.floor(pauseCountdownRemaining / 60);
     const sec = pauseCountdownRemaining % 60;
     const secStr = sec < 10 ? '0' + sec : sec;
+    let baseTitle = 'Paused';
+    let baseArtist = '';
+    if (pauseCountdownOriginalMeta) {
+      baseTitle = pauseCountdownOriginalMeta.title;
+      baseArtist = pauseCountdownOriginalMeta.artist;
+    }
     navigator.mediaSession.metadata = new MediaMetadata({
-      title: 'Paused',
-      artist: `Paused: ${min}:${secStr} remaining...`
+      title: baseTitle,
+      artist: baseArtist + ` (Paused: ${min}:${secStr} remaining...)`
     });
   }
 }
@@ -425,6 +450,14 @@ function clearPauseCountdown() {
     clearInterval(pauseCountdownTimer);
     pauseCountdownTimer = null;
   }
+  // Restore original metadata if available
+  if ('mediaSession' in navigator && pauseCountdownOriginalMeta) {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: pauseCountdownOriginalMeta.title,
+      artist: pauseCountdownOriginalMeta.artist
+    });
+  }
+  pauseCountdownOriginalMeta = null;
 }
 
   function setNavigationHandlers() {
@@ -623,7 +656,6 @@ function adjustStationButtonWidths() {
     }
 
     $playFirst.off('click').on('click', function() {
-      clearPauseCountdown();
       if (isPlaying) {
         audio.pause();
         // Icon will update on pause event
@@ -756,6 +788,8 @@ function adjustStationButtonWidths() {
       displayStations();
       adjustStationButtonWidths();
     });
+
+    audio.addEventListener('play', function() { clearPauseCountdown(); });
   });
 
   function handlePlaybackError(stationName, errorMessage) {
