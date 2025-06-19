@@ -81,6 +81,10 @@
         currentIndex = idx;
         const station = stations[currentIndex];
         const audio = $("#radioPlayer")[0];
+        // Clear MediaSession metadata before setting new one
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.metadata = null;
+        }
         audio.src = decodeUrl(station.url);
         audio.load();
         audio.play().catch(() => {});
@@ -169,6 +173,10 @@
         navigator.mediaSession.setActionHandler('pause', function() {
           $('#radioPlayer')[0].pause();
         });
+        // Disable seek forward/backward (removes 10s skip buttons in native UI)
+        navigator.mediaSession.setActionHandler('seekforward', null);
+        navigator.mediaSession.setActionHandler('seekbackward', null);
+        navigator.mediaSession.setActionHandler('seekto', null);
       }
     });
   </script>
