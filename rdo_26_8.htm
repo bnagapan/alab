@@ -196,7 +196,7 @@
 <body>
     <div id="content">
         <h1>R | a | d | i | o</h1>
-        v 26.8.3<br><br>
+        v 26.8.4<br><br>
         <table border="0" cellspacing="3" cellpadding="3" align="center">
         <tr>
             <!-- Navigation buttons -->
@@ -394,6 +394,11 @@ var currentStationIndex = 0;
             navigator.mediaSession.setActionHandler("nexttrack", function () {
                 playStation((currentStationIndex + 1) % stations.length);
             });
+
+            // Disable seek forward/backward (removes 10s skip buttons in native UI)
+            navigator.mediaSession.setActionHandler('seekforward', null);
+            navigator.mediaSession.setActionHandler('seekbackward', null);
+            navigator.mediaSession.setActionHandler('seekto', null);
 			
 			navigator.mediaSession.setActionHandler("play", function () {
 			audioPlayer.play();
