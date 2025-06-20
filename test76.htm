@@ -224,7 +224,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
   <script>
-  const appVersion = "7.6.0.1";
+  const appVersion = "7.6.0.2";
 
   var audioPlayer = document.getElementById("radioPlayer");
   var s_id = -1;
@@ -575,7 +575,10 @@ function adjustStationButtonWidths() {
     $('#categoryButtons button[data-cat="english"]').addClass('active-toggle');
     displayStations();
     $('.favorite-list').hide();
+
+    
     playStation(0);
+    DisableMediaSessionActions()
 
     let isPlaying = false;
     const $playFirst = $('#playFirst');
