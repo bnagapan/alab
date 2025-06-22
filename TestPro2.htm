@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>L o c a l  R a d i o</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    .stationBtn {
+      margin: 12px 0 12px 0;
+      padding: 12px 28px;
+      font-size: 1.08rem;
+      border-radius: 8px;
+      background: #1976d2;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      display: block;
+    }
+    .stationBtn:hover {
+      background: #0d47a1;
+      color: #fff;
+    }
+    #stationList {
+      background: none;
+      padding: 18px 0 18px 0;
+      border-radius: 10px;
+      margin-bottom: 18px;
+    }
+  </style>
+</head>
+<body>
+  <h2>L o c a l  R a d i o</h2>
+  <div id="stationList"></div>
+  <p id="nowPlaying"></p>
+
+  <div style="margin: 18px 0; display: flex; gap: 18px; align-items: center; justify-content: flex-start;">
+    <button id="prevBtn" class="stationBtn" title="Previous">⏮</button>
+    <button id="playPauseBtn" class="stationBtn" title="Play/Pause">▶</button>
+    <button id="nextBtn" class="stationBtn" title="Next">⏭</button>
+  </div>
+  <audio id="radioPlayer" controls autoplay style="margin-bottom: 24px; display: block;"></audio>
+
+  <div style="margin-bottom:16px;">
+    <input type="text" id="stationUrlInput" placeholder="Stream URL" style="width:260px;">
+    <input type="text" id="stationNameInput" placeholder="Station Name" style="width:140px;">
+    <button id="addStationBtn">Add Station</button>
+  </div>
+
+  <script>
+    $(document).ready(function () { 
+      // Station data as a JSON array with id, url (base64), name, and category
+      let rawStations = [
+        { id: 1, url: "aHR0cHM6Ly8xODY4My5saXZlLnN0cmVhbXRoZXdvcmxkLmNvbS9DQlIxRk1fQ0JDLm1wMz9ESVNUPVR1bmVJbiZUR1Q9VHVuZUluJm1heFNlcnZlcnM9MiZnZHByPQ==", name: "CBC Calgary", category: "english" },
+        { id: 2, url: "aHR0cDovL3N0cmVhbS5yZXZtYS5paHJobHMuY29tL3pjNjA0Mz8=", name: "NBC News", category: "english" },
+        { id: 3, url: "aHR0cHM6Ly90dW5laW4uY2Ruc3RyZWFtMS5jb20vNDQyNF85Ni5tcDM/", name: "ABC News", category: "english" }
+      ];
+
+      // Helper to decode base64 URL
+      function decodeUrl(b64) {
+        try {
+          return atob(b64);
+        } catch {
+          return b64;
+        }
+      }
+
+      // Calculate the max width for station buttons based on the longest display name
+      function getMaxStationDisplayWidth(stations) {
+        let maxLen = 0;
+        stations.forEach(station => {
+          const display = `${station.id}. ${station.name}`;
+          if (display.length > maxLen) maxLen = display.length;
+        });
+        // Approximate width in px: 10px per char + padding
+        return (maxLen * 10 + 40) + 'px';
+      }
+
+      function renderStations(stations) {
+        $('#stationList').empty();
+        const btnWidth = getMaxStationDisplayWidth(stations);
+        stations.forEach((station, index) => {
+          const displayName = `${station.id}. ${station.name}`;
+          const button = $(`<button class=\"stationBtn\" style=\"text-align:left;width:${btnWidth};\">${displayName}</button>`);
+          button.on("click", function () {
+            playStation(index);
+          });
+          $("#stationList").append(button);
+        });
+      }
+
+      let currentIndex = 0;
+      function playStation(idx) {
+        if (idx < 0) idx = rawStations.length - 1;
+        if (idx >= rawStations.length) idx = 0;
+        currentIndex = idx;
+        const station = rawStations[currentIndex];
+        const audio = $("#radioPlayer")[0];
+        // Clear MediaSession metadata before setting new one
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.metadata = null;
+        }
+        audio.src = decodeUrl(station.url);
+        audio.load();
+        audio.play().catch(() => {});
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.metadata = new window.MediaMetadata({
+            title: station.name,
+            artist: 'Internet Radio',
+            album: 'Radio Player',
+            artwork: [
+              { src: 'https://upload.wikimedia.org/wikipedia/commons/6/6a/Internet_radio_icon.png', sizes: '192x192', type: 'image/png' }
+            ]
+          });
+        }
+        $("#nowPlaying").text(`${station.id}. ${station.name}`);
+        updatePlayPauseBtn();
+      }
+
+      function updatePlayPauseBtn() {
+        const audio = $("#radioPlayer")[0];
+        if (audio.paused) {
+          $('#playPauseBtn').text('▶');
+        } else {
+          $('#playPauseBtn').text('⏸');
+        }
+      }
+
+      renderStations(rawStations);
+      playStation(0);
+
+      // Add station handler
+      $('#addStationBtn').on('click', function() {
+        const url = $('#stationUrlInput').val().trim();
+        const name = $('#stationNameInput').val().trim();
+        if (!url || !name) {
+          alert('Please enter both URL and Station Name.');
+          return;
+        }
+        // Assign new id and default category, encode URL as base64
+        const newId = rawStations.length > 0 ? Math.max(...rawStations.map(s => s.id)) + 1 : 1;
+        const b64url = btoa(url);
+        rawStations.push({ id: newId, url: b64url, name: name, category: 'english' });
+        renderStations(rawStations);
+        playStation(rawStations.length - 1);
+        $('#stationUrlInput').val('');
+        $('#stationNameInput').val('');
+      });
+
+      // UI next/prev/play-pause
+      $('#nextBtn').on('click', function() {
+        playStation(currentIndex + 1);
+      });
+      $('#prevBtn').on('click', function() {
+        playStation(currentIndex - 1);
+      });
+      $('#playPauseBtn').on('click', function() {
+        const audio = $('#radioPlayer')[0];
+        if (audio.paused) audio.play();
+        else audio.pause();
+      });
+      $('#radioPlayer').onplay = updatePlayPauseBtn;
+      $('#radioPlayer').onpause = updatePlayPauseBtn;
+
+      // Media Session API for iOS native controls
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.setActionHandler('nexttrack', function() {
+          playStation(currentIndex + 1);
+        });
+        navigator.mediaSession.setActionHandler('previoustrack', function() {
+          playStation(currentIndex - 1);
+        });
+        navigator.mediaSession.setActionHandler('play', function() {
+          $('#radioPlayer')[0].play();
+        });
+        navigator.mediaSession.setActionHandler('pause', function() {
+          $('#radioPlayer')[0].pause();
+        });
+        // Disable seek forward/backward (removes 10s skip buttons in native UI)
+        navigator.mediaSession.setActionHandler('seekforward', null);
+        navigator.mediaSession.setActionHandler('seekbackward', null);
+        navigator.mediaSession.setActionHandler('seekto', null);
+      }
+    });
+  </script>
+</body>
+</html>
