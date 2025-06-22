@@ -224,7 +224,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
   <script>
-  const appVersion = "7.6.0.4";
+  const appVersion = "7.6.0.5";
 
   var audioPlayer = document.getElementById("radioPlayer");
   var s_id = -1;
@@ -265,7 +265,7 @@
     { id: 30, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9nMjBiczdodTB1aHZ2", name: ". R|a|j|i|n|i R|d|ogit", category: "mp3_2" },
     { id: 31, url: "aHR0cHM6Ly9zdHJlYW0tMTY0Lnplbm8uZm0vb3NiZ212aGp5cTd1dg==", name: ". A|R|R| |H|i|g|h", category: "mp3_2" },
     { id: 32, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS90N241Ynl3ZXhlc3R2", name: ". A|T|L|A|N|T|I|C", category: "mp3_2" },
-    { id: 33, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9wbGF5ZXJzZXJ2aWNlcy5zdHJlYW10aGV3b3JsZC5jb20vYXBpL2xpdmVzdHJlYW0tcmVkaXJlY3QvQ0JVMkZNX0NCQ19TQw==", name: ". C|B|C |V|A|N|C|O|V|E|R", category: "english" },
+    { id: 33, url: "aHR0cHM6Ly8xODY4My5saXZlLnN0cmVhbXRoZXdvcmxkLmNvbS9DQlUyRk1fQ0JDLm1wMz8=", name: ". C|B|C |V|A|N|C|O|V|E|R", category: "english" },
         { id: 34, url: "aHR0cHM6Ly9zdHJlYW0tMTc2Lnplbm8uZm0vbXczc3RwMmhobnp1dj8=", name: ". M|u|r|u|g|a", category: "mp3_2" },
     { id: 35, url: "aHR0cHM6Ly9lYzQueWVzc3RyZWFtaW5nLm5ldDoxOTkwL3N0cmVhbT8=", name: ". T|h|a|l|a|m", category: "mp3_2" },
     { id: 36, url: "aHR0cHM6Ly9zdHJlYW0tMTcxLnplbm8uZm0vMWh3a2JhbmJ6M3N0dj8=", name: ". T|a|m|i|l| |P|o|p| |40", category: "mp3_2" }
@@ -340,6 +340,7 @@
       $('.station-list').removeClass('loading');
       audio.play().catch(err => handlePlaybackError(stationName, err.message));
       UpdateMediaSession(stationId, stationName, "Playing");
+      setNavigationHandlers(); // Ensure seek actions are disabled after every station play
     };
 
     // Validate stream URL
@@ -370,17 +371,28 @@
    // });
 
     highlightActiveStation();
-    DisableMediaSessionActions()
-
   }
 
-  function DisableMediaSessionActions()
-  {
+  function setNavigationHandlers() {
     if ('mediaSession' in navigator) {
-    // Disable seek forward/backward (removes 10s skip buttons in native UI)
-    navigator.mediaSession.setActionHandler('seekforward', null);
-    navigator.mediaSession.setActionHandler('seekbackward', null);
-    navigator.mediaSession.setActionHandler('seekto', null);
+      navigator.mediaSession.setActionHandler('previoustrack', () => {
+        if (isShowingFavorites && favorites.length) navigateFavorites(-1);
+        else navigateStations(-1);
+      });
+      navigator.mediaSession.setActionHandler('nexttrack', () => {
+        if (isShowingFavorites && favorites.length) navigateFavorites(1);
+        else navigateStations(1);
+      });
+      navigator.mediaSession.setActionHandler("play", () => audioPlayer.play());
+      navigator.mediaSession.setActionHandler("pause", () => audioPlayer.pause());
+      navigator.mediaSession.setActionHandler("stop", () => {
+        audioPlayer.pause();
+        audioPlayer.currentTime = 0;
+      });
+      // Always disable seek actions last
+      navigator.mediaSession.setActionHandler('seekforward', () => {});
+      navigator.mediaSession.setActionHandler('seekbackward', () => {});
+      navigator.mediaSession.setActionHandler('seekto', () => {});
     }
   }
 
@@ -422,10 +434,10 @@
         audioPlayer.pause();
         audioPlayer.currentTime = 0;
       });
-      // Disable seek forward/backward (removes 10s skip buttons in native UI)
-      navigator.mediaSession.setActionHandler('seekforward', null);
-      navigator.mediaSession.setActionHandler('seekbackward', null);
-      navigator.mediaSession.setActionHandler('seekto', null);
+      // Always disable seek actions last
+      navigator.mediaSession.setActionHandler('seekforward', () => {});
+      navigator.mediaSession.setActionHandler('seekbackward', () => {});
+      navigator.mediaSession.setActionHandler('seekto', () => {});
     }
   }
 
@@ -585,7 +597,7 @@ function adjustStationButtonWidths() {
 
     
     playStation(0);
-    DisableMediaSessionActions()
+    //DisableMediaSessionActions()
 
     let isPlaying = false;
     const $playFirst = $('#playFirst');
