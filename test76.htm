@@ -224,7 +224,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
   <script>
-  const appVersion = "7.6.0.5";
+  const appVersion = "7.6.0.6";
 
   var audioPlayer = document.getElementById("radioPlayer");
   var s_id = -1;
@@ -390,9 +390,9 @@
         audioPlayer.currentTime = 0;
       });
       // Always disable seek actions last
-      navigator.mediaSession.setActionHandler('seekforward', () => {});
-      navigator.mediaSession.setActionHandler('seekbackward', () => {});
-      navigator.mediaSession.setActionHandler('seekto', () => {});
+      navigator.mediaSession.setActionHandler('seekforward', null);
+        navigator.mediaSession.setActionHandler('seekbackward', null);
+        navigator.mediaSession.setActionHandler('seekto', null);
     }
   }
 
@@ -448,6 +448,9 @@
         title: id + " " + station,
         artist: `Live Radio ${appVersion} - ${msg} - ${isStationLoaded}`
       });
+      navigator.mediaSession.setActionHandler('seekforward', null);
+        navigator.mediaSession.setActionHandler('seekbackward', null);
+        navigator.mediaSession.setActionHandler('seekto', null);
     }
   }
 
