@@ -224,7 +224,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
   <script>
-  const appVersion = "7.9.0.1";
+  const appVersion = "7.9.0.2";
 
   var audioPlayer = document.getElementById("radioPlayer");
   var s_id = -1;
@@ -356,6 +356,7 @@ const rawStations = [
     if (decodedUrl.endsWith('.m3u8')) {
       console.log("HLS stream detected.");
       if (Hls.isSupported()) {
+        UpdateMediaSession(stationId, stationName, "Loading...");
         const hls = new Hls();
         hls.loadSource(decodedUrl);
         hls.attachMedia(audio);
