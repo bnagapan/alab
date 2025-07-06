@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>L o c a l  R a d i o</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    .stationBtn {
+      margin: 12px 0 12px 0;
+      padding: 12px 28px;
+      font-size: 1.08rem;
+      border-radius: 8px;
+      background: #1976d2;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      display: block;
+    }
+    .stationBtn:hover {
+      background: #0d47a1;
+      color: #fff;
+    }
+    #stationList {
+      background: none;
+      padding: 18px 0 18px 0;
+      border-radius: 10px;
+      margin-bottom: 18px;
+    }
+  </style>
+</head>
+<body>
+  <h2>L o c a l  R a d i o</h2>
+  <div id="stationList"></div>
+  <p id="nowPlaying"></p>
+
+<div style="margin: 18px 0; display: flex; gap: 18px; align-items: center; justify-content: flex-start;">
+  <button id="prevBtn" class="stationBtn" title="Previous">⏮</button>
+  <button id="seekBackBtn" class="stationBtn" title="Seek Backward 45s">⏪ 45s</button>
+  <button id="playPauseBtn" class="stationBtn" title="Play/Pause">▶</button>
+  <button id="seekForwardBtn" class="stationBtn" title="Seek Forward 45s">45s ⏩</button>
+  <button id="nextBtn" class="stationBtn" title="Next">⏭</button>
+</div>
+  <audio id="radioPlayer" controls autoplay style="margin-bottom: 24px; display: block;"></audio>
+
+  <div style="margin-bottom:16px;">
+    <input type="text" id="stationUrlInput" placeholder="Stream URL" style="width:260px;">
+    <input type="text" id="stationNameInput" placeholder="Station Name" style="width:140px;">
+    <button id="addStationBtn">Add Station</button>
+  </div>
+
+  <script>
+    $(document).ready(function () { 
+      // Raw station data (Base64-encoded URLs, station names with spaces between each letter)
+      const stationData = `
+        aHR0cHM6Ly9wb2RjYXN0LTM1Lnplbm8uZm0vcG9kY2FzdD9wb2RjYXN0S2V5PWFneHpmbnBsYm04dGMzUmhkSE55S3dzU0NrRjFkR2hGYm5ScGRIa1lnSUNROWR5bl9Ba01DeElIVUc5a1kyRnpkQmlBZ0xETjk4SHhDQXlpQVFkc2FXSnlZWEo1JmVwaXNvZGVLZXk9YWd4emZucGxibTh0YzNSaGRITnlGZ3NTQ1UxbFpHbGhTWFJsYlJpQWdMRDl5TGEtQ0F5aUFRZHNhV0p5WVhKNSZ6dD1leUpoYkdjaU9pSklVekkxTmlKOS5leUp6ZEhKbFlXMGlPaUpoWjNoNlptNXdiR0p0T0hSak0xSm9aRWhPZVV0M2MxTkRhMFl4WkVkb1JtSnVVbkJrU0d0WlowbERVVGxrZVc1ZlFXdE5RM2hKU0ZWSE9XdFpNa1o2WkVKcFFXZE1SRTQ1T0VoNFEwRjVhVUZSWkhOaFYwcDVXVmhLTldGbmVIcG1ibkJzWW0wNGRHTXpVbWhrU0U1NVJtZHpVME5WTVd4YVIyeG9VMWhTYkdKU2FVRm5URVE1ZVV4aExVTkJlV2xCVVdSellWZEtlVmxZU2pVaUxDSm9iM04wSWpvaWNHOWtZMkZ6ZEMwek5TNTZaVzV2TG1adElpd2lhblJwSWpvaVlXSXdNRGcwT1dZd09HRmlNMlZrTUdVME1UZzBPVGRqT0RjeVpERTBNV1k0WTJOa01XRmxNMk5qTnpOak1UbGlOemd3WlRBNFlqVmxNRFJpT0RrNE9TSXNJbWxoZENJNk1UYzFNVGMzTVRVNE1Dd2laWGh3SWpveE56VXhOemN4TmpRd2ZRLjEwRkdtZXY3dnNpOFZlSndiWkk4dm9zaUhuVDJRZFM5dXlGdGZnOXRPQ0k=|M o h a n H i t S o n g s
+        aHR0cHM6Ly9wb2RjYXN0LTM2Lnplbm8uZm0vcG9kY2FzdD9wb2RjYXN0S2V5PWFneHpmbnBsYm04dGMzUmhkSE55S3dzU0NrRjFkR2hGYm5ScGRIa1lnSUNROWR5bl9Ba01DeElIVUc5a1kyRnpkQmlBZ0xETjk4SHhDQXlpQVFkc2FXSnlZWEo1JmVwaXNvZGVLZXk9YWd4emZucGxibTh0YzNSaGRITnlGZ3NTQ1UxbFpHbGhTWFJsYlJpQWdQRE1zZWo1Q3d5aUFRZHNhV0p5WVhKNSZ6dD1leUpoYkdjaU9pSklVekkxTmlKOS5leUp6ZEhKbFlXMGlPaUpoWjNoNlptNXdiR0p0T0hSak0xSm9aRWhPZVV0M2MxTkRhMFl4WkVkb1JtSnVVbkJrU0d0WlowbERVVGxrZVc1ZlFXdE5RM2hKU0ZWSE9XdFpNa1o2WkVKcFFXZE1SRTQ1T0VoNFEwRjVhVUZSWkhOaFYwcDVXVmhLTldGbmVIcG1ibkJzWW0wNGRHTXpVbWhrU0U1NVJtZHpVME5WTVd4YVIyeG9VMWhTYkdKU2FVRm5VRVJOYzJWcU5VTjNlV2xCVVdSellWZEtlVmxZU2pVaUxDSm9iM04wSWpvaWNHOWtZMkZ6ZEMwek5pNTZaVzV2TG1adElpd2lhblJwSWpvaU1qRTVaakkyWkdKaVltVXdZemxsTlRJMU16TXdNMkkwWTJWa09UazRaREJqWVdOaFpUVTJOMll4WTJJME5XRmpOMk16WVRjMlpEWXpOVEUyWVRnM01DSXNJbWxoZENJNk1UYzFNVGMzTWpJM05pd2laWGh3SWpveE56VXhOemN5TXpNMmZRLi1mWUJuV0Y3UVd2dE9XRmE2cGRCamtHbXNsMmVwUm5LclpnNFoycWZoS3c=|H a r i h a r a n S o n g s
+        aHR0cHM6Ly9wb2RjYXN0LTM3Lnplbm8uZm0vcG9kY2FzdD9wb2RjYXN0S2V5PWFneHpmbnBsYm04dGMzUmhkSE55S3dzU0NrRjFkR2hGYm5ScGRIa1lnSUNROWR5bl9Ba01DeElIVUc5a1kyRnpkQmlBZ0xETjk4SHhDQXlpQVFkc2FXSnlZWEo1JmVwaXNvZGVLZXk9YWd4emZucGxibTh0YzNSaGRITnlGZ3NTQ1UxbFpHbGhTWFJsYlJpQWdQRFluNmUtQ2d5aUFRZHNhV0p5WVhKNSZ6dD1leUpoYkdjaU9pSklVekkxTmlKOS5leUp6ZEhKbFlXMGlPaUpoWjNoNlptNXdiR0p0T0hSak0xSm9aRWhPZVV0M2MxTkRhMFl4WkVkb1JtSnVVbkJrU0d0WlowbERVVGxrZVc1ZlFXdE5RM2hKU0ZWSE9XdFpNa1o2WkVKcFFXZE1SRTQ1T0VoNFEwRjVhVUZSWkhOaFYwcDVXVmhLTldGbmVIcG1ibkJzWW0wNGRHTXpVbWhrU0U1NVJtZHpVME5WTVd4YVIyeG9VMWhTYkdKU2FVRm5VRVJaYmpabExVTm5lV2xCVVdSellWZEtlVmxZU2pVaUxDSm9iM04wSWpvaWNHOWtZMkZ6ZEMwek55NTZaVzV2TG1adElpd2lhblJwSWpvaU5UVTROR0l6WW1JM056VXdPVGhsWkRGaU1XVmxaamswTkRkaE5XSmtNV0l5Tmprd01tSTJOV1JtTURReVptRTNNRFl4WkRVeE5EUXpOekJqT0daaU9DSXNJbWxoZENJNk1UYzFNVGMzTWpFNE1pd2laWGh3SWpveE56VXhOemN5TWpReWZRLnBwNHc4a2tnOGhzU2hFcGdweHRBTHZEdUQxV0FKVF9ZdERiT3BfYkdiRmM=|H a r i - L o v e s o n g s
+      `.trim();
+
+      // Parse and display station links
+      const stations = stationData.split("\n").map(line => {
+        const [b64url, name] = line.trim().split("|");
+        return { url: b64url.trim(), name: name.trim() };
+      });
+
+      function decodeUrl(b64) {
+        try {
+          return atob(b64);
+        } catch {
+          return b64;
+        }
+      }
+
+      function formatStationName(spacedName) {
+        // Remove all spaces to display normally
+        return spacedName.replace(/\s+/g, '');
+      }
+
+      let currentIndex = 0;
+      function playStation(idx) {
+        if (idx < 0) idx = stations.length - 1;
+        if (idx >= stations.length) idx = 0;
+        currentIndex = idx;
+        const station = stations[currentIndex];
+        const audio = $("#radioPlayer")[0];
+        // Clear MediaSession metadata before setting new one
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.metadata = null;
+        }
+        audio.src = decodeUrl(station.url);
+        audio.load();
+        audio.play().catch(() => {});
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.metadata = new window.MediaMetadata({
+            title: station.name,
+            artist: 'Internet Radio',
+            album: 'Radio Player',
+            artwork: [
+              { src: 'https://upload.wikimedia.org/wikipedia/commons/6/6a/Internet_radio_icon.png', sizes: '192x192', type: 'image/png' }
+            ]
+          });
+        }
+        $("#nowPlaying").text(formatStationName(station.name));
+        updatePlayPauseBtn();
+      }
+
+      function updatePlayPauseBtn() {
+        const audio = $("#radioPlayer")[0];
+        if (audio.paused) {
+          $('#playPauseBtn').text('▶');
+        } else {
+          $('#playPauseBtn').text('⏸');
+        }
+      }
+
+      function renderStations(stations) {
+        $('#stationList').empty();
+        stations.forEach((station, index) => {
+          const button = $(`<button class=\"stationBtn\">${formatStationName(station.name)}</button>`);
+          button.on("click", function () {
+            playStation(index);
+          });
+          $("#stationList").append(button);
+        });
+      }
+
+      renderStations(stations);
+      playStation(0);
+
+      // Add station handler
+      $('#addStationBtn').on('click', function() {
+        const url = $('#stationUrlInput').val().trim();
+        const name = $('#stationNameInput').val().trim();
+        if (!url || !name) {
+          alert('Please enter both URL and Station Name.');
+          return;
+        }
+        // Encode user input URL to Base64
+        const b64url = btoa(url);
+        // Insert a space between each letter for new stations
+        const spacedName = name.split('').join(' ');
+        stations.push({ url: b64url, name: spacedName });
+        renderStations(stations);
+        playStation(stations.length - 1);
+        $('#stationUrlInput').val('');
+        $('#stationNameInput').val('');
+      });
+
+      // UI next/prev/play-pause
+      $('#nextBtn').on('click', function() {
+        playStation(currentIndex + 1);
+      });
+      $('#prevBtn').on('click', function() {
+        playStation(currentIndex - 1);
+      });
+      $('#playPauseBtn').on('click', function() {
+        const audio = $('#radioPlayer')[0];
+        if (audio.paused) audio.play();
+        else audio.pause();
+      });
+      $('#radioPlayer').onplay = updatePlayPauseBtn;
+      $('#radioPlayer').onpause = updatePlayPauseBtn;
+
+      // Media Session API for iOS native controls
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.setActionHandler('nexttrack', function() {
+          playStation(currentIndex + 1);
+        });
+        navigator.mediaSession.setActionHandler('previoustrack', function() {
+          playStation(currentIndex - 1);
+        });
+        navigator.mediaSession.setActionHandler('play', function() {
+          $('#radioPlayer')[0].play();
+        });
+        navigator.mediaSession.setActionHandler('pause', function() {
+          $('#radioPlayer')[0].pause();
+        });
+        // Disable seek forward/backward (removes 10s skip buttons in native UI)
+        navigator.mediaSession.setActionHandler('seekforward', null);
+        navigator.mediaSession.setActionHandler('seekbackward', null);
+        navigator.mediaSession.setActionHandler('seekto', null);
+      }
+    });
+
+    $('#seekBackBtn').on('click', function() {
+  const audio = $('#radioPlayer')[0];
+  if (!isNaN(audio.duration)) {
+    audio.currentTime = Math.max(audio.currentTime - 45, 0);
+  }
+});
+
+$('#seekForwardBtn').on('click', function() {
+  const audio = $('#radioPlayer')[0];
+  if (!isNaN(audio.duration)) {
+    audio.currentTime = Math.min(audio.currentTime + 45, audio.duration);
+  }
+});
+
+  </script>
+</body>
+</html>
