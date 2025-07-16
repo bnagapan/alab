@@ -224,7 +224,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
   <script>
-  const appVersion = "7.6.1.1";
+  const appVersion = "7.6.1.2";
 
   var audioPlayer = document.getElementById("radioPlayer");
   var s_id = -1;
@@ -259,7 +259,7 @@ const rawStations = [
   { id: 122, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtLzF5Y21lcG50aGtodnY=", name: ". M|a|d|u|r|a|i", category: "mp3_2" },
   { id: 123, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL3RxbndzMmVhZnd6dXYuYWFj", name: ". T|a|m|i|l Melodies", category: "mp3_2" },
   { id: 124, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL2U5aHNiYmJleTR6dXY=", name: ". M|e|l|l|i|s|a|i F|M", category: "mp3_2" },
-  { id: 125, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL3RxbndzMmVhZnd6dXYuYWFj", name: ". 9|0|s T|a|m|i|l Melodies", category: "mp3_2" },
+  { id: 125, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL3RxbndzMmVhZnd6dXYuYWFj", name: ". 9|0|s Melodies", category: "mp3_2" },
   { id: 126, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtLzBjeXMyaDQxdzBodnY=", name: ". A|R|R F|M", category: "mp3_2" },
   { id: 127, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS8zZGFjdDQzd3FnMHV2", name: ". K|a|m|a|l h|i|t|s", category: "mp3_2" },
   { id: 128, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtLzlmcDEzODNmMGQwdXY=", name: ". E|r|o|d|e", category: "mp3_2" },
@@ -314,7 +314,7 @@ const rawStations = [
     currentIndex = index;
     isStationLoaded = false;
 
-    const stationName = station.name.replace(/\|/g, ' ');
+    const stationName = station.name.replace(/\|/g, '');
     const stationId = station.id;
 
     $('#msg').text(stationId + ' ' + stationName); // Show currently playing station with id and name only
@@ -520,7 +520,7 @@ const rawStations = [
 
     stations.forEach((station, idx) => {
       if (excludeIds.includes(station.id)) return;
-      const stationName = `${station.id} ${station.name.replace(/\|/g, ' ')}`;
+      const stationName = `${station.id} ${station.name.replace(/\|/g, '')}`;
       const isFav = favorites.includes(station.id);
       const favText = isFav ? '★' : '☆';
       $('.station-list').append(`
@@ -544,7 +544,7 @@ const rawStations = [
     favorites.forEach(id => {
       const station = stations.find(s => s.id === id);
       if (station) {
-        const stationName = `${station.id} ${station.name.replace(/\|/g, ' ')}`;
+        const stationName = `${station.id} ${station.name.replace(/\|/g, '')}`;
         const index = stations.findIndex(s => s.id === station.id);
         $('.favorite-list').append(`
           <div>
@@ -568,7 +568,7 @@ function adjustStationButtonWidths() {
   });
 
   // Reduce width by 25%
-  const reducedWidth = maxWidth * 1.00;
+  const reducedWidth = maxWidth * 0.95;
 
   // Apply reduced width to visible station buttons
   $('.station-link:visible').css('width', reducedWidth);
