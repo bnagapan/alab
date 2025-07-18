@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>L o c a l  R a d i o</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    .stationBtn {
+      margin: 12px 0 12px 0;
+      padding: 12px 28px;
+      font-size: 1.08rem;
+      border-radius: 8px;
+      background: #1976d2;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      display: block;
+    }
+    .stationBtn:hover {
+      background: #0d47a1;
+      color: #fff;
+    }
+    #stationList {
+      background: none;
+      padding: 18px 0 18px 0;
+      border-radius: 10px;
+      margin-bottom: 18px;
+    }
+  </style>
+</head>
+<body>
+  <h2>L o c a l  R a d i o</h2>
+  <div id="stationList"></div>
+  <p id="nowPlaying"></p>
+
+  <div style="margin: 18px 0; display: flex; gap: 18px; align-items: center; justify-content: flex-start;">
+    <button id="prevBtn" class="stationBtn" title="Previous">⏮</button>
+    <button id="seekBackBtn" class="stationBtn" title="Seek Backward 45s">⏪ 45s</button>
+    <button id="playPauseBtn" class="stationBtn" title="Play/Pause">▶</button>
+    <button id="seekForwardBtn" class="stationBtn" title="Seek Forward 45s">45s ⏩</button>
+    <button id="nextBtn" class="stationBtn" title="Next">⏭</button>
+  </div>
+  
+  <audio id="radioPlayer" controls autoplay style="margin-bottom: 24px; display: block;"></audio>
+
+  <div style="margin-bottom:16px;">
+    <input type="text" id="stationUrlInput" placeholder="Stream URL" style="width:260px;">
+    <input type="text" id="stationNameInput" placeholder="Station Name" style="width:140px;">
+    <button id="addStationBtn">Add Station</button>
+  </div>
+
+  <script>
+    $(document).ready(function () { 
+      // Stations JSON array with ids starting from 100
+      const stations = [
+        {
+          id: 100,
+          url: "aHR0cHM6Ly9wb2RjYXN0Lnplbm9tZWRpYS5jb20vcHVibGljL3BvZGNhc3RzL21lZGlhL2FneHpmbnBsYm04dGMzUmhkSE55S3dzU0NrRjFkR2hGYm5ScGRIa1lnSUNROWR5bl9Ba01DeElIVUc5a1kyRnpkQmlBZ0xETjk4SHhDQXlpQVFkc2FXSnlZWEo1L2FneHpmbnBsYm04dGMzUmhkSE55RmdzU0NVMWxaR2xoU1hSbGJSaUFnTEQ5eUxhLUNBeWlBUWRzYVdKeVlYSjUubXAz",
+          name: "I||l|l|a|y|a| - Mohan"
+        },
+        {
+          id: 101,
+          url: "aHR0cHM6Ly9wb2RjYXN0LTM2Lnplbm8uZm0vcG9kY2FzdD9wb2RjYXN0S2V5PWFneHpmbnBsYm04dGMzUmhkSE55S3dzU0NrRjFkR2hGYm5ScGRIa1lnSUNROWR5bl9Ba01DeElIVUc5a1kyRnpkQmlBZ0xETjk4SHhDQXlpQVFkc2FXSnlZWEo1JmVwaXNvZGVLZXk9YWd4emZucGxibTh0YzNSaGRITnlGZ3NTQ1UxbFpHbGhTWFJsYlJpQWdMRGQ0SmptQ1F5aUFRZHNhV0p5WVhKNSZ6dD1leUpoYkdjaU9pSklVekkxTmlKOS5leUp6ZEhKbFlXMGlPaUpoWjNoNlptNXdiR0p0T0hSak0xSm9aRWhPZVV0M2MxTkRhMFl4WkVkb1JtSnVVbkJrU0d0WlowbERVVGxrZVc1ZlFXdE5RM2hKU0ZWSE9XdFpNa1o2WkVKcFFXZE1SRTQ1T0VoNFEwRjVhVUZSWkhOaFYwcDVXVmhLTldGbmVIcG1ibkJzWW0wNGRHTXpVbWhrU0U1NVJtZHpVME5WTVd4YVIyeG9VMWhTYkdKU2FVRm5URVJrTkVwcWJVTlJlV2xCVVdSellWZEtlVmxZU2pVaUxDSm9iM04wSWpvaWNHOWtZMkZ6ZEMwek5pNTZaVzV2TG1adElpd2lhblJwSWpvaU1qZ3hPV1l4TkRFM00yRTNZakJtT1Rrd09UQTVPREExWmpVd1lqWmxZMkUxTkRReU5HSTRZVEU0T1RRMVlXSmhNak5tWTJKallUTXlNak0yTnpnMlpDSXNJbWxoZENJNk1UYzFNamd3T1RNd05Dd2laWGh3SWpveE56VXlPREE1TXpZMGZRLkliX0lObjJmMzZYbVB2TkVpb1RQMDJBU3poX0E0WWgzR1VFQ3NMN0h1Nk0NCg==",
+          name: "Y|e|s|s|u|d|a|s|"
+        },
+        {
+          id: 102,
+          url: "aHR0cHM6Ly9wb2RjYXN0Lnplbm9tZWRpYS5jb20vcHVibGljL3BvZGNhc3RzL21lZGlhL2FneHpmbnBsYm04dGMzUmhkSE55S3dzU0NrRjFkR2hGYm5ScGRIa1lnSUNROWR5bl9Ba01DeElIVUc5a1kyRnpkQmlBZ0xETjk4SHhDQXlpQVFkc2FXSnlZWEo1L2FneHpmbnBsYm04dGMzUmhkSE55RmdzU0NVMWxaR2xoU1hSbGJSaUFnTEN6Z0xYLUNBeWlBUWRzYVdKeVlYSjUubXAz",
+          name: "I|l|l|a|y|a| - S|P|B| - Golden"
+        },
+        {
+          id: 103,
+          url: "aHR0cHM6Ly9wb2RjYXN0Lnplbm9tZWRpYS5jb20vcHVibGljL3BvZGNhc3RzL21lZGlhL2FneHpmbnBsYm04dGMzUmhkSE55S3dzU0NrRjFkR2hGYm5ScGRIa1lnSUNROWR5bl9Ba01DeElIVUc5a1kyRnpkQmlBZ0xETjk4SHhDQXlpQVFkc2FXSnlZWEo1L2FneHpmbnBsYm04dGMzUmhkSE55RmdzU0NVMWxaR2xoU1hSbGJSaUFnTERUXzVYRUN3eWlBUWRzYVdKeVlYSjUubXAz",
+          name: "Tamil "
+        },
+        {
+          id: 104,
+          url: "aHR0cHM6Ly9wb2RjYXN0Lnplbm9tZWRpYS5jb20vcHVibGljL3BvZGNhc3RzL21lZGlhL2FneHpmbnBsYm04dGMzUmhkSE55S3dzU0NrRjFkR2hGYm5ScGRIa1lnSUNROWR5bl9Ba01DeElIVUc5a1kyRnpkQmlBZ0xETjk4SHhDQXlpQVFkc2FXSnlZWEo1L2FneHpmbnBsYm04dGMzUmhkSE55RmdzU0NVMWxaR2xoU1hSbGJSaUFnTER6eU5IUEN3eWlBUWRzYVdKeVlYSjUubXAz",
+          name: "U|n|n|i| M|e|n|o|n Super Hit  "
+        }
+      ];
+
+      function decodeUrl(b64) {
+        try {
+          return atob(b64);
+        } catch {
+          return b64;
+        }
+      }
+      
+
+function formatStationName(rawName) {
+  return rawName.replace(/\|/g, '').trim();
+}
+
+      let currentIndex = 0;
+
+      function playStation(idx) {
+        if (idx < 0) idx = stations.length - 1;
+        if (idx >= stations.length) idx = 0;
+        currentIndex = idx;
+        const station = stations[currentIndex];
+        const audio = $("#radioPlayer")[0];
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.metadata = null;
+        }
+        audio.src = decodeUrl(station.url);
+        audio.load();
+        audio.play().catch(() => {});
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.metadata = new window.MediaMetadata({
+            title: station.name,
+            artist: 'Internet Radio',
+            album: 'Radio Player',
+            artwork: [
+              { src: 'https://upload.wikimedia.org/wikipedia/commons/6/6a/Internet_radio_icon.png', sizes: '192x192', type: 'image/png' }
+            ]
+          });
+        }
+        $("#nowPlaying").text(formatStationName(station.name));
+        updatePlayPauseBtn();
+      }
+
+      function updatePlayPauseBtn() {
+        const audio = $("#radioPlayer")[0];
+        if (audio.paused) {
+          $('#playPauseBtn').text('▶');
+        } else {
+          $('#playPauseBtn').text('⏸');
+        }
+      }
+
+      function renderStations(stations) {
+        $('#stationList').empty();
+        stations.forEach((station, index) => {
+          const button = $(`<button class="stationBtn">${formatStationName(station.name)}</button>`);
+          button.on("click", function () {
+            playStation(index);
+          });
+          $("#stationList").append(button);
+        });
+      }
+
+      function cleanName(name) {
+  return name.replace(/\|/g, '').trim();
+}
+
+function setStationButtonWidth(stations) {
+  const testSpan = $('<span>').css({
+    visibility: 'hidden',
+    position: 'absolute',
+    whiteSpace: 'nowrap',
+    fontSize: '1rem',
+    padding: '12px 24px',
+    fontFamily: 'sans-serif'
+  }).appendTo('body');
+
+  let maxWidth = 0;
+  stations.forEach(station => {
+    testSpan.text(cleanName(station.name));
+    const width = testSpan.outerWidth();
+    if (width > maxWidth) maxWidth = width;
+  });
+
+  testSpan.remove();
+
+  $('.stationBtn').css('width', (maxWidth + 20) + 'px'); // Add some buffer
+}
+
+      renderStations(stations);
+      setStationButtonWidth(stations);
+      playStation(0);
+
+      // Add station handler
+      $('#addStationBtn').on('click', function() {
+        const url = $('#stationUrlInput').val().trim();
+        const name = $('#stationNameInput').val().trim();
+        if (!url || !name) {
+          alert('Please enter both URL and Station Name.');
+          return;
+        }
+        const b64url = btoa(url);
+        const spacedName = name.split('').join(' ');
+        // Assign new id as max current id +1 or start at 100 if empty
+        const newId = stations.length ? Math.max(...stations.map(s => s.id)) + 1 : 100;
+        stations.push({ id: newId, url: b64url, name: spacedName });
+        renderStations(stations);
+        playStation(stations.length - 1);
+        $('#stationUrlInput').val('');
+        $('#stationNameInput').val('');
+      });
+
+      // UI next/prev/play-pause
+      $('#nextBtn').on('click', function() {
+        playStation(currentIndex + 1);
+      });
+      $('#prevBtn').on('click', function() {
+        playStation(currentIndex - 1);
+      });
+      $('#playPauseBtn').on('click', function() {
+        const audio = $('#radioPlayer')[0];
+        if (audio.paused) audio.play();
+        else audio.pause();
+      });
+      $('#radioPlayer').onplay = updatePlayPauseBtn;
+      $('#radioPlayer').onpause = updatePlayPauseBtn;
+
+      // Media Session API for iOS native controls
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.setActionHandler('nexttrack', function() {
+          playStation(currentIndex + 1);
+        });
+        navigator.mediaSession.setActionHandler('previoustrack', function() {
+          playStation(currentIndex - 1);
+        });
+        navigator.mediaSession.setActionHandler('play', function() {
+          $('#radioPlayer')[0].play();
+        });
+        navigator.mediaSession.setActionHandler('pause', function() {
+          $('#radioPlayer')[0].pause();
+        });
+        // Disable seek forward/backward (removes 10s skip buttons in native UI)
+        navigator.mediaSession.setActionHandler('seekforward', null);
+        navigator.mediaSession.setActionHandler('seekbackward', null);
+        navigator.mediaSession.setActionHandler('seekto', null);
+      }
+
+      // Seek buttons
+      $('#seekBackBtn').on('click', function() {
+        const audio = $('#radioPlayer')[0];
+        if (!isNaN(audio.duration)) {
+          audio.currentTime = Math.max(audio.currentTime - 45, 0);
+        }
+      });
+
+      $('#seekForwardBtn').on('click', function() {
+        const audio = $('#radioPlayer')[0];
+        if (!isNaN(audio.duration)) {
+          audio.currentTime = Math.min(audio.currentTime + 45, audio.duration);
+        }
+      });
+
+    });
+  </script>
+</body>
+</html>
