@@ -165,7 +165,7 @@
   </style>
 </head>
 <body>
-  <h2>L o c a l  R a d i o  - V6</h2>
+  <h2>L o c a l  R a d i o  - V6.1</h2>
   <div id="stationList"></div>
     <div class="controls-row">
 
@@ -174,8 +174,8 @@
     <button id="nextBtn" class="stationBtn" title="Next">⏭</button>
     <br style="flex-basis: 100%; height: 0;" />
     <div style="display: flex; gap: 10px; justify-content: center; width: 100%;">
-      <button id="seekBackBtn" class="stationBtn" title="Seek Backward 45s">45s⏪</button>
-      <button id="seekForwardBtn" class="stationBtn" title="Seek Forward 45s">45s⏩</button>
+      <button id="seekBackBtn" class="stationBtn" title="Seek Backward 45s">&nbsp;45s⏪&nbsp;</button>
+      <button id="seekForwardBtn" class="stationBtn" title="Seek Forward 45s">&nbsp;45s⏩&nbsp;</button>
     </div>
   </div>
   <p id="nowPlaying"></p>
@@ -446,19 +446,19 @@ function setStationButtonWidth(stations) {
         });
         // Disable seek forward/backward (removes 10s skip buttons in native UI)
 // Enable 45s skip on car steering wheel or headset controls
-navigator.mediaSession.setActionHandler('seekforward', function() {
-  const audio = document.getElementById('radioPlayer');
-  if (!isNaN(audio.duration)) {
-    audio.currentTime = Math.min(audio.currentTime + 45, audio.duration);
-  }
-});
+// navigator.mediaSession.setActionHandler('seekforward', function() {
+//   const audio = document.getElementById('radioPlayer');
+//   if (!isNaN(audio.duration)) {
+//     audio.currentTime = Math.min(audio.currentTime + 45, audio.duration);
+//   }
+// });
 
-navigator.mediaSession.setActionHandler('seekbackward', function() {
-  const audio = document.getElementById('radioPlayer');
-  if (!isNaN(audio.duration)) {
-    audio.currentTime = Math.max(audio.currentTime - 45, 0);
-  }
-});
+// navigator.mediaSession.setActionHandler('seekbackward', function() {
+//   const audio = document.getElementById('radioPlayer');
+//   if (!isNaN(audio.duration)) {
+//     audio.currentTime = Math.max(audio.currentTime - 45, 0);
+//   }
+// });
       }
 
       // Seek buttons
