@@ -32,6 +32,7 @@
   <h2>L o c a l  R a d i o</h2>
   <div id="stationList"></div>
   <p id="nowPlaying"></p>
+  <span id="decodedStationUrl" style="display:block; margin-bottom:12px; color:#444; font-size:0.98em;"></span>
 
   <div style="margin: 18px 0; display: flex; gap: 18px; align-items: center; justify-content: flex-start;">
     <button id="prevBtn" class="stationBtn" title="Previous">⏮</button>
@@ -50,10 +51,14 @@
     $(document).ready(function () { 
       // Station data as a JSON array with id, url (base64), name, and category
       let rawStations = [
-        { id: 1, url: "aHR0cHM6Ly8xODY4My5saXZlLnN0cmVhbXRoZXdvcmxkLmNvbS9DQlIxRk1fQ0JDLm1wMz9ESVNUPVR1bmVJbiZUR1Q9VHVuZUluJm1heFNlcnZlcnM9MiZnZHByPQ==", name: "CBC Calgary", category: "english" },
-        { id: 2, url: "aHR0cDovL3N0cmVhbS5yZXZtYS5paHJobHMuY29tL3pjNjA0Mz8=", name: "NBC News", category: "english" },
-        { id: 3, url: "aHR0cHM6Ly90dW5laW4uY2Ruc3RyZWFtMS5jb20vNDQyNF85Ni5tcDM/", name: "ABC News", category: "english" }
-      ];
+        { id: 1, url: "aHR0cHM6Ly9yb2dlcnMtaGxzLmxlYW5zdHJlYW0uY28vcm9nZXJzL2hhbDk1Ny5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: " C|i|t|y N|e|w|s", category: "english" },
+        { id: 2, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: " C|B|C R|a|d|i|o", category: "english" },
+        { id: 4, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQxMDUwL0VTX1IxUFZDL21hc3Rlci5tM3U4", name: " C|B|C| |T|o|r|o|n|t|o", category: "english" },
+        { id: 5, url: "aHR0cHM6Ly9oZWwtYWlzLWVkZ2UxLmxlYW5zdHJlYW0uY28vcm9nZXJzL3RvcjY4MC5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: " C|i|t|y| |T|o|r|o|n|t|o", category: "english" },
+        { id: 6, url: "aHR0cHM6Ly8xODY4My5saXZlLnN0cmVhbXRoZXdvcmxkLmNvbS9DQlIxRk1fQ0JDLm1wMz9ESVNUPVR1bmVJbiZUR1Q9VHVuZUluJm1heFNlcnZlcnM9MiZnZHByPQ==", name: " C|B|C |C|a|l", category: "english" },
+        { id: 7, url: "aHR0cDovL3N0cmVhbS5yZXZtYS5paHJobHMuY29tL3pjNjA0Mz8=", name: " N|B|C| |N|e|w|s", category: "english" },
+        { id: 8, url: "aHR0cHM6Ly90dW5laW4uY2Ruc3RyZWFtMS5jb20vNDQyNF85Ni5tcDM/", name: " A|B|C| |N|e|w|s", category: "english" }
+		];
 
       // Helper to decode base64 URL
       function decodeUrl(b64) {
@@ -99,9 +104,36 @@
         if ('mediaSession' in navigator) {
           navigator.mediaSession.metadata = null;
         }
-        audio.src = decodeUrl(station.url);
-        audio.load();
-        audio.play().catch(() => {});
+        // HLS.js support for .m3u8 streams
+        if (audio.hlsInstance) {
+          audio.hlsInstance.detachMedia();
+          audio.hlsInstance.destroy();
+          audio.hlsInstance = null;
+        }
+        const url = decodeUrl(station.url);
+        if (url.endsWith('.m3u8')) {
+          if (window.Hls && Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(url);
+            hls.attachMedia(audio);
+            audio.hlsInstance = hls;
+            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+              audio.play().catch(() => {});
+            });
+          } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+            audio.src = url;
+            audio.load();
+            audio.play().catch(() => {});
+          } else {
+            audio.src = url;
+            audio.load();
+            audio.play().catch(() => {});
+          }
+        } else {
+          audio.src = url;
+          audio.load();
+          audio.play().catch(() => {});
+        }
         if ('mediaSession' in navigator) {
           navigator.mediaSession.metadata = new window.MediaMetadata({
             title: station.name,
@@ -113,6 +145,7 @@
           });
         }
         $("#nowPlaying").text(`${station.id}. ${station.name}`);
+        $("#decodedStationUrl").text(url);
         updatePlayPauseBtn();
       }
 

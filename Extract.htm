@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Zeno.fm Radio Station URL Extractor</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        input[type="text"] {
+            width: 300px;
+            padding: 5px;
+        }
+        button {
+            padding: 5px 10px;
+        }
+        #result {
+            margin-top: 10px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Zeno.fm Radio Station URL Extractor</h1>
+    <label for="podcastUrl">Enter Zeno.fm Podcast URL:</label><br>
+    <input type="text" id="podcastUrl" placeholder="e.g., https://zeno.fm/podcast/isaithentral/...">
+    <button id="extractBtn">Extract Radio Station URL</button>
+    <div id="result"></div>
+
+    <script>
+        $(document).ready(function() {
+            // Function to extract radio station URL from a Zeno.fm podcast URL
+            function extractRadioStationUrl(podcastUrl) {
+                // Ensure the URL is valid
+                if (!podcastUrl || typeof podcastUrl !== 'string') {
+                    return 'Invalid URL';
+                }
+
+                // Parse the URL to extract the podcast slug
+                const urlParts = podcastUrl.split('/');
+                const podcastIndex = urlParts.indexOf('podcast');
+                
+                // Check if the URL contains 'podcast' and has a slug after it
+                if (podcastIndex === -1 || podcastIndex + 1 >= urlParts.length) {
+                    return 'Invalid podcast URL';
+                }
+
+                // The podcast slug is the part after 'podcast'
+                const podcastSlug = urlParts[podcastIndex + 1];
+
+                // Construct the radio station URL
+                const radioStationUrl = `https://zeno.fm/radio/${podcastSlug}/`;
+
+                return radioStationUrl;
+            }
+
+            // Handle button click to extract URL
+            $('#extractBtn').click(function() {
+                const podcastUrl = $('#podcastUrl').val().trim();
+                const radioStationUrl = extractRadioStationUrl(podcastUrl);
+                $('#result').text('Radio Station URL: ' + radioStationUrl);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Extract Video URLs</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+  <h2>Extracted Video URLs</h2>
+  <button id="fetchVideoUrls">Fetch Video URLs</button>
+  <pre id="output"></pre>
+
+  <script>
+    $('#fetchVideoUrls').on('click', function () {
+      const targetURL = 'https://zeno.fm/podcast/isaithentral/episodes/isaignani-ilayaraja-dts-5-1-surround/';
+      const proxyURL = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetURL);
+
+      $.getJSON(proxyURL, function(data) {
+        const htmlContent = data.contents;
+        const doc = new DOMParser().parseFromString(htmlContent, 'text/html');
+        const videoTags = doc.querySelectorAll('video');
+
+        if (videoTags.length === 0) {
+          $('#output').text('No <video> tag found on the page.');
+          return;
+        }
+
+        let output = '';
+
+        videoTags.forEach((video, index) => {
+          output += `Video Tag ${index + 1}:\n${video.outerHTML}\n`;
+
+          // Check for src on <video>
+          if (video.src) {
+            output += `\nDirect video.src: ${video.src}\n`;
+          }
+
+          // Look for <source> children
+          const sources = video.querySelectorAll('source');
+          sources.forEach((source, i) => {
+            output += `Source ${i + 1}: ${source.getAttribute('src')}\n`;
+          });
+
+          output += '\n----------------------------------\n\n';
+        });
+
+        $('#output').text(output);
+      }).fail(function() {
+        $('#output').text('Failed to fetch content. Possible CORS or network error.');
+      });
+    });
+  </script>
+</body>
+</html>

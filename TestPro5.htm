@@ -3,10 +3,39 @@
 <head>
   <title>L o c a l  R a d i o</title>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <style>
+    html, body {
+      max-width: 100vw;
+      overflow-x: hidden;
+      -webkit-text-size-adjust: 100%;
+      background: #f7fafd;
+    }
+    body {
+      font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+      margin: 0;
+      padding: 0 0 24px 0;
+      box-sizing: border-box;
+      background: #f7fafd;
+    }
+    h2 {
+      font-size: 1.5rem;
+      margin: 18px 0 10px 0;
+      text-align: center;
+      letter-spacing: 0.04em;
+    }
+    #stationList {
+      background: none;
+      padding: 12px 0 12px 0;
+      border-radius: 10px;
+      margin: 0 0 18px 0;
+      width: 100vw;
+      max-width: 100vw;
+      box-sizing: border-box;
+    }
     .stationBtn {
-      margin: 12px 0 12px 0;
-      padding: 12px 28px;
+      margin: 10px 0 10px 0;
+      padding: 12px 16px;
       font-size: 1.08rem;
       border-radius: 8px;
       background: #1976d2;
@@ -15,42 +44,174 @@
       cursor: pointer;
       transition: background 0.2s, color 0.2s;
       display: block;
+      text-align: left;
+      width: 92vw;
+      max-width: 420px;
+      min-width: 180px;
+      margin-left: auto;
+      margin-right: auto;
+      box-sizing: border-box;
     }
-    .stationBtn:hover {
+    /* Reduce width for control buttons with short captions */
+    #playPauseBtn, #nextBtn, #prevBtn {
+      width: auto;
+      min-width: 0;
+      max-width: 80px;
+      padding-left: 12px;
+      padding-right: 12px;
+      text-align: center;
+      display: inline-block;
+      margin-left: 0;
+      margin-right: 0;
+    }
+    #seekBackBtn, #seekForwardBtn {
+      width: auto;
+      min-width: 0;
+      max-width: 64px;
+      padding-left: 8px;
+      padding-right: 8px;
+      text-align: center;
+      display: inline-block;
+      margin-left: 0;
+      margin-right: 0;
+    }
+    .stationBtn:hover, .stationBtn:active {
       background: #0d47a1;
       color: #fff;
     }
-    #stationList {
-      background: none;
-      padding: 18px 0 18px 0;
-      border-radius: 10px;
-      margin-bottom: 18px;
+    .stationBtn:focus {
+      outline: 2px solid #1976d2;
+      outline-offset: 2px;
+    }
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      margin: 10px 0 18px 0;
+    }
+    #nowPlaying {
+      text-align: center;
+      font-size: 1.08rem;
+      margin: 0 0 8px 0;
+      color: #222;
+      word-break: break-word;
+    }
+    audio#radioPlayer {
+      width: 96vw;
+      max-width: 420px;
+      display: block;
+      margin: 0 auto 18px auto;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+    .input-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .input-row input[type="text"] {
+      font-size: 1rem;
+      padding: 10px 8px;
+      border-radius: 6px;
+      border: 1px solid #bbb;
+      width: 60vw;
+      max-width: 260px;
+      min-width: 120px;
+      box-sizing: border-box;
+    }
+    .input-row button {
+      font-size: 1rem;
+      padding: 10px 18px;
+      border-radius: 6px;
+      background: #1976d2;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .input-row button:active {
+      background: #0d47a1;
+    }
+    @media (max-width: 480px) {
+      .stationBtn, audio#radioPlayer {
+        max-width: 98vw;
+        min-width: 0;
+        font-size: 1rem;
+      }
+      .input-row input[type="text"] {
+        max-width: 98vw;
+        min-width: 0;
+      }
+      /* Adjust control buttons for mobile */
+      #playPauseBtn, #nextBtn, #prevBtn {
+        max-width: 60px;
+        font-size: 0.98rem;
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+      #seekBackBtn, #seekForwardBtn {
+        max-width: 48px;
+        font-size: 0.98rem;
+        padding-left: 4px;
+        padding-right: 4px;
+      }
     }
   </style>
 </head>
 <body>
   <h2>L o c a l  R a d i o</h2>
   <div id="stationList"></div>
-  <p id="nowPlaying"></p>
+    <div class="controls-row">
 
-  <div style="margin: 18px 0; display: flex; gap: 18px; align-items: center; justify-content: flex-start;">
     <button id="prevBtn" class="stationBtn" title="Previous">⏮</button>
-    <button id="seekBackBtn" class="stationBtn" title="Seek Backward 45s">⏪ 45s</button>
     <button id="playPauseBtn" class="stationBtn" title="Play/Pause">▶</button>
-    <button id="seekForwardBtn" class="stationBtn" title="Seek Forward 45s">45s ⏩</button>
     <button id="nextBtn" class="stationBtn" title="Next">⏭</button>
+    <br style="flex-basis: 100%; height: 0;" />
+    <div style="display: flex; gap: 10px; justify-content: center; width: 100%;">
+      <button id="seekBackBtn" class="stationBtn" title="Seek Backward 45s">45s⏪</button>
+      <button id="seekForwardBtn" class="stationBtn" title="Seek Forward 45s">45s⏩</button>
+    </div>
   </div>
-  
-  <audio id="radioPlayer" controls autoplay style="margin-bottom: 24px; display: block;"></audio>
+  <p id="nowPlaying"></p>
+  <div id="audioPosition" style="text-align:center; font-size:0.98rem; color:#444; margin-bottom:6px;"></div>
+  <div style="text-align:center; margin-bottom:8px; width:100vw;">
+    <button id="showStationInfoBtn" style="font-size:1.08rem; padding:12px 16px; border-radius:8px; background:#1976d2; color:#fff; border:none; cursor:pointer; display:block; margin:0 auto 8px auto; width:92vw; max-width:420px; min-width:180px; box-sizing:border-box;">Show Station Info</button>
+    <div id="stationInfoLabel" style="display:block; color:#1976d2; font-size:0.98rem; text-align:left; word-break:break-word; max-width:420px; margin:0 auto;"></div>
+  </div>
 
-  <div style="margin-bottom:16px;">
-    <input type="text" id="stationUrlInput" placeholder="Stream URL" style="width:260px;">
-    <input type="text" id="stationNameInput" placeholder="Station Name" style="width:140px;">
+  <audio id="radioPlayer" controls autoplay></audio>
+  <div class="input-row">
+    <input type="text" id="stationUrlInput" placeholder="Stream URL">
+    <input type="text" id="stationNameInput" placeholder="Station Name">
     <button id="addStationBtn">Add Station</button>
   </div>
 
   <script>
     $(document).ready(function () { 
+      // Show station id and last played audio position
+      let stationInfoVisible = false;
+      $('#showStationInfoBtn').on('click', function() {
+        stationInfoVisible = !stationInfoVisible;
+        if (stationInfoVisible) {
+          let info = '';
+          stations.forEach(function(station, idx) {
+            const savedPos = localStorage.getItem('radio_pos_' + station.id);
+            let pos = savedPos && !isNaN(savedPos) ? parseFloat(savedPos) : 0;
+            let posStr = '<span style="color:#d32f2f;font-weight:bold;">' + formatTime(pos) + '</span>';
+            info += 'Station ID: ' + station.id + ' (' + formatStationName(station.name) + ') - Last Position: ' + posStr + '<br>';
+          });
+          if (!info) info = 'No station positions found.';
+          $('#stationInfoLabel').html(info);
+        } else {
+          $('#stationInfoLabel').html('');
+        }
+      });
       // Stations JSON array with ids starting from 100
       const stations = [
         {
@@ -105,8 +266,42 @@ function formatStationName(rawName) {
           navigator.mediaSession.metadata = null;
         }
         audio.src = decodeUrl(station.url);
+        // Restore position if available
+        const savedPos = localStorage.getItem('radio_pos_' + station.id);
+        if (savedPos && !isNaN(savedPos)) {
+          audio.currentTime = parseFloat(savedPos);
+        }
         audio.load();
         audio.play().catch(() => {});
+        // Attach error handler to advance to next station and update nowPlaying
+        audio.onerror = function(e) {
+          let errorMsg = '';
+          if (audio.error) {
+            switch (audio.error.code) {
+              case audio.error.MEDIA_ERR_ABORTED:
+                errorMsg = 'You aborted the audio playback.';
+                break;
+              case audio.error.MEDIA_ERR_NETWORK:
+                errorMsg = 'A network error caused the audio download to fail.';
+                break;
+              case audio.error.MEDIA_ERR_DECODE:
+                errorMsg = 'The audio playback was aborted due to a corruption problem or unsupported features.';
+                break;
+              case audio.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+                errorMsg = 'The audio could not be loaded due to server, network, or format issues.';
+                break;
+              default:
+                errorMsg = 'An unknown error occurred.';
+                break;
+            }
+          } else {
+            errorMsg = 'Unknown error.';
+          }
+          $("#nowPlaying").text(formatStationName(station.name) + ' [Error: ' + errorMsg + ']');
+          setTimeout(function() {
+            playStation(currentIndex + 1);
+          }, 1200);
+        };
         if ('mediaSession' in navigator) {
           navigator.mediaSession.metadata = new window.MediaMetadata({
             title: station.name,
@@ -119,6 +314,22 @@ function formatStationName(rawName) {
         }
         $("#nowPlaying").text(formatStationName(station.name));
         updatePlayPauseBtn();
+        updateAudioPosition();
+      }
+      // Format seconds as mm:ss
+      function formatTime(secs) {
+        if (isNaN(secs) || secs < 0) return '00:00';
+        const m = Math.floor(secs / 60);
+        const s = Math.floor(secs % 60);
+        return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+      }
+
+      // Update the audio position label
+      function updateAudioPosition() {
+        const audio = $("#radioPlayer")[0];
+        let pos = formatTime(audio.currentTime);
+        let dur = isNaN(audio.duration) || !isFinite(audio.duration) ? '' : ' / ' + formatTime(audio.duration);
+        $("#audioPosition").text('Position: ' + pos + dur);
       }
 
       function updatePlayPauseBtn() {
@@ -189,6 +400,20 @@ function setStationButtonWidth(stations) {
         $('#stationUrlInput').val('');
         $('#stationNameInput').val('');
       });
+
+      // Update position every second while playing and save to localStorage
+      $("#radioPlayer").on("timeupdate", function() {
+        updateAudioPosition();
+        // Save current position by station id
+        const audio = $("#radioPlayer")[0];
+        const station = stations[currentIndex];
+        if (station && !isNaN(audio.currentTime)) {
+          localStorage.setItem('radio_pos_' + station.id, audio.currentTime);
+        }
+      });
+      $("#radioPlayer").on("loadedmetadata", updateAudioPosition);
+      $("#radioPlayer").on("play", updateAudioPosition);
+      $("#radioPlayer").on("pause", updateAudioPosition);
 
       // UI next/prev/play-pause
       $('#nextBtn').on('click', function() {
