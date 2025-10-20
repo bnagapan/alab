@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html>
+<head> 
+  <meta charset="UTF-8">
+ <title>P l a y || R a d i o || S t r e a m</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Header */
+    h1 {
+        font-size: 26px;
+        margin-bottom: 20px;
+    }
+
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+      transition: background 0.5s ease;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
+    button, select {
+      margin: 5px;
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .button-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: left;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .station-list, .favorite-list {
+      margin-top: 10px;
+    }
+    .theme-default button { background-color: lightgray; }
+    .theme-dark button { background-color: #444; color: white; }
+    .theme-blue button { background-color: #564294; color: white; }
+    .theme-ocean button { background-color: #2e8b57; color: white; }
+    .theme-nature button { background-color: #8b4513; color: white; }
+    .theme-snow button { background-color: #01497A; color: white; }
+
+    .theme-dark a.station-link { background-color: #444; color: white; }
+    .theme-dark a.station-link:hover { background-color: #C9C9C9; color:white ; }
+    .theme-blue a.station-link { background-color: #564294; color: white; }
+    .theme-blue a.station-link:hover { background-color: #3D5F94; color: white; }
+
+    .theme-snow a.station-link { background-color: #01497A; color: white; }
+    .theme-snow a.station-link:hover { background-color: #01497A; color: white; }
+
+    /* Ensure theme-specific station-link colors override the default .station-link rule */
+    body.theme-default a.station-link { background-color: #28a745 !important; color: white !important; }
+    body.theme-default a.station-link:hover { background-color: #218838 !important; }
+    body.theme-dark a.station-link { background-color: #444 !important; color: white !important; }
+    body.theme-dark a.station-link:hover { background-color: #C9C9C9 !important; color: white !important; }
+    body.theme-blue a.station-link { background-color: #564294 !important; color: white !important; }
+    body.theme-blue a.station-link:hover { background-color: #3D5F94 !important; color: white !important; }
+    body.theme-ocean a.station-link { background-color: #2e8b57 !important; color: white !important; }
+    body.theme-nature a.station-link { background-color: #8b4513 !important; color: white !important; }
+    body.theme-snow a.station-link { background-color: #01497A !important; color: white !important; }
+
+    a.station-link {
+      display: inline-block;
+      padding: 10px 20px;
+      margin: 5px;
+      background-color: #28a745;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    a.station-link:hover {
+      background-color: #218838;
+    }
+    .fav-btn {
+      padding: 5px 10px;
+      font-size: 0.8rem;
+      background-color: #ff8c00;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .active-station {
+      background-color: #FFD700; /* Gold background for active station */
+      color: #FFD700 !important; /* Dark yellow text color for active station */
+      font-weight: bold;
+      /*font-size: 1.1rem;*/
+    }
+	#playFirst, #playPrevious, #playNext {
+  height: 60px;         /* Increase height */
+  padding: 0 20px;      /* Optional: add horizontal padding */
+  font-size: 1.5rem;    /* Optional: increase icon/text size */
+}
+#categoryButtons button.active-toggle {
+  background-color: #333;
+  color: white;
+  transform: scale(0.96);
+}
+    .grouped-btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .grouped-btn-row label {
+      margin-bottom: 0;
+      margin-left: 10px;
+      display: flex;
+      align-items: center;
+    }
+    .grouped-btn-row input[type="text"] {
+      min-width: 220px;
+      max-width: 340px;
+    }
+    /* Tooltip-style message box */
+    #msg {
+      display: inline-block;
+      background: #fffbe6;
+      color: #bfa100;
+      border: 1px solid #ffe066;
+      border-radius: 6px;
+      padding: 8px 18px;
+      margin: 10px 0 10px 0;
+      font-size: 1.05rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      min-width: 210px;
+      max-width: 90vw;
+      word-break: break-word;
+      font-weight: 600;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body class="theme-ocean">
+  <div style="text-align:center">
+    <h1>R | a | d | i | o</h1>
+    <span id="versionDisplay"></span><br><br>
+    <br><br>
+ </div>
+   <div id="toggleButtonsGroup" style="display:none" >
+    <div class="grouped-btn-row">
+      <button id="showStations">Show All Stations</button>
+      <button id="showFavorites">Show Favorite Stations</button>
+      <label style="margin-left:10px;">
+        <input type="checkbox" id="useRemoteStations">
+        Load from remote URL:
+      </label>
+      <input type="text" id="remoteStationsUrl" style="width:320px;" placeholder="https://example.com/stations.json" value="https://////raw.githubusercontent.com/bnagapan/alab/refs/heads/main/ref/stations.json">
+      <button id="clearStorage">Clear & Reload Stations</button>
+      <button id="clearFavoritesBtn">
+        <i class="bi bi-trash"></i> Clear Favorites
+      </button>
+    </div>
+    <!-- <button id="clearFavoritesBtn">🗑️ Clear Favorites</button> -->
+	     <!-- Theme and Background Selector inside Toggle Buttons Group -->
+      <div id="themeBgContainer">
+        <label>Theme:
+          <select id="themeSelect">
+            <option value="theme-default">Default</option>
+            <option value="theme-dark">Dark</option>
+            <option value="theme-blue">Blue</option>
+            <option value="theme-ocean">Ocean</option>
+            <option value="theme-nature">Nature</option>
+            <option value="theme-snow">Snow</option>
+          </select>
+        </label>
+
+        <label style="margin-left: 20px;">Background Image:
+          <select id="bgImageSelect">
+            <option value="">None</option>
+            <option value="https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk102_sha.png">Ocean</option>
+            <option value="https://groupbenefits.manulife.ca/gb/member-portal/assets/ciam-sign-in-DWxAuxYg.png">Nature</option>
+            <option value="https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk105_beach.png">Beach</option>
+            <option value="https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk107_eve_beach.png">Evening Beach</option>
+            <option value="https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk108_beach2.png">Day Beach</option>
+            <option value="https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk109_snow.png">Snow</option>
+          </select>
+        </label>
+
+        <div style="margin-top: 10px;">
+          <label for="excludeInput">Exclude Station IDs (comma-separated):</label>
+          <input type="text" id="excludeInput" placeholder="e.g. 2, 12"
+          style="padding:5px; border-radius: 5px; width: 50px;" maxlength="20">
+        
+            </div>
+
+      </div>
+    </div>
+  </div>
+ 
+  <button id="toggleButtons">Hide/Show All Buttons</button>
+ 
+  <div>
+
+    <button id="playPrevious">&nbsp;&nbsp;⏮&nbsp;&nbsp;</button>
+    <button id="playFirst">&nbsp;&nbsp;▶&nbsp;&nbsp;</button>
+    <button id="playNext">&nbsp;&nbsp;⏭&nbsp;&nbsp;</button>
+  </div>
+  <div class="button-container" id="categoryButtons">
+    <button data-cat="all">All</button>
+    <button data-cat="english">English</button>
+    <button data-cat="live">Live</button>
+ 
+    <button data-cat="mp3">MP3</button>
+    <button data-cat="mp3_2">MP3 2</button>  
+    <button data-cat="pod">POD</button>    
+
+  </div>
+
+  <audio id="radioPlayer" controls playsinline></audio>
+  <div>
+    <span id="msg"></span>
+  </div>
+  <div class="station-list"></div>
+  <div class="favorite-list"></div>
+  
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <!-- Bootstrap Icons CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+  <script>
+  const appVersion = "7.6.1.4";
+
+  var audioPlayer = document.getElementById("radioPlayer");
+  var s_id = -1;
+  var s_name = '';
+  let isShowingFavorites = false;
+
+  var isStationLoaded = false;
+const rawStations = [
+  { id: 100, url: "aHR0cHM6Ly9yb2dlcnMtaGxzLmxlYW5zdHJlYW0uY28vcm9nZXJzL2hhbDk1Ny5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y N|e|w|s", category: "english" },
+  { id: 101, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: ". C|B|C R|a|d|i|o", category: "english" },
+  { id: 102, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg2L0VTX1IxQUZSL2FkYXB0aXZlXzE5Mi9jaHVua2xpc3RfYW8ubTN1OA==", name: ". C|B|C M|o|n|c", category: "english" },
+  { id: 102, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQxMDUwL0VTX1IxUFZDL21hc3Rlci5tM3U4", name: ". C|B|C| |T|o|r|o|n|t|o", category: "english" },
+  { id: 103, url: "aHR0cHM6Ly9oZWwtYWlzLWVkZ2UxLmxlYW5zdHJlYW0uY28vcm9nZXJzL3RvcjY4MC5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y| |T|o|r|o|n|t|o", category: "english" },
+  { id: 104, url: "aHR0cHM6Ly8xODY4My5saXZlLnN0cmVhbXRoZXdvcmxkLmNvbS9DQlIxRk1fQ0JDLm1wMz9ESVNUPVR1bmVJbiZUR1Q9VHVuZUluJm1heFNlcnZlcnM9MiZnZHByPQ==", name: ". C|B|C |C|a|l", category: "english" },
+  { id: 105, url: "aHR0cDovL3N0cmVhbS5yZXZtYS5paHJobHMuY29tL3pjNjA0Mz8=", name: ". N|B|C| |N|e|w|s", category: "english" },
+  { id: 106, url: "aHR0cHM6Ly90dW5laW4uY2Ruc3RyZWFtMS5jb20vNDQyNF85Ni5tcDM/", name: ". A|B|C| |N|e|w|s", category: "english" },
+  { id: 107, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NDI4L2F1ZGlv", name: ". Hello F|M", category: "live" },
+  { id: 108, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NTQzL2F1ZGlv", name: ". M|i|r|c|y F|M", category: "live" },
+  { id: 109, url: "aHR0cHM6Ly9zdHJ3My5vcGVuc3RyZWFtLmNvLzEzMTE=", name: ". R|a|d|i|o| |c|i|t|y", category: "live" },
+  { id: 110, url: "aHR0cHM6Ly9yYWRpb3MuY3JhYmRhbmNlLmNvbTo4MDAyLzI=", name: ". S|u|r|y|a|n| 9|3|.|5", category: "live" },
+  { id: 111, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9yMmduMXBnbTRxcnV2", name: ". B|I|G| |F|M", category: "live" },
+  { id: 112, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9vYjZ0amc4Z3VscHR2", name: ". H|a|r|r|i|s| |J|a|y|a|r|a|j", category: "mp3" },
+  { id: 113, url: "aHR0cHM6Ly9wc3JsaXZlMy5saXN0ZW5vbi5pbi9pbGF5YW0/c3RhdGlvbj1pbGF5YW1hYW5yYWRpbw==", name: ". I|l|a|y|a|r|a|j|a", category: "mp3" },
+  { id: 114, url: "aHR0cHM6Ly9wc3JsaXZlMy5saXN0ZW5vbi5pbi9wb3A/c3RhdGlvbj10YW1pbHBvcHJhZGlv", name: ". T|a|m|i|l| |P|o|p|", category: "mp3" },
+  { id: 115, url: "aHR0cHM6Ly9wc3JsaXZlMy5saXN0ZW5vbi5pbi9hbmlydWQ/c3RhdGlvbj1hbmlydWRocmFkaW8=", name: ". A|n|i|r|u|d|h", category: "mp3" },
+  { id: 116, url: "aHR0cHM6Ly9wc3JsaXZlMy5saXN0ZW5vbi5pbi9hdj9zdGF0aW9uPXRoYWxhdGhhbGFwYXRoeXJhZGlv", name: ". |T|h|a|l|a|p|a|t|h|y", category: "mp3" },
+  { id: 117, url: "aHR0cHM6Ly9wc3JsaXZlMy5saXN0ZW5vbi5pbi95c3I/c3RhdGlvbj15c3JyYWRpbw==", name: ". Y|u|v|a|n", category: "mp3" },
+  { id: 118, url: "aHR0cHM6Ly9zcHNlcnZlci5zc2Nhc3QydS5pbi9kaW5kaWd1bGNpdHlmbS9zdHJlYW0=", name: ". D|i|n|d|i|g|u|l| |F|M", category: "mp3_2" },
+  { id: 119, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtLzBjeXMyaDQxdzBodnY=", name: ". A|R|R F|M", category: "mp3_2" },
+  { id: 120, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9hYWQ0ZTUxcXo3enV2", name: ". K|S C|h|i|t|r|a FM", category: "mp3_2" },
+  { id: 121, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL3V2ZGJ5Z202YTQ4dXY=", name: ". K|J| |Y|e|s|u|d|a|s", category: "mp3_2" },
+  { id: 122, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtLzF5Y21lcG50aGtodnY=", name: ". M|a|d|u|r|a|i", category: "mp3_2" },
+  { id: 123, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL3RxbndzMmVhZnd6dXYuYWFj", name: ". T|a|m|i|l Melodies", category: "mp3_2" },
+  { id: 124, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL2U5aHNiYmJleTR6dXY=", name: ". M|e|l|l|i|s|a|i F|M", category: "mp3_2" },
+  { id: 125, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL3RxbndzMmVhZnd6dXYuYWFj", name: ". 9|0|s Melodies", category: "mp3_2" },
+  { id: 126, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtLzBjeXMyaDQxdzBodnY=", name: ". A|R|R F|M", category: "mp3_2" },
+  { id: 127, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS8zZGFjdDQzd3FnMHV2", name: ". K|a|m|a|l h|i|t|s", category: "mp3_2" },
+  { id: 128, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtLzlmcDEzODNmMGQwdXY=", name: ". E|r|o|d|e", category: "mp3_2" },
+  { id: 129, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9nMjBiczdodTB1aHZ2", name: ". R|a|j|i|n|i R|d|ogit", category: "mp3_2" },
+  { id: 130, url: "aHR0cHM6Ly9zdHJlYW0tMTY0Lnplbm8uZm0vb3NiZ212aGp5cTd1dg==", name: ". A|R|R| |H|i|g|h", category: "mp3_2" },
+  { id: 131, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS90N241Ynl3ZXhlc3R2", name: ". A|T|L|A|N|T|I|C", category: "mp3_2" },
+  { id: 132, url: "aHR0cHM6Ly8xODY4My5saXZlLnN0cmVhbXRoZXdvcmxkLmNvbS9DQlUyRk1fQ0JDLm1wMz8=", name: ". C|B|C |V|A|N|C|O|V|E|R", category: "english" },
+  { id: 133, url: "aHR0cHM6Ly9zdHJlYW0tMTc2Lnplbm8uZm0vbXczc3RwMmhobnp1dj8=", name: ". M|u|r|u|g|a", category: "mp3_2" },
+  { id: 134, url: "aHR0cHM6Ly9lYzQueWVzc3RyZWFtaW5nLm5ldDoxOTkwL3N0cmVhbT8=", name: ". T|h|a|l|a|m", category: "mp3_2" },
+  { id: 135, url: "aHR0cHM6Ly9zdHJlYW0tMTcxLnplbm8uZm0vMWh3a2JhbmJ6M3N0dj8=", name: ". T|a|m|i|l| |P|o|p| |40", category: "mp3_2" },
+	{ id: 136, url: "aHR0cDovL2Fpci5wYy5jZG4uYml0Z3Jhdml0eS5jb20vYWlyL2xpdmUvcGJhdWRpbzA3OC9tYXN0ZXIubTN1OA==", name: ". D|h|a|r|m|a|p|u|r|i|", category: "live" }	,
+  { id: 137, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: ". C|B|C M|o|n|c 2", category: "english" }
+];
+
+
+  let stations = [];
+  let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+  let currentIndex = 0;
+
+  function saveStations() {
+    localStorage.setItem('stations', JSON.stringify(rawStations));
+  }
+
+  function loadStations() {
+    stations = JSON.parse(localStorage.getItem('stations')) || rawStations;
+  }
+
+  function decodeUrl(b64) {
+    return atob(b64);
+  }
+
+  async function checkStreamUrl(url) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 8000); // Increased to 8s
+      const response = await fetch(url, {
+        method: 'GET',
+        signal: controller.signal,
+        headers: { 'Range': 'bytes=0-1' }
+      });
+      clearTimeout(timeout);
+      return response.ok;
+    } catch {
+      return false;
+    }
+  }
+
+ function playStation(index) {
+    const station = stations[index];
+    const decodedUrl = decodeUrl(station.url);
+    const audio = document.getElementById('radioPlayer');
+    currentIndex = index;
+    isStationLoaded = false;
+
+    const stationName = station.name.replace(/\|/g, '');
+    const stationId = station.id;
+
+    $('#msg').text(stationId + ' ' + stationName); // Show currently playing station with id and name only
+    $('.station-list').addClass('loading'); // Assumes CSS .loading class
+    UpdateMediaSession(stationId, stationName, "Initializing...");
+
+    if (audio.hlsInstance) {
+      audio.hlsInstance.detachMedia();
+      audio.hlsInstance.destroy();
+      audio.hlsInstance = null;
+    }
+
+    audio.pause();
+    audio.src = '';
+    audio.removeAttribute('src');
+
+          // Clear MediaSession metadata before setting new one
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = null;
+      }
+
+    // Set persistent error handler
+    audio.onerror = () => handlePlaybackError(stationName, audio.error?.message || 'Unknown error');
+
+    const onCanPlay = () => {
+      isStationLoaded = true;
+      $('.station-list').removeClass('loading');
+      audio.play().catch(err => handlePlaybackError(stationName, err.message));
+      UpdateMediaSession(stationId, stationName, "Playing");
+      setNavigationHandlers(); // Ensure seek actions are disabled after every station play
+    };
+
+    // Validate stream URL
+    // checkStreamUrl(decodedUrl).then(isValid => {
+    //   if (!isValid) {
+    //     handlePlaybackError(stationName, 'Stream not available (#404)');
+    //     return;
+    //   }
+
+      if (decodedUrl.endsWith('.m3u8')) {
+        console.log("HLS stream detected.");
+        if (Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(decodedUrl);
+          hls.attachMedia(audio);
+          audio.hlsInstance = hls;
+          hls.on(Hls.Events.MANIFEST_PARSED, onCanPlay);
+        } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+          audio.src = decodedUrl;
+          audio.addEventListener('canplaythrough', onCanPlay, { once: true });
+        } else {
+          handlePlaybackError(stationName, "HLS not supported.");
+        }
+      } else {
+        audio.src = decodedUrl;
+        audio.addEventListener('canplaythrough', onCanPlay, { once: true });
+      }
+   // });
+
+    highlightActiveStation();
+  }
+
+  function setNavigationHandlers() {
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.setActionHandler('previoustrack', () => {
+        if (isShowingFavorites && favorites.length) navigateFavorites(-1);
+        else navigateStations(-1);
+      });
+      navigator.mediaSession.setActionHandler('nexttrack', () => {
+        if (isShowingFavorites && favorites.length) navigateFavorites(1);
+        else navigateStations(1);
+      });
+      navigator.mediaSession.setActionHandler("play", () => audioPlayer.play());
+      navigator.mediaSession.setActionHandler("pause", () => audioPlayer.pause());
+      navigator.mediaSession.setActionHandler("stop", () => {
+        audioPlayer.pause();
+        audioPlayer.currentTime = 0;
+      });
+      // Always disable seek actions last
+      navigator.mediaSession.setActionHandler('seekforward', null);
+        navigator.mediaSession.setActionHandler('seekbackward', null);
+        navigator.mediaSession.setActionHandler('seekto', null);
+    }
+  }
+
+  function handleAudioError(e, stationName) {
+    let errorMessage = '';
+    switch (e.target.error.code) {
+      case e.target.error.MEDIA_ERR_ABORTED:
+        errorMessage = 'You aborted the audio playback.';
+        break;
+      case e.target.error.MEDIA_ERR_NETWORK:
+        errorMessage = 'A network error caused the audio download to fail.';
+        break;
+      case e.target.error.MEDIA_ERR_DECODE:
+        errorMessage = 'The audio playback was aborted due to a corruption problem or unsupported features.';
+        break;
+      case e.target.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+        errorMessage = 'The audio could not be loaded due to server, network, or format issues.';
+        break;
+      default:
+        errorMessage = 'An unknown error occurred.';
+        break;
+    }
+    handlePlaybackError(stationName, errorMessage);
+  }
+
+  function setNavigationHandlers() {
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.setActionHandler('previoustrack', () => {
+        if (isShowingFavorites && favorites.length) navigateFavorites(-1);
+        else navigateStations(-1);
+      });
+      navigator.mediaSession.setActionHandler('nexttrack', () => {
+        if (isShowingFavorites && favorites.length) navigateFavorites(1);
+        else navigateStations(1);
+      });
+      navigator.mediaSession.setActionHandler("play", () => audioPlayer.play());
+      navigator.mediaSession.setActionHandler("pause", () => audioPlayer.pause());
+      navigator.mediaSession.setActionHandler("stop", () => {
+        audioPlayer.pause();
+        audioPlayer.currentTime = 0;
+      });
+      // Always disable seek actions last
+      navigator.mediaSession.setActionHandler('seekforward', null);
+      navigator.mediaSession.setActionHandler('seekbackward', null);
+      navigator.mediaSession.setActionHandler('seekto',null);
+    }
+  }
+
+  function UpdateMediaSession(id, station, msg) {
+    console.log(msg);
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: id + " " + station,
+        artist: `Live Radio ${appVersion} - ${msg} - ${isStationLoaded}`
+      });
+      navigator.mediaSession.setActionHandler('seekforward', null);
+        navigator.mediaSession.setActionHandler('seekbackward', null);
+        navigator.mediaSession.setActionHandler('seekto', null);
+    }
+  }
+
+  function navigateFavorites(dir) {
+    if (!favorites.length) {
+      console.warn("No favorites available.");
+      return;
+    }
+    let currentId = stations[currentIndex].id;
+    let favIndex = favorites.findIndex(id => id === currentId);
+    let nextIndex = (favIndex + dir + favorites.length) % favorites.length;
+    let newIndex = stations.findIndex(s => s.id === favorites[nextIndex]);
+    playStation(newIndex);
+  }
+
+  function navigateStations(dir) {
+    const excludeValue = $('#excludeInput').val() || '';
+    const excludeIds = excludeValue
+      .split(',')
+      .map(id => parseInt(id.trim()))
+      .filter(id => !isNaN(id));
+
+    let attempts = 0;
+    let newIndex = currentIndex;
+
+    do {
+      newIndex = (newIndex + dir + stations.length) % stations.length;
+      attempts++;
+      if (attempts > stations.length) {
+        console.warn("All stations are excluded.");
+        return;
+      }
+    } while (excludeIds.includes(stations[newIndex].id));
+
+    playStation(newIndex);
+  }
+
+  function clearFavorites() {
+    favorites = [];
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+    displayStations();
+    $('.favorite-list').empty().hide();
+    $('#msg').text('Favorites cleared!'); // Show message in msg div
+  }
+
+  function highlightActiveStation() {
+    $('.station-link').removeClass('active-station');
+    $(`.station-link[data-idx="${currentIndex}"]`).addClass('active-station');
+  }
+
+  function displayStations() {
+    $('.station-list').empty();
+    isShowingFavorites = false;
+    $('.favorite-list').hide().empty();
+    $('.station-list').show();
+    stations.sort((a, b) => a.id - b.id);
+
+    const excludeValue = $('#excludeInput').val() || '';
+    const excludeIds = excludeValue
+      .split(',')
+      .map(id => parseInt(id.trim()))
+      .filter(id => !isNaN(id));
+
+    stations.forEach((station, idx) => {
+      if (excludeIds.includes(station.id)) return;
+      const stationName = `${station.id} ${station.name.replace(/\|/g, '')}`;
+      const isFav = favorites.includes(station.id);
+      const favText = isFav ? '★' : '☆';
+      $('.station-list').append(`
+        <div>
+          <a href="#" class="station-link" data-idx="${idx}">${stationName}</a>
+          <button class="fav-btn" data-id="${station.id}">${favText}</button>
+        </div>
+      `);
+    });
+
+    adjustStationButtonWidths();
+  }
+
+  function displayFavorites() {
+    isShowingFavorites = true;
+    $('.favorite-list').empty();
+    $('.station-list').hide().empty();
+    $('.favorite-list').show();
+
+    favorites.sort();
+    favorites.forEach(id => {
+      const station = stations.find(s => s.id === id);
+      if (station) {
+        const stationName = `${station.id} ${station.name.replace(/\|/g, '')}`;
+        const index = stations.findIndex(s => s.id === station.id);
+        $('.favorite-list').append(`
+          <div>
+            <a href="#" class="station-link" data-idx="${index}">${stationName}</a>
+            <button class="fav-btn" data-id="${station.id}">★</button>
+          </div>
+        `);
+      }
+    });
+
+    adjustStationButtonWidths();
+  }
+
+function adjustStationButtonWidths() {
+  let maxWidth = 0;
+
+  // First pass: find max width among visible station buttons
+  $('.station-link:visible').each(function () {
+    const width = $(this).outerWidth();
+    maxWidth = Math.max(maxWidth, width);
+  });
+
+  // Reduce width by 25%
+  const reducedWidth = maxWidth * 0.95;
+
+  // Apply reduced width to visible station buttons
+  $('.station-link:visible').css('width', reducedWidth);
+}
+
+
+
+  $(document).ready(function() {
+    console.clear();
+    $('#versionDisplay').text(`Version: ${appVersion}`);
+    $('body').removeClass().addClass('theme-snow');
+    $('#bgImageSelect').val('https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk109_snow.png');
+    $('#themeSelect').val('theme-snow');
+    $('#bgImageSelect').val('https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk102_sha.png');
+    $('#themeSelect').val('theme-ocean');
+
+    if (!localStorage.getItem('stations')) saveStations();
+    loadStations();
+
+    // Restore exclude input value from localStorage so it's persistent across reloads
+    const savedExclude = localStorage.getItem('excludeStations') || '';
+    $('#excludeInput').val(savedExclude);
+
+    // Apply saved theme and background from localStorage immediately (fallback to Ocean and second image)
+    const initialTheme = localStorage.getItem('themeSelect') || 'theme-ocean';
+    $('body').removeClass().addClass(initialTheme);
+    $('#themeSelect').val(initialTheme);
+    const initialBg = localStorage.getItem('bgImageSelect') || $('#bgImageSelect option').eq(1).val() || '';
+    $('#bgImageSelect').val(initialBg);
+    if (initialBg) $('body').css('background-image', 'url(' + initialBg + ')');
+
+    // Persist theme/bg selections whenever user changes them
+    $('#themeSelect').on('change', function() {
+      localStorage.setItem('themeSelect', $(this).val());
+    });
+    $('#bgImageSelect').on('change', function() {
+      localStorage.setItem('bgImageSelect', $(this).val());
+      // keep existing behavior of applying background as well
+      $('body').css('background-image', 'url(' + $(this).val() + ')');
+    });
+
+    // Save exclude input changes to localStorage whenever user edits it
+    $('#excludeInput').on('input', function() {
+      localStorage.setItem('excludeStations', $(this).val());
+      displayStations();
+    });
+
+    displayStations();
+    $('.favorite-list').hide();
+    playStation(0);
+
+    // Set navigation handlers once
+    setNavigationHandlers();
+
+    // Default filter: English
+    stations = rawStations.filter(st => st.category === 'english');
+    $('#categoryButtons button').removeClass('active-toggle');
+    $('#categoryButtons button[data-cat="english"]').addClass('active-toggle');
+    displayStations();
+    $('.favorite-list').hide();
+
+    
+    playStation(0);
+    //DisableMediaSessionActions()
+
+    let isPlaying = false;
+    const $playFirst = $('#playFirst');
+    const audio = document.getElementById('radioPlayer');
+
+    function updatePlayPauseIcon() {
+      if (audio.paused) {
+        $playFirst.html('&nbsp;&nbsp;▶&nbsp;&nbsp;');
+        isPlaying = false;
+      } else {
+        $playFirst.html('&nbsp;&nbsp;⏸&nbsp;&nbsp;');
+        isPlaying = true;
+      }
+    }
+
+    $playFirst.off('click').on('click', function() {
+      if (isPlaying) {
+        audio.pause();
+        // Icon will update on pause event
+      } else {
+        // Play first non-excluded station
+        const excludeValue = $('#excludeInput').val() || '';
+        const excludeIds = excludeValue
+          .split(',')
+          .map(id => parseInt(id.trim()))
+          .filter(id => !isNaN(id));
+        let firstIndex = stations.findIndex(st => !excludeIds.includes(st.id));
+        if (firstIndex !== -1) {
+          playStation(firstIndex);
+          setTimeout(() => {
+            audio.play();
+            // Also update msg with id and name, no 'Now playing:'
+            const st = stations[firstIndex];
+            if (st) $('#msg').text(st.id + ' ' + st.name.replace(/\|/g, ' '));
+          }, 100); // Ensure play is called after station loads
+        } else {
+          $('#msg').text('All stations are excluded!');
+        }
+      }
+    });
+
+    // Sync play/pause icon with audio events
+    audio.addEventListener('play', updatePlayPauseIcon);
+    audio.addEventListener('pause', updatePlayPauseIcon);
+    updatePlayPauseIcon(); // Set initial icon
+
+    $('#playPrevious').click(() => {
+      if (isShowingFavorites) navigateFavorites(-1);
+      else navigateStations(-1);
+    });
+
+    $('#playNext').click(() => {
+      if (isShowingFavorites) navigateFavorites(1);
+      else navigateStations(1);
+    });
+
+    $('#showStations').click(() => {
+      isShowingFavorites = false;
+      displayStations();
+    });
+
+    $('#showFavorites').click(() => {
+      isShowingFavorites = true;
+      displayFavorites();
+    });
+
+    $('#clearStorage').off('click').on('click', async function() {
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = null;
+      }
+      $('#msg').text(''); // Clear message
+
+      // Always clear stored exclude list when user clears storage
+      localStorage.removeItem('excludeStations');
+      // Also clear the exclude input textbox in the UI
+      $('#excludeInput').val('');
+
+      // Reset theme and background defaults when clearing storage
+      localStorage.setItem('themeSelect', 'theme-ocean');
+      const defaultBg = $('#bgImageSelect option').eq(1).val() || '';
+      localStorage.setItem('bgImageSelect', defaultBg);
+      // Apply defaults to UI
+      $('#themeSelect').val('theme-ocean').trigger('change');
+      $('#bgImageSelect').val(defaultBg).trigger('change');
+
+      if ($('#useRemoteStations').is(':checked')) {
+        const url = $('#remoteStationsUrl').val().trim();
+        if (!url) {
+          $('#msg').text('Please enter a remote stations URL.');
+          return;
+        }
+        try {
+          const response = await fetch(url, {cache: 'no-store'});
+          if (!response.ok) throw new Error('Failed to fetch stations');
+          const remoteStations = await response.json();
+          localStorage.setItem('stations', JSON.stringify(remoteStations));
+          loadStations();
+          displayStations();
+          $('#msg').text('Stations loaded from remote URL!');
+        } catch (e) {
+          $('#msg').text('Error loading stations from remote URL: ' + e.message);
+        }
+      } else {
+        // Clear all localStorage but ensure excludeStations is removed as requested
+        localStorage.clear();
+        localStorage.removeItem('excludeStations');
+        // Ensure the exclude input is cleared after clearing storage
+        $('#excludeInput').val('');
+        // Re-apply the theme/background defaults after clearing storage
+        localStorage.setItem('themeSelect', 'theme-ocean');
+        const defaultBg2 = $('#bgImageSelect option').eq(1).val() || '';
+        localStorage.setItem('bgImageSelect', defaultBg2);
+        $('#themeSelect').val('theme-ocean').trigger('change');
+        $('#bgImageSelect').val(defaultBg2).trigger('change');
+        saveStations();
+        loadStations();
+        displayStations();
+        $('#msg').text('Stations loaded from default list.');
+      }
+    });
+
+    $('#clearFavoritesBtn').click(clearFavorites);
+
+    $(document).on('click', 'a.station-link', function(e) {
+      e.preventDefault();
+      playStation($(this).data('idx'));
+    });
+
+    $(document).on('click', '.fav-btn', function(e) {
+      const stationId = $(this).data('id');
+      const idx = favorites.indexOf(stationId);
+      if (idx === -1) {
+        favorites.push(stationId);
+        $(this).text('★');
+      } else {
+        favorites.splice(idx, 1);
+        $(this).text('☆');
+      }
+      localStorage.setItem('favorites', JSON.stringify(favorites));
+      if (isShowingFavorites) displayFavorites();
+    });
+
+    $('#toggleButtons').click(function() {
+      $('#toggleButtonsGroup').toggle();
+    });
+
+    $('#bgImageSelect').change(function() {
+      $('body').css('background-image', 'url(' + $(this).val() + ')');
+    });
+
+    $('#themeSelect').change(function() {
+      $('body').removeClass().addClass($(this).val());
+      highlightActiveStation();
+    });
+
+    $('#excludeInput').on('input', displayStations);
+
+    $('#categoryButtons button').click(function() {
+      const $btn = $(this);
+      const category = $btn.data('cat');
+
+      if ($btn.hasClass('active-toggle')) {
+        $btn.removeClass('active-toggle');
+        stations = rawStations;
+      } else {
+        $('#categoryButtons button').removeClass('active-toggle');
+        $btn.addClass('active-toggle');
+        stations = category === 'all' ? rawStations : rawStations.filter(st => st.category === category);
+      }
+      displayStations();
+      adjustStationButtonWidths();
+    });
+  });
+
+  function handlePlaybackError(stationName, errorMessage) {
+    console.error(`Playback failed for "${stationName}": ${errorMessage}`);
+    $('.station-list').removeClass('loading');
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: stationName.replace(/\|/g, ' '),
+        artist: `Playback error: ${errorMessage}`
+      });
+    }
+  }
+</script>
+</body>
+</html>
