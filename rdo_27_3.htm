@@ -304,7 +304,7 @@
 <body>
     <div id="content">
         <h1>R | a | d | i | o</h1>
-        v 27.3.2<br><br>
+        v 27.3.3<br><br>
         <table border="0" cellspacing="3" cellpadding="3" align="center">
         <tr>
             <!-- Navigation buttons -->
@@ -423,6 +423,8 @@ var currentStationIndex = 0;
       { id: 102, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQxMDUwL0VTX1IxUFZDL21hc3Rlci5tM3U4", name: ". C|B|C| |T|o|r|o|n|t|o", category: "english" },
       { id: 103, url: "aHR0cHM6Ly9oZWwtYWlzLWVkZ2UxLmxlYW5zdHJlYW0uY28vcm9nZXJzL3RvcjY4MC5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y| |T|o|r|o|n|t|o" },
       { id: 104, url: "aHR0cHM6Ly8xODY4My5saXZlLnN0cmVhbXRoZXdvcmxkLmNvbS9DQlIxRk1fQ0JDLm1wMz9ESVNUPVR1bmVJbiZUR1Q9VHVuZUluJm1heFNlcnZlcnM9MiZnZHByPQ==", name: ". C|B|C |C|a|l" },
+      { id: 105, url: "aHR0cDovL3N0cmVhbS5yZXZtYS5paHJobHMuY29tL3pjNjA0Mz8=", name: ". N|B|C| |N|e|w|s", category: "english" },
+    //  { id: 106, url: "aHR0cHM6Ly90dW5laW4uY2Ruc3RyZWFtMS5jb20vNDQyNF85Ni5tcDM/", name: ". A|B|C| |N|e|w|s", category: "english" },
       { id: 132, url: "aHR0cHM6Ly8xODY4My5saXZlLnN0cmVhbXRoZXdvcmxkLmNvbS9DQlUyRk1fQ0JDLm1wMz8=", name: ". C|B|C |V|A|N|C|O|V|E|R", category: "english" },
       { id: 137, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: ". C|B|C M|o|n|c 2", category: "english" }
     ];
@@ -505,7 +507,7 @@ var currentStationIndex = 0;
       if ("mediaSession" in navigator) {
         // include station id in the MediaMetadata title so iPhone playback screen shows the id
         navigator.mediaSession.metadata = new MediaMetadata({
-          title: station.id + " - " + stationName,
+          title: station.id + stationName,
           artist: "Live Radio" + ": " + serverName,
           album: "Streaming"
         });
@@ -548,7 +550,7 @@ var currentStationIndex = 0;
     function UpdateMediaSession(stationName, msg, stationId, serverNameParam) {
       // stationId and serverNameParam are optional; include id in title when available
       if ("mediaSession" in navigator) {
-        var titlePrefix = stationId ? (stationId + " - ") : ((currentStationIndex + 1) + " - ");
+        var titlePrefix = stationId ? (stationId) : ((currentStationIndex + 1));
         navigator.mediaSession.metadata = new MediaMetadata({
           title: titlePrefix + stationName,
           artist: "Live Radio" + ": " + (serverNameParam || ""),
