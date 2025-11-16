@@ -75,7 +75,7 @@
         cursor: pointer;
     }
 
-    #playButton {
+   /* #playButton {
         display: inline-block;
         padding: 12px; /* same padding as other buttons to match height */
         background-color: #1e90ff; /* match other control buttons (Dodger Blue) */
@@ -89,7 +89,7 @@
         text-align: center;
         line-height: 1.2; /* ensure proper vertical alignment */
         cursor: pointer;
-    }
+    }*/
 
     #playButton:hover { background-color: #1c74d4; }
 
@@ -125,7 +125,7 @@
 
 /* --- Updated Styles for Button Wrapper Elements --- */
 /* Replace any existing styles for these IDs with the following if not already present */
-#listButton,#btnClear,#toggleButton,#prevButton,#nextButton,#favoritesButton,#template2Button,#englishButton {
+#playButton,#prevButton,#nextButton {
   display: inline-block;
   padding: 12px;
   background-color: #1e90ff; /* Dodger Blue */
@@ -136,6 +136,21 @@
   font-size: 16px;
   width: 150px;
   max-width: 300px;
+  text-align: center;
+  cursor: pointer;
+}
+
+#listButton,#btnClear,#toggleButton,#favoritesButton,#template2Button,#englishButton {
+  display: inline-block;
+  padding: 12px;
+  background-color: #1e90ff; /* Dodger Blue */
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  font-size: 16px;
+  width: 100px;
+  max-width: 120px;
   text-align: center;
   cursor: pointer;
 }
@@ -289,7 +304,7 @@
 <body>
     <div id="content">
         <h1>R | a | d | i | o</h1>
-        v 27.3.0<br><br>
+        v 27.3.2<br><br>
         <table border="0" cellspacing="3" cellpadding="3" align="center">
         <tr>
             <!-- Navigation buttons -->
@@ -311,6 +326,10 @@
 						<!-- New Template 2 button -->
 						<div id="template2Button" onclick="loadTemplate2()">Template 2</div>
 						<div id="favoritesButton" onclick="listFavorites()">⭐ Favorites</div>
+						<!-- Exclude IDs input -->
+						<input id="excludeInput" placeholder="Exclude IDs (e.g. 1,4,7)"
+                            style="padding:10px;border-radius:5px;border:1px solid #ccc;width:150px;max-width:100%;"
+                            oninput="updateExcludedIds(this.value)" title="Type comma-separated station IDs to exclude" />
 
 				</div>
 
@@ -319,7 +338,7 @@
         </tr>
        
         <tr>
-            <td colspan="3">            <div id="toggleButton" onclick="toggleTextArea()">Logs Output</div></td>
+            <td colspan="3">            <div id="toggleButton" onclick="toggleTextArea()">Logs</div></td>
 			 <td colspan="2">
                 <div id="btnClear" onclick="clearData()">Clear</div>
             </td>
@@ -344,6 +363,7 @@
 var currentStationIndex = 0;
     var audioPlayer = document.createElement("audio");
     var hls = null; // Single instance of HLS.js
+    var excludedIds = []; // station ids to exclude from display
 
     audioPlayer.controls = true;
     audioPlayer.autoplay = true;
@@ -374,7 +394,7 @@ var currentStationIndex = 0;
 		var template2Stations = [
 			{ id: 1, url: "aHR0cHM6Ly9yb2dlcnMtaGxzLmxlYW5zdHJlYW0uY28vcm9nZXJzL2hhbDk1Ny5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y N|e|w|s" },
 			{ id: 2, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQxMDUwL0VTX1JQVkMvbWFzdGVyLm0zdTg=", name: ". C|B|C R|a|d|i|o" },
-			{ id: 3, url: "aHR0cHM6Ly9jaGktbGl2ZTEtYWlzLXJlbGF5MS5sZWFuc3RyZWFtLmNvL3JvZ2Vycy90b3I2ODAuc3RyZWFtL3BsYXlsaXN0Lm0zdTg=", name: ". C|B|C| |T|o|r|o|n|t|o" },
+			{ id: 3, url: "aHR0cHM6Ly9jaGktbGl2ZTEtYWlzLXJlbGF5MS5sZWFuc3RyZWFtLmNvL3JvZ2Vycy90b3I2ODAuc3RyZWFtL3BsYXlsaXN0Lm0zdDg=", name: ". C|B|C| |T|o|r|o|n|t|o" },
 			{ id: 4, url: "aHR0cHM6Ly9oZWwtYWlzLWVkZ2UxLmxlYW5zdHJlYW0uY28vcm9nZXJzL3RvcjY4MC5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y| |N|e|w|s| |T|o|r|o|n|t|o" },
 			{ id: 5, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NDI4L2F1ZGlv", name: ". Hello F|M" },
 			{ id: 5, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NTQzL2F1ZGlv", name: ". M|i|r|c|y F|M" },
@@ -401,8 +421,8 @@ var currentStationIndex = 0;
       { id: 101, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: ". C|B|C R|a|d|i|o", category: "english" },
       { id: 102, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg2L0VTX1IxQUZSL2FkYXB0aXZlXzE5Mi9jaHVua2xpc3RfYW8ubTN1OA==", name: ". C|B|C M|o|n|c", category: "english" },
       { id: 102, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQxMDUwL0VTX1IxUFZDL21hc3Rlci5tM3U4", name: ". C|B|C| |T|o|r|o|n|t|o", category: "english" },
-      { id: 103, url: "aHR0cHM6Ly9oZWwtYWlzLWVkZ2UxLmxlYW5zdHJlYW0uY28vcm9nZXJzL3RvcjY4MC5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y| |T|o|r|o|n|t|o", category: "english" },
-      { id: 104, url: "aHR0cHM6Ly8xODY4My5saXZlLnN0cmVhbXRoZXdvcmxkLmNvbS9DQlIxRk1fQ0JDLm1wMz9ESVNUPVR1bmVJbiZUR1Q9VHVuZUluJm1heFNlcnZlcnM9MiZnZHByPQ==", name: ". C|B|C |C|a|l", category: "english" },
+      { id: 103, url: "aHR0cHM6Ly9oZWwtYWlzLWVkZ2UxLmxlYW5zdHJlYW0uY28vcm9nZXJzL3RvcjY4MC5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y| |T|o|r|o|n|t|o" },
+      { id: 104, url: "aHR0cHM6Ly8xODY4My5saXZlLnN0cmVhbXRoZXdvcmxkLmNvbS9DQlIxRk1fQ0JDLm1wMz9ESVNUPVR1bmVJbiZUR1Q9VHVuZUluJm1heFNlcnZlcnM9MiZnZHByPQ==", name: ". C|B|C |C|a|l" },
       { id: 132, url: "aHR0cHM6Ly8xODY4My5saXZlLnN0cmVhbXRoZXdvcmxkLmNvbS9DQlUyRk1fQ0JDLm1wMz8=", name: ". C|B|C |V|A|N|C|O|V|E|R", category: "english" },
       { id: 137, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: ". C|B|C M|o|n|c 2", category: "english" }
     ];
@@ -551,22 +571,33 @@ var currentStationIndex = 0;
       writeOutput("handlePlaybackError()");
     }
 
-    // Render station list using jQuery
+    // Render station list using jQuery (applies exclusions immediately)
     function listStations() {
-      let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
-      $("#stationList").html(
-        stations
-          .map(
-            (s, i) =>
-              `<div onclick="playStation(${i})" id="station-${i}" class="${i === currentStationIndex ? 'active' : ''}">
-                ${s.id + s.name.replace(/\|/g, "")}
-                <button onclick="event.stopPropagation(); toggleFavorite(${i})">
-                  ${favorites.includes(i) ? "★" : "☆"}
-                </button>
-              </div>`
-          )
-          .join("")
-      );
+      try {
+        var favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+        // Ensure favorites are numbers (stored as indexes)
+        favorites = favorites.map(function(n){ return Number(n); });
+
+        // Build display list applying exclusions to the current stations array
+        var display = applyExclusionsToArray(stations);
+
+        $("#stationList").html(
+          display.map(function(s){
+            // find real index in stations array so play/toggle work correctly
+            var realIdx = stations.findIndex(function(st){ return Number(st.id) === Number(s.id); });
+            var isActive = (realIdx === currentStationIndex) ? 'active' : '';
+            var label = (s.id + s.name.replace(/\|/g, ""));
+            var fav = (favorites.includes(realIdx) ? '★' : '☆');
+            return '<div onclick="playStation(' + realIdx + ')" id="station-' + s.id + '" class="' + isActive + '">' +
+                   label +
+                   '<button onclick="event.stopPropagation(); toggleFavorite(' + realIdx + ')">' + fav + '</button>' +
+                   '</div>';
+          }).join("")
+        );
+      } catch (e) {
+        console.error('listStations error', e);
+        writeOutput('listStations error: ' + e.message);
+      }
     }
 
     function toggleFavorite(index) {
@@ -586,26 +617,34 @@ var currentStationIndex = 0;
         alert("No favorite stations yet!");
         return;
       }
+      // Map stored favorite indices to current stations where possible, then exclude by id
       let sortedFavorites = favorites
-        .map(i => stations[i])
-        .sort((a, b) => a.id - b.id);
+        .map(function(i){ return stations[i]; })
+        .filter(function(s){ return !!s; })
+        .filter(function(s){ return !excludedIds.includes(Number(s.id)); })
+        .sort(function(a,b){ return a.id - b.id; });
       $("#stationList").html(
         sortedFavorites
           .map(
-            s =>
-              `<div onclick="playStation(${stations.findIndex(st => st.id === s.id)})" id="station-${s.id}" class="active">
+            function(s){
+              var idx = stations.findIndex(function(st){ return st.id === s.id; });
+              return `<div onclick="playStation(${idx})" id="station-${s.id}" class="active">
                 ${s.id + s.name.replace(/\|/g, "")}
-                <button onclick="event.stopPropagation(); toggleFavorite(${stations.findIndex(st => st.id === s.id)})">★</button>
-              </div>`
+                <button onclick="event.stopPropagation(); toggleFavorite(${idx})">★</button>
+              </div>`;
+            }
           )
           .join("")
       );
-      playStation(stations.findIndex(st => st.id === sortedFavorites[0].id));
+      if (sortedFavorites.length>0) {
+        var firstIdx = stations.findIndex(function(st){ return st.id === sortedFavorites[0].id; });
+        if (firstIdx !== -1) playStation(firstIdx);
+      }
     }
 
    // Helper functions to switch station lists using jQuery
     function loadTemplate2() {
-      stations = template2Stations.slice(); // clear current list and load Template 2 stations
+      stations = applyExclusionsToArray(template2Stations.slice()); // clear current list and load Template 2 stations (apply exclusions)
       currentStationIndex = 0;
       listStations();
       writeOutput("Template 2 loaded with new station list.");
@@ -614,7 +653,7 @@ var currentStationIndex = 0;
     function loadEnglishStations() {
       // Load the English station set (template3Stations)
       if (typeof template3Stations !== 'undefined' && Array.isArray(template3Stations)) {
-        stations = template3Stations.slice();
+        stations = applyExclusionsToArray(template3Stations.slice());
         currentStationIndex = 0;
         listStations();
         writeOutput('English (Template 3) stations loaded.');
@@ -624,14 +663,43 @@ var currentStationIndex = 0;
     }
 
     function loadOriginalStations() {
-      stations = originalStations.slice(); // reload original station list
+      stations = applyExclusionsToArray(originalStations.slice()); // reload original station list (apply exclusions)
       currentStationIndex = 0;
       listStations();
       writeOutput("Original station list reloaded.");
     }
 
+    // Helper: apply exclusion filter to an array of station objects
+    function applyExclusionsToArray(arr) {
+      if (!Array.isArray(arr)) return [];
+      if (!excludedIds || excludedIds.length === 0) return arr.slice();
+      return arr.filter(function(s) { return !excludedIds.includes(Number(s.id)); });
+    }
 
-
+    // Parse comma-separated IDs and update excludedIds, then refresh list
+    function updateExcludedIds(val) {
+      var v = (typeof val !== 'undefined') ? val : (document.getElementById('excludeInput') ? document.getElementById('excludeInput').value : '');
+      // Persist the raw exclude input so it is remembered across reloads
+      try { localStorage.setItem('excludeInputValue', v || ''); } catch(e) { /* ignore storage errors */ }
+      if (!v) {
+        excludedIds = [];
+      } else {
+        excludedIds = v.split(',').map(function(x){ return parseInt(x.trim(),10); }).filter(function(n){ return !isNaN(n); });
+      }
+      // Refresh stations display to apply exclusions
+      // If stations currently reference an excluded id, adjust currentStationIndex
+      if (stations && stations.length && stations[currentStationIndex] && excludedIds.includes(Number(stations[currentStationIndex].id))) {
+        var firstAvailable = stations.findIndex(function(s){ return !excludedIds.includes(Number(s.id)); });
+        if (firstAvailable === -1) {
+          audioPlayer.pause();
+          writeOutput('All stations excluded. Playback stopped.');
+        } else {
+          currentStationIndex = firstAvailable;
+          playStation(currentStationIndex);
+        }
+      }
+      listStations();
+    }
 
     function writeOutput(txt) {
         $('#output').val(txt + '\n' + $('#output').val());
@@ -651,7 +719,37 @@ var currentStationIndex = 0;
     });
 
     $(document).ready(function() {
-        listStations();
+        // Restore exclude input value from localStorage (if available)
+        try {
+          var savedExclude = localStorage.getItem('excludeInputValue') || '';
+          if (savedExclude && savedExclude.length > 0) {
+            $('#excludeInput').val(savedExclude);
+            // parse into excludedIds without triggering updateExcludedIds (avoid double list render)
+            excludedIds = savedExclude.split(',').map(function(x){ return parseInt(x.trim(),10); }).filter(function(n){ return !isNaN(n); });
+          } else {
+            excludedIds = [];
+          }
+        } catch(e) {
+          excludedIds = [];
+        }
+
+        // By default load the English stations (template3Stations) on page load
+        if (typeof template3Stations !== 'undefined' && Array.isArray(template3Stations)) {
+          stations = applyExclusionsToArray(template3Stations.slice());
+          currentStationIndex = 0;
+          listStations();
+          if (stations.length > 0) {
+            playStation(0);
+          }
+        } else {
+          // Fallback to original stations
+          stations = applyExclusionsToArray(originalStations.slice());
+          currentStationIndex = 0;
+          listStations();
+          if (stations.length > 0) {
+            playStation(0);
+          }
+        }
     });
 	
 	function toggleTextArea() {
@@ -669,6 +767,11 @@ var currentStationIndex = 0;
 			writeOutput('Media session cleared')
 			localStorage.setItem("favorites", JSON.stringify([])); // Set the value to an empty array
 			writeOutput('Favorite local storage cleared')
+			// Clear stored exclude input and reset exclusions
+			excludedIds = [];
+			try { localStorage.removeItem('excludeInputValue'); } catch(e) { }
+			$('#excludeInput').val('');
+			writeOutput('Exclude input cleared from local storage')
 			listStations();
 			}
 </script>
