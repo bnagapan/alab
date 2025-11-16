@@ -44,6 +44,17 @@
     .theme-ocean button { background-color: #2e8b57; color: white; }
     .theme-nature button { background-color: #8b4513; color: white; }
     .theme-snow button { background-color: #01497A; color: white; }
+
+    /* Default border (white) for non-orange themes */
+    body:not(.theme-orange) button,
+    body:not(.theme-orange) .fav-btn,
+    body:not(.theme-orange) #categoryButtons button,
+    body:not(.theme-orange) .button-container button,
+    body:not(.theme-orange) .grouped-btn-row button,
+    body:not(.theme-orange) a.station-link {
+      border: 2px solid #fff !important;
+    }
+
     /* Orange theme buttons and related elements */
     body.theme-orange button,
     body.theme-orange .fav-btn,
@@ -52,7 +63,7 @@
     body.theme-orange .grouped-btn-row button {
       background-color: #ac520a !important;
       color: white !important;
-      border-color: transparent !important;
+      border: 2px solid #000 !important;
     }
     body.theme-orange button:hover,
     body.theme-orange .fav-btn:hover,
@@ -78,7 +89,7 @@
     body.theme-ocean a.station-link { background-color: #2e8b57 !important; color: white !important; }
     body.theme-nature a.station-link { background-color: #8b4513 !important; color: white !important; }
     body.theme-snow a.station-link { background-color: #01497A !important; color: white !important; }
-    body.theme-orange a.station-link { background-color: #ac520a !important; color: white !important; }
+    body.theme-orange a.station-link { background-color: #ac520a !important; color: white !important; border: 2px solid #000 !important; }
     body.theme-orange a.station-link:hover { background-color: #8f3f08 !important; color: white !important; }
 
     a.station-link {
