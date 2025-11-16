@@ -66,24 +66,36 @@
         background-color: #1c74d4; /* Slightly darker Dodger Blue */
     }
 		
-       /* Styling for play button */
-        #link  {
-            display: inline-block;
-            padding: 12px;
-            background-color: #007bff; /* Primary Blue */
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            font-size: 16px;
-            width: 80%;
-            max-width: 300px;
-            text-align: center;
-            cursor: pointer;
-        }
+       /* Styling for play button container and inner button - match other controls */
+    #link {
+        display: inline-block;
+        background-color: transparent;
+        text-decoration: none;
+        margin-bottom: 10px;
+        cursor: pointer;
+    }
 
-    #link:hover {
-        background-color: #0056b3; /* Darker Blue for hover */
+    #playButton {
+        display: inline-block;
+        padding: 12px; /* same padding as other buttons to match height */
+        background-color: #1e90ff; /* match other control buttons (Dodger Blue) */
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 16px;
+        width: 150px; /* same width as other buttons */
+        max-width: 100%;
+        box-sizing: border-box;
+        text-align: center;
+        line-height: 1.2; /* ensure proper vertical alignment */
+        cursor: pointer;
+    }
+
+    #playButton:hover { background-color: #1c74d4; }
+
+    /* Ensure playButton shrinks on small screens to remain usable */
+    @media (max-width: 420px) {
+        #playButton { width: 100% !important; padding: 10px; font-size: 15px; }
     }
 	
 	/* --- New Styles for Control Buttons --- */
@@ -285,7 +297,7 @@
             <td>&nbsp;</td>
             <td>
                 <!-- Clickable link to start the radio playlist -->
-                <a href="javascript:void(0);" id="link"> ▶ ️ </a>
+                <a href="javascript:void(0);" id="link"><div id="playButton"> ▶ ️ </div></a>
             </td>
             <td>&nbsp;</td>
             <td>        <div id="nextButton">⏭ Next</div></td>
@@ -471,9 +483,10 @@ var currentStationIndex = 0;
 
       // Media Session API updates using jQuery (if available)
       if ("mediaSession" in navigator) {
+        // include station id in the MediaMetadata title so iPhone playback screen shows the id
         navigator.mediaSession.metadata = new MediaMetadata({
-          title: stationName,
-          artist: "Live Radio" +": " + serverName,
+          title: station.id + " - " + stationName,
+          artist: "Live Radio" + ": " + serverName,
           album: "Streaming"
         });
         navigator.mediaSession.setActionHandler("previoustrack", function () {
@@ -484,16 +497,16 @@ var currentStationIndex = 0;
         });
         navigator.mediaSession.setActionHandler("play", function () {
           audioPlayer.play();
-		  writeOutput('PLAY');
+	  writeOutput('PLAY');
         });
         navigator.mediaSession.setActionHandler("pause", function () {
           audioPlayer.pause();
-		  writeOutput('PAUSE');
+	  writeOutput('PAUSE');
         });
         navigator.mediaSession.setActionHandler("stop", function () {
           audioPlayer.pause();
           audioPlayer.currentTime = 0;
-		  writeOutput('STOP');
+	  writeOutput('STOP');
         });
       }
     }
@@ -512,11 +525,13 @@ var currentStationIndex = 0;
 	}
 
     // Update Media Session helper
-    function UpdateMediaSession(stationName, msg) {
+    function UpdateMediaSession(stationName, msg, stationId, serverNameParam) {
+      // stationId and serverNameParam are optional; include id in title when available
       if ("mediaSession" in navigator) {
+        var titlePrefix = stationId ? (stationId + " - ") : ((currentStationIndex + 1) + " - ");
         navigator.mediaSession.metadata = new MediaMetadata({
-          title: (currentStationIndex + 1) + stationName,
-          artist: "Live Radio" +": " + serverName,
+          title: titlePrefix + stationName,
+          artist: "Live Radio" + ": " + (serverNameParam || ""),
           album: msg
         });
         navigator.mediaSession.setActionHandler("previoustrack", function () {
