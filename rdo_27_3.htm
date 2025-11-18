@@ -143,7 +143,7 @@
   cursor: pointer;
 }
 
-#listButton,#btnClear,#toggleButton,#favoritesButton,#template2Button,#englishButton {
+#listButton,#btnClear,#toggleButton,#favoritesButton,#template2Button,#englishButton, #showHideButton {
   display: inline-block;
   padding: 12px;
   background-color: #1e90ff; /* Dodger Blue */
@@ -317,12 +317,23 @@
         #output {
             display: none;
         }
+
+        /* hide target controls when collapsed (hidden by default) */
+        body.controls-collapsed #listButton,
+        body.controls-collapsed #englishButton,
+        body.controls-collapsed #template2Button,
+        body.controls-collapsed #favoritesButton,
+        body.controls-collapsed #excludeInput,
+        body.controls-collapsed #toggleButton,
+        body.controls-collapsed #btnClear {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
     <div id="content">
         <h1>R | a | d | i | o</h1>
-        v 27.3.7<br><br>
+        v 27.3.8<br><br>
         <table border="0" cellspacing="3" cellpadding="3" align="center">
         <tr>
             <!-- Navigation buttons -->
@@ -339,13 +350,14 @@
             <td colspan="5"> 
                 <!-- Button to list all stations -->
 				<div id="buttonWrapper" class="button-wrapper">
-						<div id="listButton" onclick="loadOriginalStations()">All Stations</div>
-						<div id="englishButton" onclick="loadEnglishStations()">English</div>
-						<!-- New Template 2 button -->
-						<div id="template2Button" onclick="loadTemplate2()">Template 2</div>
-						<div id="favoritesButton" onclick="listFavorites()">⭐ Favorites</div>
-						<!-- Exclude IDs input -->
-						<input id="excludeInput" placeholder="Exclude IDs (e.g. 1,4,7)"
+						<div id="showHideButton">Show</div>
+                        <div id="listButton" onclick="loadOriginalStations()">All Stations</div>
+                        <div id="englishButton" onclick="loadEnglishStations()">English</div>
+                        <!-- New Template 2 button -->
+                        <div id="template2Button" onclick="loadTemplate2()">Template 2</div>
+                        <div id="favoritesButton" onclick="listFavorites()">⭐ Favorites</div>
+                        <!-- Exclude IDs input -->
+                        <input id="excludeInput" placeholder="Exclude IDs (e.g. 1,4,7)"
                             style="padding:10px;border-radius:5px;border:1px solid #ccc;width:150px;max-width:100%;"
                             oninput="updateExcludedIds(this.value)" title="Type comma-separated station IDs to exclude" />
 
@@ -770,6 +782,16 @@ var currentStationIndex = 0;
             playStation(0);
           }
         }
+
+        // Initialize controls hidden by default and wire the Show/Hide button
+        try {
+          document.body.classList.add('controls-collapsed');
+          $('#showHideButton').text('Show');
+          $('#showHideButton').click(function(){
+            var collapsed = document.body.classList.toggle('controls-collapsed');
+            $(this).text(collapsed ? 'Show' : 'Hide');
+          });
+        } catch(e) { /* ignore */ }
     });
 	
 	function toggleTextArea() {
