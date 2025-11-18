@@ -214,6 +214,13 @@
 		text-align: left;
 		}
 
+		/* When the page is in a "media screen" state (playing / media session active)
+           reduce each station list item's width by ~10% to make room for media UI */
+		.media-screen #stationList div {
+			width: 70% !important;
+			max-width: 270px !important;
+		}
+
 		#stationList div button {
 		background: none;
 		border: none;
@@ -304,7 +311,7 @@
 <body>
     <div id="content">
         <h1>R | a | d | i | o</h1>
-        v 27.3.3<br><br>
+        v 27.3.4<br><br>
         <table border="0" cellspacing="3" cellpadding="3" align="center">
         <tr>
             <!-- Navigation buttons -->
@@ -774,6 +781,8 @@ var currentStationIndex = 0;
 			try { localStorage.removeItem('excludeInputValue'); } catch(e) { }
 			$('#excludeInput').val('');
 			writeOutput('Exclude input cleared from local storage')
+			// Remove media screen visual state
+			try { document.body.classList.remove('media-screen'); } catch(e) { }
 			listStations();
 			}
 </script>
