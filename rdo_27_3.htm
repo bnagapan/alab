@@ -303,6 +303,14 @@
             #content { padding: 10px; }
         }
 
+        /* iPhone 11 / Safari specific tweak: reduce station list item width */
+        @media only screen and (device-width: 414px) and (max-width: 420px) and (-webkit-min-device-pixel-ratio: 2) {
+            #stationList div {
+                width: 70% !important;
+                max-width: 280px !important;
+            }
+        }
+
         #output {
             display: none;
         }
@@ -311,7 +319,7 @@
 <body>
     <div id="content">
         <h1>R | a | d | i | o</h1>
-        v 27.3.4<br><br>
+        v 27.3.5<br><br>
         <table border="0" cellspacing="3" cellpadding="3" align="center">
         <tr>
             <!-- Navigation buttons -->
