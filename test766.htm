@@ -289,7 +289,7 @@
   // ============================================================================
   // APPLICATION CONFIGURATION & CONSTANTS
   // ============================================================================
-  const appVersion = "7.7.0.0";
+  const appVersion = "7.6.6.2";
   const DEBUG_MODE = false;
 
   // Configuration object for centralized management
@@ -1173,11 +1173,54 @@ function adjustStationButtonWidths() {
 
       /**
        * LoadStart event: Fired when browser starts loading media
+       * Auto-plays station if delayLoadStation is true
+       * Keeps Media Session active with loading status for delayed stations
        */
       audio.addEventListener('loadstart', function() {
         try {
-          debugLog("Audio event: loadstart", `Loading initiated`);
+          const currentStation = stations[currentIndex];
+          
+          debugLog("Audio event: loadstart", `Loading initiated for station: ${currentStation?.name || 'Unknown'}`);
           console.log(`⟳ Loading stream - ${new Date().toLocaleTimeString()}`);
+          
+          // Check if current station has delayLoadStation flag set to true
+          if (currentStation && currentStation.delayLoadStation === true) {
+            const stationName = currentStation.name.replace(/\|/g, '');
+            const stationId = currentStation.id;
+            
+            debugLog("DelayLoadStation enabled", `Auto-playing: ${currentStation.name}`);
+            console.log(`⏱ DelayLoadStation enabled - Auto-playing: ${stationName}`);
+            
+            // Keep Media Session active with loading status
+            if ('mediaSession' in navigator) {
+              navigator.mediaSession.metadata = new MediaMetadata({
+                title: stationId + " " + stationName,
+                artist: `Loading stream (may take a moment)...`
+              });
+              debugLog("Media Session updated", `Loading message displayed for: ${stationName}`);
+            }
+            
+            // Display loading message to user
+            $('#msg').text(`${stationId} ${stationName} - Loading stream...`);
+            
+            // Attempt to play with error handling
+            setTimeout(() => {
+              try {
+                audio.play().catch(playError => {
+                  // Silently handle play errors and continue
+                  debugLog("DelayLoadStation play attempt failed", playError.message);
+                  console.warn(`⚠ Auto-play failed (moving on): ${playError.message}`);
+                });
+              } catch (playException) {
+                // Even if exception occurs, just log and continue
+                debugLog("DelayLoadStation play exception", playException.message);
+                console.warn(`⚠ Auto-play exception (moving on): ${playException.message}`);
+              }
+            }, 100); // Small delay to ensure loadstart is fully processed
+          } else {
+            // For normal stations, do NOT display loading status
+            debugLog("Normal station loading", `No delayed loading for: ${currentStation?.name || 'Unknown'}`);
+          }
         } catch (error) {
           errorLog("loadstart event handler failed", error);
         }
