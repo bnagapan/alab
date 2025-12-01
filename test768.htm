@@ -295,7 +295,7 @@
   // ============================================================================
   // APPLICATION CONFIGURATION & CONSTANTS
   // ============================================================================
-  const appVersion = "7.6.8.1";
+  const appVersion = "7.6.8.2";
   const DEBUG_MODE = false;
 
   // Configuration object for centralized management
@@ -438,6 +438,8 @@
   var s_id = -1;
   var s_name = '';
   let isShowingFavorites = false;
+  let stationLoadStartTime = 0; // Track when station load begins
+  let lastStationLoadTime = 0; // Store last station load time in seconds
 const rawStations = [
   { id: 100, url: "aHR0cHM6Ly9yb2dlcnMtaGxzLmxlYW5zdHJlYW0uY28vcm9nZXJzL2hhbDk1Ny5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y N|e|w|s", category: "english", delayLoadStation: false },
   { id: 101, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: ". C|B|C R|a|d|i|o", category: "english", delayLoadStation: false },
@@ -445,7 +447,7 @@ const rawStations = [
   { id: 102, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQxMDUwL0VTX1IxUFZDL21hc3Rlci5tM3U4", name: ". C|B|C| |T|o|r|o|n|t|o", category: "english", delayLoadStation: false },
   { id: 103, url: "aHR0cHM6Ly9oZWwtYWlzLWVkZ2UxLmxlYW5zdHJlYW0uY28vcm9nZXJzL3RvcjY4MC5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y| |T|o|r|o|n|t|o", category: "english", delayLoadStation: false },
   { id: 104, url: "aHR0cHM6Ly8xODY4My5saXZlLnN0cmVhbXRoZXdvcmxkLmNvbS9DQlIxRk1fQ0JDLm1wMz9ESVNUPVR1bmVJbiZUR1Q9VHVuZUluJm1heFNlcnZlcnM9MiZnZHByPQ==", name: ". C|B|C |C|a|l", category: "english", delayLoadStation: false },
-  { id: 105, url: "aHR0cDovL3N0cmVhbS5yZXZtYS5paHJobHMuY29tL3pjNjA0Mz8=", name: ". N|B|C| |N|e|w|s", category: "english", delayLoadStation: false },
+  { id: 105, url: "aHR0cDovL3N0cmVhbS5yZXZtYS5paHJobHMuY29tL3pjNjA0Mz8=", name: ". N|B|C| |N|e|w|s", category: "english", delayLoadStation: true },
   { id: 106, url: "aHR0cHM6Ly90dW5laW4uY2Ruc3RyZWFtMS5jb20vNDQyNF85Ni5tcDM/", name: ". A|B|C| |N|e|w|s", category: "english", delayLoadStation: true },
   { id: 107, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NDI4L2F1ZGlv", name: ". Hello F|M", category: "live", delayLoadStation: true },
   { id: 108, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NTQzL2F1ZGlv", name: ". M|i|r|c|y F|M", category: "live", delayLoadStation: false },
@@ -620,6 +622,7 @@ const rawStations = [
       const audio = document.getElementById('radioPlayer');
       currentIndex = index;
       isStationLoaded = false;
+      stationLoadStartTime = performance.now(); // Record load start time in milliseconds
 
       const stationName = station.name.replace(/\|/g, '');
       const stationId = station.id;
@@ -646,9 +649,15 @@ const rawStations = [
         isStationLoaded = true;
         $('.station-list').removeClass('loading');
         audio.play().catch(err => handlePlaybackError(stationName, err.message));
-        safeSetMediaMetadata(stationId + " " + stationName, "Playing");
+        
+        // Calculate load time
+        const loadTimeMs = performance.now() - stationLoadStartTime;
+        lastStationLoadTime = parseFloat((loadTimeMs / 1000).toFixed(2)); // Convert to seconds with 2 decimals
+        
+        const titleWithLoadTime = `${stationId} ${stationName} (${lastStationLoadTime}s)`;
+        safeSetMediaMetadata(titleWithLoadTime, "Playing");
         setNavigationHandlers();
-        debugLog("Station loaded and playing", `ID: ${stationId}, Name: ${stationName}`);
+        debugLog("Station loaded and playing", `ID: ${stationId}, Name: ${stationName}, Load Time: ${lastStationLoadTime}s`);
       };
 
       if (decodedUrl.endsWith('.m3u8')) {
@@ -1189,6 +1198,16 @@ function adjustStationButtonWidths() {
         try {
           debugLog("Audio event: play", `Station: ${stations[currentIndex]?.name || 'Unknown'}`);
           console.log(`▶ Playback started - ${new Date().toLocaleTimeString()}`);
+          
+          // Update message with load time if available
+          if (lastStationLoadTime > 0) {
+            const station = stations[currentIndex];
+            if (station) {
+              const stationName = station.name.replace(/\|/g, '');
+              $('#msg').text(`${station.id} ${stationName} (${lastStationLoadTime}s)`);
+              debugLog("Message updated with load time", `${lastStationLoadTime}s`);
+            }
+          }
         } catch (error) {
           errorLog("play event handler failed", error);
         }
@@ -1295,8 +1314,9 @@ function adjustStationButtonWidths() {
             debugLog("DelayLoadStation enabled", `Auto-playing: ${currentStation.name}`);
             console.log(`⏱ DelayLoadStation enabled - Auto-playing: ${stationName}`);
             
-            // Keep Media Session active with loading status
-            safeSetMediaMetadata(stationId + " " + stationName, "Loading stream (may take a moment)...");
+            // Keep Media Session active with loading status (use current load time if available)
+            const currentLoadTime = lastStationLoadTime > 0 ? ` (${lastStationLoadTime}s)` : '';
+            safeSetMediaMetadata(stationId + " " + stationName + currentLoadTime, "Loading stream (may take a moment)...");
             
             // Display loading message to user
             $('#msg').text(`${stationId} ${stationName} - Loading stream...`);
@@ -1362,7 +1382,8 @@ function adjustStationButtonWidths() {
   function handlePlaybackError(stationName, errorMessage) {
     console.error(`Playback failed for "${stationName}": ${errorMessage}`);
     $('.station-list').removeClass('loading');
-    safeSetMediaMetadata(stationName.replace(/\|/g, ' '), `Playback error: ${errorMessage}`);
+    const currentLoadTime = lastStationLoadTime > 0 ? ` (${lastStationLoadTime}s)` : '';
+    safeSetMediaMetadata(stationName.replace(/\|/g, ' ') + currentLoadTime, `Playback error: ${errorMessage}`);
   }
 </script>
 </body>
