@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html>
+<head> 
+  <meta charset="UTF-8">
+ <title>P l a y || R a d i o || S t r e a m</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Header */
+    h1 {
+        font-size: 26px;
+        margin-bottom: 20px;
+    }
+
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+      transition: background 0.5s ease;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
+    button, select {
+      margin: 5px;
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .button-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: left;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .station-list, .favorite-list {
+      margin-top: 10px;
+    }
+    .theme-default button { background-color: lightgray; }
+    .theme-dark button { background-color: #444; color: white; }
+    .theme-blue button { background-color: #564294; color: white; }
+    .theme-ocean button { background-color: #2e8b57; color: white; }
+    .theme-nature button { background-color: #8b4513; color: white; }
+    .theme-snow button { background-color: #01497A; color: white; }
+
+    /* Default border (white) for specific themes */
+    .theme-default button,
+    .theme-dark button,
+    .theme-blue button,
+    .theme-ocean button,
+    .theme-nature button,
+    .theme-snow button,
+    .theme-default .fav-btn,
+    .theme-dark .fav-btn,
+    .theme-blue .fav-btn,
+    .theme-ocean .fav-btn,
+    .theme-nature .fav-btn,
+    .theme-snow .fav-btn,
+    .theme-default #categoryButtons button,
+    .theme-dark #categoryButtons button,
+    .theme-blue #categoryButtons button,
+    .theme-ocean #categoryButtons button,
+    .theme-nature #categoryButtons button,
+    .theme-snow #categoryButtons button,
+    .theme-default .button-container button,
+    .theme-dark .button-container button,
+    .theme-blue .button-container button,
+    .theme-ocean .button-container button,
+    .theme-nature .button-container button,
+    .theme-snow .button-container button,
+    .theme-default .grouped-btn-row button,
+    .theme-dark .grouped-btn-row button,
+    .theme-blue .grouped-btn-row button,
+    .theme-ocean .grouped-btn-row button,
+    .theme-nature .grouped-btn-row button,
+    .theme-snow .grouped-btn-row button,
+    .theme-default a.station-link,
+    .theme-dark a.station-link,
+    .theme-blue a.station-link,
+    .theme-ocean a.station-link,
+    .theme-nature a.station-link,
+    .theme-snow a.station-link {
+      border: 2px solid #fff !important;
+    }
+
+    /* Orange theme buttons and related elements */
+    body.theme-orange button,
+    body.theme-orange .fav-btn,
+    body.theme-orange #categoryButtons button,
+    body.theme-orange .button-container button,
+    body.theme-orange .grouped-btn-row button {
+      background-color: #ac520a !important;
+      color: white !important;
+      border: 2px solid #000 !important;
+    }
+    body.theme-orange button:hover,
+    body.theme-orange .fav-btn:hover,
+    body.theme-orange #categoryButtons button:hover {
+      background-color: #8f3f08 !important;
+    }
+
+    .theme-dark a.station-link { background-color: #444; color: white; }
+    .theme-dark a.station-link:hover { background-color: #C9C9C9; color:white ; }
+    .theme-blue a.station-link { background-color: #564294; color: white; }
+    .theme-blue a.station-link:hover { background-color: #3D5F94; color: white; }
+
+    .theme-snow a.station-link { background-color: #01497A; color: white; }
+    .theme-snow a.station-link:hover { background-color: #01497A; color: white; }
+
+    /* Ensure theme-specific station-link colors override the default .station-link rule */
+    body.theme-default a.station-link { background-color: #28a745 !important; color: white !important; }
+    body.theme-default a.station-link:hover { background-color: #218838 !important; }
+    body.theme-dark a.station-link { background-color: #444 !important; color: white !important; }
+    body.theme-dark a.station-link:hover { background-color: #C9C9C9 !important; color: white !important; }
+    body.theme-blue a.station-link { background-color: #564294 !important; color: white !important; }
+    body.theme-blue a.station-link:hover { background-color: #3D5F94 !important; color: white !important; }
+    body.theme-ocean a.station-link { background-color: #2e8b57 !important; color: white !important; }
+    body.theme-nature a.station-link { background-color: #8b4513 !important; color: white !important; }
+    body.theme-snow a.station-link { background-color: #01497A !important; color: white !important; }
+    body.theme-orange a.station-link { background-color: #ac520a !important; color: white !important; border: 2px solid #000 !important; }
+    body.theme-orange a.station-link:hover { background-color: #8f3f08 !important; color: white !important; }
+
+    a.station-link {
+      display: inline-block;
+      padding: 10px 20px;
+      margin: 5px;
+      background-color: #28a745;
+      color: white;
+      text-decoration: none;    
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    a.station-link:hover {
+      background-color: #218838;
+    }
+    .fav-btn {
+      padding: 5px 10px;
+      font-size: 0.8rem;
+      background-color: #ff8c00;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .active-station {
+      background-color: #FFD700; /* Gold background for active station */
+      color: #FFD700 !important; /* Dark yellow text color for active station */
+      font-weight: bold;
+      /*font-size: 1.1rem;*/
+    }
+	#playFirst, #playPrevious, #playNext {
+  height: 60px;         /* Increase height */
+  padding: 0 20px;      /* Optional: add horizontal padding */
+  font-size: 1.5rem;    /* Optional: increase icon/text size */
+}
+#categoryButtons button.active-toggle {
+  background-color: #333;
+  color: white;
+  transform: scale(0.96);
+}
+    .grouped-btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .grouped-btn-row label {
+      margin-bottom: 0;
+      margin-left: 10px;
+      display: flex;
+      align-items: center;
+    }
+    .grouped-btn-row input[type="text"] {
+      min-width: 220px;
+      max-width: 340px;
+    }
+    /* Tooltip-style message box */
+    #msg {
+      display: inline-block;
+      background: #fffbe6;
+      color: #bfa100;
+      border: 1px solid #ffe066;
+      border-radius: 6px;
+      padding: 8px 18px;
+      margin: 10px 0 10px 0;
+      font-size: 1.05rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      min-width: 210px;
+      max-width: 90vw;
+      word-break: break-word;
+      font-weight: 600;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body class="theme-ocean">
+  <div style="text-align:center">
+    <h1>R | a | d | i | o</h1>
+    <span id="versionDisplay"></span><br><br>
+    <br><br>
+ </div>
+   <div id="toggleButtonsGroup" style="display:none" >
+    <div class="grouped-btn-row">
+      <button id="showStations">Show All Stations</button>
+      <button id="showFavorites">Show Favorite Stations</button>
+      <label style="margin-left:10px;">
+        <input type="checkbox" id="useRemoteStations">
+        Load from remote URL:
+      </label>
+      <input type="text" id="remoteStationsUrl" style="width:320px;" placeholder="https://example.com/stations.json" value="https://////raw.githubusercontent.com/bnagapan/alab/refs/heads/main/ref/stations.json">
+      <button id="clearStorage">Clear & Reload Stations</button>
+      <button id="clearFavoritesBtn">
+        <i class="bi bi-trash"></i> Clear Favorites
+      </button>
+    </div>
+    <!-- <button id="clearFavoritesBtn">🗑️ Clear Favorites</button> -->
+	     <!-- Theme and Background Selector inside Toggle Buttons Group -->
+      <div id="themeBgContainer">
+        <label>Theme:
+          <select id="themeSelect">
+            <option value="theme-default">Default</option>
+            <option value="theme-dark">Dark</option>
+            <option value="theme-blue">Blue</option>
+            <option value="theme-ocean">Ocean</option>
+            <option value="theme-nature">Nature</option>
+            <option value="theme-snow">Snow</option>
+            <option value="theme-orange">Orange</option>
+          </select>
+        </label>
+
+        <label style="margin-left: 20px;">Background Image:
+          <select id="bgImageSelect">
+            <option value="">None</option>
+            <option value="https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk102_sha.png">Ocean</option>
+            <option value="https://groupbenefits.manulife.ca/gb/member-portal/assets/ciam-sign-in-DWxAuxYg.png">Nature</option>
+            <option value="https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk105_beach.png">Beach</option>
+            <option value="https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk107_eve_beach.png">Evening Beach</option>
+            <option value="https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk108_beach2.png">Day Beach</option>
+            <option value="https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk109_snow.png">Snow</option>
+          </select>
+        </label>
+
+        <div style="margin-top: 10px;">
+          <label for="excludeInput">Exclude Station IDs (comma-separated):</label>
+          <input type="text" id="excludeInput" placeholder="e.g. 2, 12"
+          style="padding:5px; border-radius: 5px; width: 50px;" maxlength="20">
+        </div>
+
+        <div style="margin-top: 10px;">
+          <label for="delayTimeoutInput">Delay Load Timeout (ms):</label>
+          <input type="number" id="delayTimeoutInput" placeholder="100"
+          style="padding:5px; border-radius: 5px; width: 80px;" min="0" max="10000" value="100">
+          <span style="font-size: 0.9rem; color: #666; margin-left: 10px;;">(Auto-play delay for slow-loading stations)</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+ 
+  <button id="toggleButtons">Hide/Show All Buttons</button>
+ 
+  <div>
+
+    <button id="playPrevious">&nbsp;&nbsp;⏮&nbsp;&nbsp;</button>
+    <button id="playFirst">&nbsp;&nbsp;▶&nbsp;&nbsp;</button>
+    <button id="playNext">&nbsp;&nbsp;⏭&nbsp;&nbsp;</button>
+  </div>
+  <div class="button-container" id="categoryButtons">
+    <button data-cat="all">All</button>
+    <button data-cat="english">English</button>
+    <button data-cat="live">Live</button>
+ 
+    <button data-cat="mp3">MP3</button>
+    <button data-cat="mp3_2">MP3 2</button>  
+    <button data-cat="pod">POD</button>    
+
+  </div>
+
+  <audio id="radioPlayer" controls playsinline></audio>
+  <div>
+    <span id="msg"></span>
+  </div>
+  <div class="station-list"></div>
+  <div class="favorite-list"></div>
+  
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <!-- Bootstrap Icons CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+  <script>
+  // ============================================================================
+  // APPLICATION CONFIGURATION & CONSTANTS
+  // ============================================================================
+  const appVersion = "7.6.9.0";
+  const DEBUG_MODE = false;
+
+  // Configuration object for centralized management
+  const CONFIG = {
+    STORAGE_KEYS: {
+      EXCLUDE: 'excludeStations',
+      THEME: 'themeSelect',
+      BACKGROUND: 'bgImageSelect',
+      FAVORITES: 'favorites',
+      STATIONS: 'stations',
+      DELAY_TIMEOUT: 'delayLoadTimeout'
+    },
+    DEFAULTS: {
+      THEME: 'theme-ocean',
+      EXCLUDE_TIMEOUT_MS: 8000,
+      WIDTH_REDUCTION_RATIO: 0.95,
+      BUTTON_HEIGHT_PX: 60,
+      BUTTON_PADDING_PX: 20,
+      FETCH_CACHE: 'no-store',
+      DELAY_LOAD_TIMEOUT_MS: 100
+    }
+  };
+
+  // ============================================================================
+  // BROWSER & FEATURE DETECTION
+  // ============================================================================
+  /**
+   * Detect browser and capabilities
+   * @returns {Object} Browser detection object
+   */
+  function detectBrowser() {
+    const ua = navigator.userAgent;
+    return {
+      isChrome: /Chrome/.test(ua) && !/Edg/.test(ua),
+      isSafari: /Safari/.test(ua) && !/Chrome/.test(ua),
+      isAndroid: /Android/.test(ua),
+      isIOS: /iPhone|iPad|iPod/.test(ua),
+      hasMediaSession: 'mediaSession' in navigator,
+      hasMediaMetadata: typeof MediaMetadata !== 'undefined'
+    };
+  }
+
+  const BROWSER = detectBrowser();
+
+  /**
+   * Safely update Media Session metadata with cross-browser compatibility
+   * @param {string} title - Station title
+   * @param {string} artist - Station artist/status
+   * @returns {void}
+   */
+  function safeSetMediaMetadata(title, artist) {
+    try {
+      if (!BROWSER.hasMediaSession) return;
+      
+      // Build metadata object - remove unsupported properties for older Safari
+      const metadataObj = {
+        title: title || 'Radio Station',
+        artist: artist || 'Live Radio'
+      };
+      
+      // Try to create MediaMetadata - may fail in some Safari versions
+      if (BROWSER.hasMediaMetadata) {
+        navigator.mediaSession.metadata = new MediaMetadata(metadataObj);
+      } else {
+        // Fallback for browsers that don't support MediaMetadata constructor
+        try {
+          navigator.mediaSession.metadata = metadataObj;
+        } catch (e) {
+          debugLog("MediaMetadata not supported on this browser");
+        }
+      }
+      debugLog("Media Session metadata updated", `Title: ${title}`);
+    } catch (error) {
+      debugLog("Media Session metadata update failed (non-critical)", error.message);
+    }
+  }
+
+  /**
+   * Safely clear Media Session metadata
+   * @returns {void}
+   */
+  function safeClearMediaMetadata() {
+    try {
+      if (BROWSER.hasMediaSession && navigator.mediaSession.metadata) {
+        navigator.mediaSession.metadata = null;
+      }
+    } catch (error) {
+      debugLog("Media Session metadata clear failed (non-critical)", error.message);
+    }
+  }
+
+  /**
+   * Safely set Media Session action handler
+   * @param {string} action - Action name (e.g., 'play', 'pause', 'nexttrack')
+   * @param {Function|null} handler - Handler function or null to disable
+   * @returns {void}
+   */
+  function safeSetActionHandler(action, handler) {
+    try {
+      if (BROWSER.hasMediaSession && navigator.mediaSession.setActionHandler) {
+        navigator.mediaSession.setActionHandler(action, handler);
+      }
+    } catch (error) {
+      debugLog(`Failed to set action handler for ${action}`, error.message);
+    }
+  }
+
+  // ============================================================================
+  // LOGGING UTILITIES
+  // ============================================================================
+  /**
+   * Log debug messages (only in DEBUG_MODE)
+   * @param {string} message - Debug message
+   * @param {*} data - Optional data to log
+   */
+  function debugLog(message, data = null) {
+    if (DEBUG_MODE) {
+      console.log(`[DEBUG] ${message}`, data || '');
+    }
+  }
+
+  /**
+   * Log error messages
+   * @param {string} message - Error message        
+   * @param {Error} error - Optional error object
+   */
+  function errorLog(message, error = null) {
+    console.error(`[ERROR] ${message}`, error || '');
+  }
+
+  // ============================================================================
+  // DOM ELEMENTS & VALIDATION
+  // ============================================================================
+  var audioPlayer = document.getElementById("radioPlayer");
+  if (!audioPlayer) {
+    errorLog("Critical: audioPlayer element not found");
+    throw new Error("Audio player element missing - page cannot initialize");
+  }
+
+  var s_id = -1;
+  var s_name = '';
+  let isShowingFavorites = false;
+  let stationLoadStartTime = 0; // Track when station load begins
+  let lastStationLoadTime = 0; // Store last station load time in seconds
+  let ErrorNumberLocal = 0; // Global error code variable
+const rawStations = [
+  { id: 100, url: "aHR0cHM6Ly9yb2dlcnMtaGxzLmxlYW5zdHJlYW0uY28vcm9nZXJzL2hhbDk1Ny5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y N|e|w|s", category: "english", delayLoadStation: false },
+  { id: 101, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: ". C|B|C R|a|d|i|o", category: "english", delayLoadStation: false },
+  { id: 102, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg2L0VTX1IxQUZSL2FkYXB0aXZlXzE5Mi9jaHVua2xpc3RfYW8ubTN1OA==", name: ". C|B|C M|o|n|c", category: "english", delayLoadStation: false },
+  { id: 102, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQxMDUwL0VTX1IxUFZDL21hc3Rlci5tM3U4", name: ". C|B|C| |T|o|r|o|n|t|o", category: "english", delayLoadStation: false },
+  { id: 103, url: "aHR0cHM6Ly9oZWwtYWlzLWVkZ2UxLmxlYW5zdHJlYW0uY28vcm9nZXJzL3RvcjY4MC5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y| |T|o|r|o|n|t|o", category: "english", delayLoadStation: false },
+  { id: 104, url: "aHR0cHM6Ly8xODY4My5saXZlLnN0cmVhbXRoZXdvcmxkLmNvbS9DQlIxRk1fQ0JDLm1wMz9ESVNUPVR1bmVJbiZUR1Q9VHVuZUluJm1heFNlcnZlcnM9MiZnZHByPQ==", name: ". C|B|C |C|a|l", category: "english", delayLoadStation: false },
+  { id: 105, url: "aHR0cDovL3N0cmVhbS5yZXZtYS5paHJobHMuY29tL3pjNjA0Mz8=", name: ". N|B|C| |N|e|w|s", category: "english", delayLoadStation: true },
+  { id: 106, url: "aHR0cHM6Ly90dW5laW4uY2Ruc3RyZWFtMS5jb20vNDQyNF85Ni5tcDM/", name: ". A|B|C| |N|e|w|s", category: "english", delayLoadStation: true },
+  { id: 107, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NDI4L2F1ZGlv", name: ". Hello F|M", category: "live", delayLoadStation: true },
+  { id: 108, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NTQzL2F1ZGlv", name: ". M|i|r|c|y F|M", category: "live", delayLoadStation: false },
+  { id: 109, url: "aHR0cHM6Ly9zdHJ3My5vcGVuc3RyZWFtLmNvLzEzMTE=", name: ". R|a|d|i|o| |c|i|t|y", category: "live", delayLoadStation: true },
+  { id: 110, url: "aHR0cHM6Ly9yYWRpb3MuY3JhYmRhbmNlLmNvbTo4MDAyLzI=", name: ". S|u|r|y|a|n| 9|3|.|5", category: "live", delayLoadStation: true },
+  { id: 111, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9yMmduMXBnbTRxcnV2", name: ". B|I|G| |F|M", category: "live", delayLoadStation: true },
+  { id: 112, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9vYjZ0amc4Z3VscHR2", name: ". H|a|r|r|i|s| |J|a|y|a|r|a|j", category: "mp3", delayLoadStation: false },
+  { id: 113, url: "aHR0cHM6Ly9wc3JsaXZlMy5saXN0ZW5vbi5pbi9pbGF5YW0/c3RhdGlvbj1pbGF5YW1hYW5yYWRpbw==", name: ". I|l|a|y|a|r|a|j|a", category: "mp3", delayLoadStation: false },
+  { id: 114, url: "aHR0cHM6Ly9wc3JsaXZlMy5saXN0ZW5vbi5pbi9wb3A/c3RhdGlvbj10YW1pbHBvcHJhZGlv", name: ". T|a|m|i|l| |P|o|p|", category: "mp3", delayLoadStation: false },
+  { id: 115, url: "aHR0cHM6Ly9wc3JsaXZlMy5saXN0ZW5vbi5pbi9hbmlydWQ/c3RhdGlvbj1hbmlydWRocmFkaW8=", name: ". A|n|i|r|u|d|h", category: "mp3", delayLoadStation: false },
+  { id: 116, url: "aHR0cHM6Ly9wc3JsaXZlMy5saXN0ZW5vbi5pbi9hdj9zdGF0aW9uPXRoYWxhdGhhbGFwYXRoeXJhZGlv", name: ". |T|h|a|l|a|p|a|t|h|y", category: "mp3", delayLoadStation: false },
+  { id: 117, url: "aHR0cHM6Ly9wc3JsaXZlMy5saXN0ZW5vbi5pbi95c3I/c3RhdGlvbj15c3JyYWRpbw==", name: ". Y|u|v|a|n", category: "mp3", delayLoadStation: false },
+  { id: 118, url: "aHR0cHM6Ly9zcHNlcnZlci5zc2Nhc3QydS5pbi9kaW5kaWd1bGNpdHlmbS9zdHJlYW0=", name: ". D|i|n|d|i|g|u|l| |F|M", category: "mp3_2", delayLoadStation: false },
+  { id: 119, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtLzBjeXMyaDQxdzBodnY=", name: ". A|R|R F|M", category: "mp3_2", delayLoadStation: false },
+  { id: 120, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9hYWQ0ZTUxcXo3enV2", name: ". K|S C|h|i|t|r|a FM", category: "mp3_2", delayLoadStation: false },
+  { id: 121, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL3V2ZGJ5Z202YTQ4dXY=", name: ". K|J| |Y|e|s|u|d|a|s", category: "mp3_2", delayLoadStation: false },
+  { id: 122, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtLzF5Y21lcG50aGtodnY=", name: ". M|a|d|u|r|a|i", category: "mp3_2", delayLoadStation: false },
+  { id: 123, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL3RxbndzMmVhZnd6dXYuYWFj", name: ". T|a|m|i|l Melodies", category: "mp3_2", delayLoadStation: false },
+  { id: 124, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL2U5aHNiYmJleTR6dXY=", name: ". M|e|l|l|i|s|a|i F|M", category: "mp3_2", delayLoadStation: false },
+  { id: 125, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL3RxbndzMmVhZnd6dXYuYWFj", name: ". 9|0|s Melodies", category: "mp3_2", delayLoadStation: false },
+  { id: 126, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtLzBjeXMyaDQxdzBodnY=", name: ". A|R|R F|M", category: "mp3_2", delayLoadStation: false },
+  { id: 127, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS8zZGFjdDQzd3FnMHV2", name: ". K|a|m|a|l h|i|t|s", category: "mp3_2", delayLoadStation: false },
+  { id: 128, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtLzlmcDEzODNmMGQwdXY=", name: ". E|r|o|d|e", category: "mp3_2", delayLoadStation: false },
+  { id: 129, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9nMjBiczdodTB1aHZ2", name: ". R|a|j|i|n|i R|d|ogit", category: "mp3_2", delayLoadStation: false },
+  { id: 130, url: "aHR0cHM6Ly9zdHJlYW0tMTY0Lnplbm8uZm0vb3NiZ212aGp5cTd1dg==", name: ". A|R|R| |H|i|g|h", category: "mp3_2", delayLoadStation: false },
+  { id: 131, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS90N241Ynl3ZXhlc3R2", name: ". A|T|L|A|N|T|I|C", category: "mp3_2", delayLoadStation: false },
+  { id: 132, url: "aHR0cHM6Ly8xODY4My5saXZlLnN0cmVhbXRoZXdvcmxkLmNvbS9DQlUyRk1fQ0JDLm1wMz8=", name: ". C|B|C |V|A|N|C|O|V|E|R", category: "english", delayLoadStation: false },
+  { id: 133, url: "aHR0cHM6Ly9zdHJlYW0tMTc2Lnplbm8uZm0vbXczc3RwMmhobnp1dj8=", name: ". M|u|r|u|g|a", category: "mp3_2", delayLoadStation: false },
+  { id: 134, url: "aHR0cHM6Ly9lYzQueWVzc3RyZWFtaW5nLm5ldDoxOTkwL3N0cmVhbT8=", name: ". T|h|a|l|a|m", category: "mp3_2", delayLoadStation: false },
+  { id: 135, url: "aHR0cHM6Ly9zdHJlYW0tMTcxLnplbm8uZm0vMWh3a2JhbmJ6M3N0dj8=", name: ". T|a|m|i|l| |P|o|p| |40", category: "mp3_2", delayLoadStation: false },
+	{ id: 136, url: "aHR0cDovL2Fpci5wYy5jZG4uYml0Z3Jhdml0eS5jb20vYWlyL2xpdmUvcGJhdWRpbzA3OC9tYXN0ZXIubTN1OA==", name: ". D|h|a|r|m|a|p|u|r|i|", category: "live", delayLoadStation: false },
+  { id: 137, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: ". C|B|C M|o|n|c 2", category: "english", delayLoadStation: false }
+];
+
+
+  let stations = [];
+  let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+  let currentIndex = 0;
+
+  // ============================================================================
+  // INPUT VALIDATION HELPERS
+  // ============================================================================
+  /**
+   * Parse and validate exclude IDs from input string
+   * @param {string} input - Comma-separated exclude IDs
+   * @returns {number[]} Array of validated exclude IDs
+   */
+  function parseExcludeIds(input) {
+    if (!input || typeof input !== 'string') return [];
+    return input.split(',')
+      .map(id => parseInt(id.trim()))
+      .filter(id => !isNaN(id) && id > 0);
+  }
+
+  /**
+   * Validate station data structure
+   * @param {Object} station - Station object to validate
+   * @returns {boolean} True if valid station
+   */
+  function isValidStation(station) {
+    return station && 
+           typeof station.id === 'number' && 
+           typeof station.url === 'string' && 
+           typeof station.name === 'string' &&
+           station.id > 0 && 
+           station.url.length > 0;
+  }
+
+  /**
+   * Validate remote stations data
+   * @param {Array} data - Array of stations to validate
+   * @returns {boolean} True if all stations valid
+   * @throws {Error} If data is invalid
+   */
+  function validateStationData(data) {
+    if (!Array.isArray(data)) {
+      throw new Error("Stations data must be an array");
+    }
+    if (data.length === 0) {
+      throw new Error("Stations array is empty");
+    }
+    const allValid = data.every(station => isValidStation(station));
+    if (!allValid) {
+      throw new Error("One or more stations have invalid structure");
+    }
+    return true;
+  }
+
+  function saveStations() {
+    localStorage.setItem(CONFIG.STORAGE_KEYS.STATIONS, JSON.stringify(rawStations));
+    debugLog("Stations saved to localStorage");
+  }
+
+  function loadStations() {
+    stations = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.STATIONS)) || rawStations;
+    debugLog("Stations loaded", `Total: ${stations.length}`);
+  }
+
+  /**
+   * Decode base64 encoded URL
+   * @param {string} b64 - Base64 encoded string
+   * @returns {string} Decoded URL
+   */
+  function decodeUrl(b64) {
+    try {
+      return atob(b64);
+    } catch (error) {
+      errorLog("Failed to decode URL", error);
+      return '';
+    }
+  }
+
+  /**
+   * Debounce function to prevent excessive function calls
+   * @param {Function} func - Function to debounce
+   * @param {number} wait - Wait time in milliseconds
+   * @returns {Function} Debounced function
+   */
+  function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+  }
+
+  /**
+   * Check if stream URL is valid and accessible
+   * @param {string} url - Stream URL to check
+   * @returns {Promise<boolean>} True if stream is accessible
+   */
+  async function checkStreamUrl(url) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), CONFIG.DEFAULTS.EXCLUDE_TIMEOUT_MS);
+      const response = await fetch(url, {
+        method: 'GET',
+        signal: controller.signal,
+        headers: { 'Range': 'bytes=0-1' }
+      });
+      clearTimeout(timeout);
+      debugLog("Stream URL check", `URL: ${url}, OK: ${response.ok}`);
+      return response.ok;
+    } catch (error) {
+      errorLog("Stream URL check failed", error);
+      return false;
+    }
+  }
+
+ /**
+   * Play a station by index
+   * @param {number} index - The index of the station to play
+   * @throws {Error} If station index is invalid
+   * @returns {void}
+   */
+  function playStation(index) {
+    try {
+      if (index < 0 || index >= stations.length) {
+        throw new Error(`Invalid station index: ${index}`);
+      }
+
+      const station = stations[index];
+      if (!isValidStation(station)) {
+        throw new Error("Invalid station data");
+      }
+
+      const decodedUrl = decodeUrl(station.url);
+      if (!decodedUrl) {
+        throw new Error("Failed to decode station URL");
+      }
+
+      const audio = document.getElementById('radioPlayer');
+      currentIndex = index;
+      isStationLoaded = false;
+      stationLoadStartTime = performance.now(); // Record load start time in milliseconds
+
+      const stationName = station.name.replace(/\|/g, '');
+      const stationId = station.id;
+
+      $('#msg').text(stationId + ' ' + stationName);
+      $('.station-list').addClass('loading');
+      safeSetMediaMetadata(stationId + " " + stationName, "Initializing...");
+
+      if (audio.hlsInstance) {
+        audio.hlsInstance.detachMedia();
+        audio.hlsInstance.destroy();
+        audio.hlsInstance = null;
+      }
+
+      audio.pause();
+      audio.src = '';
+      audio.removeAttribute('src');
+
+      safeClearMediaMetadata();
+
+      audio.onerror = () => handlePlaybackError(stationName, audio.error?.message || 'Unknown error');
+
+      const onCanPlay = () => {
+        isStationLoaded = true;
+        $('.station-list').removeClass('loading');
+        audio.play().catch(err => handlePlaybackError(stationName, err.message));
+        
+        // Calculate load time
+        const loadTimeMs = performance.now() - stationLoadStartTime;
+        lastStationLoadTime = parseFloat((loadTimeMs / 1000).toFixed(2)); // Convert to seconds with 2 decimals
+        
+        const titleWithLoadTime = `${stationId} ${stationName} (${lastStationLoadTime}s)`;
+        safeSetMediaMetadata(titleWithLoadTime, "Playing");
+        setNavigationHandlers();
+        debugLog("Station loaded and playing", `ID: ${stationId}, Name: ${stationName}, Load Time: ${lastStationLoadTime}s`);
+      };
+
+      if (decodedUrl.endsWith('.m3u8')) {
+        debugLog("HLS stream detected", decodedUrl);
+        if (Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(decodedUrl);
+          hls.attachMedia(audio);
+          audio.hlsInstance = hls;
+          hls.on(Hls.Events.MANIFEST_PARSED, onCanPlay);
+        } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+          audio.src = decodedUrl;
+          audio.addEventListener('canplaythrough', onCanPlay, { once: true });
+        } else {
+          handlePlaybackError(stationName, "HLS not supported on this browser.");
+        }
+      } else {
+        audio.src = decodedUrl;
+        audio.addEventListener('canplaythrough', onCanPlay, { once: true });
+      }
+
+      highlightActiveStation();
+    } catch (error) {
+      errorLog("playStation failed", error);
+      handlePlaybackError("Unknown", error.message);
+    }
+  }
+
+  /**
+   * Set up Media Session navigation handlers
+   * Enables track navigation via hardware media buttons and lock screen
+   * Cross-browser compatible with iOS Safari and Android Chrome
+   */
+  function setNavigationHandlers() {
+    if (!BROWSER.hasMediaSession) {
+      debugLog("Media Session not available on this browser");
+      return;
+    }
+    
+    try {
+      safeSetActionHandler('previoustrack', () => {
+        if (isShowingFavorites && favorites.length) navigateFavorites(-1);
+        else navigateStations(-1);
+      });
+      
+      safeSetActionHandler('nexttrack', () => {
+        if (isShowingFavorites && favorites.length) navigateFavorites(1);
+        else navigateStations(1);
+      });
+      
+      safeSetActionHandler("play", () => audioPlayer.play());
+      safeSetActionHandler("pause", () => audioPlayer.pause());
+      safeSetActionHandler("stop", () => {
+        audioPlayer.pause();
+        audioPlayer.currentTime = 0;
+      });
+      
+      // Disable seek actions (not supported for live streams)
+      safeSetActionHandler('seekforward', null);
+      safeSetActionHandler('seekbackward', null);
+      safeSetActionHandler('seekto', null);
+      
+      debugLog("Navigation handlers set", `Browser: ${BROWSER.isSafari ? 'Safari' : BROWSER.isChrome ? 'Chrome' : 'Other'}`);
+    } catch (error) {
+      debugLog("Failed to set navigation handlers (non-critical)", error.message);
+    }
+  }
+
+  /**
+   * Handle audio playback errors and generate descriptive error messages
+   * @param {Event} e - The error event object
+   * @param {string} stationName - The name of the station that failed
+   * @returns {void}
+   */
+  function handleAudioError(e, stationName) {
+    try {
+      let errorMessage = '';
+      const errorCode = e.target.error?.code;
+      
+      switch (errorCode) {
+        case e.target.error?.MEDIA_ERR_ABORTED:
+          errorMessage = 'Playback aborted by user.';
+          ErrorNumberLocal=1001;
+          break;
+        case e.target.error?.MEDIA_ERR_NETWORK:
+          errorMessage = 'Network error - cannot connect to stream.';
+          ErrorNumberLocal=1002;
+          break;
+        case e.target.error?.MEDIA_ERR_DECODE:
+          errorMessage = 'Stream format not supported or corrupted.';
+          ErrorNumberLocal=1004;
+          break;
+        case e.target.error?.MEDIA_ERR_SRC_NOT_SUPPORTED:
+          errorMessage = 'Stream source not supported or unavailable.';
+          ErrorNumberLocal=1005;
+          break;
+        default:
+          errorMessage = 'Unknown playback error occurred.';
+          ErrorNumberLocal=1006;
+          break;
+      }
+      
+      debugLog("Audio error handled", `Station: ${stationName}, Code: ${errorCode}, Message: ${errorMessage}`);
+      handlePlaybackError(stationName, errorMessage);
+    } catch (error) {
+      errorLog("handleAudioError failed", error);
+    }
+  }
+
+  /**
+   * Navigate through favorite stations
+   * @param {number} dir - Direction: 1 for next, -1 for previous
+   */
+  function navigateFavorites(dir) {
+    if (!favorites.length) {
+      errorLog("No favorite stations available");
+      return;
+    }
+    let currentId = stations[currentIndex].id;
+    let favIndex = favorites.findIndex(id => id === currentId);
+    let nextIndex = (favIndex + dir + favorites.length) % favorites.length;
+    let newIndex = stations.findIndex(s => s.id === favorites[nextIndex]);
+    playStation(newIndex);
+  }
+
+  /**
+   * Navigate to next or previous station
+   * @param {number} dir - Direction: 1 for next, -1 for previous
+   */
+  function navigateStations(dir) {
+    const excludeValue = $('#excludeInput').val() || '';
+    const excludeIds = parseExcludeIds(excludeValue);
+
+    let attempts = 0;
+    let newIndex = currentIndex;
+
+    do {
+      newIndex = (newIndex + dir + stations.length) % stations.length;
+      attempts++;
+      if (attempts > stations.length) {
+        errorLog("All stations are excluded");
+        return;
+      }
+    } while (excludeIds.includes(stations[newIndex].id));
+
+    playStation(newIndex);
+  }
+
+  /**
+   * Clear all favorite stations
+   * @returns {void}
+   * @throws {Error} If localStorage operation fails
+   */
+  function clearFavorites() {
+    try {
+      favorites = [];
+      localStorage.setItem(CONFIG.STORAGE_KEYS.FAVORITES, JSON.stringify(favorites));
+      displayStations();
+      $('.favorite-list').empty().hide();
+      $('#msg').text('Favorites cleared!');
+      debugLog("Favorites cleared successfully");
+    } catch (error) {
+      errorLog("clearFavorites failed", error);
+      $('#msg').text('Error clearing favorites');
+      throw error;
+    }
+  }
+
+  /**
+   * Highlight the currently playing station in the UI
+   * @returns {void}
+   */
+  function highlightActiveStation() {
+    try {
+      $('.station-link').removeClass('active-station');
+      if (currentIndex >= 0 && currentIndex < stations.length) {
+        $(`.station-link[data-idx="${currentIndex}"]`).addClass('active-station');
+        debugLog("Station highlighted", `Index: ${currentIndex}`);
+      }
+    } catch (error) {
+      errorLog("highlightActiveStation failed", error);
+    }
+  }
+
+  /**
+   * Display all stations or filtered subset
+   */
+  function displayStations() {
+    try {
+      $('.station-list').empty();
+      isShowingFavorites = false;
+      $('.favorite-list').hide().empty();
+      $('.station-list').show();
+      stations.sort((a, b) => a.id - b.id);
+
+      const excludeValue = $('#excludeInput').val() || '';
+      const excludeIds = parseExcludeIds(excludeValue);
+
+      stations.forEach((station, idx) => {
+        if (excludeIds.includes(station.id)) return;
+        const stationName = `${station.id} ${station.name.replace(/\|/g, '')}`;
+        const isFav = favorites.includes(station.id);
+        const favText = isFav ? '★' : '☆';
+        $('.station-list').append(`
+          <div>
+            <a href="#" class="station-link" data-idx="${idx}" aria-label="Play ${stationName}">${stationName}</a>
+            <button class="fav-btn" data-id="${station.id}" aria-label="Toggle favorite" title="Toggle favorite">${favText}</button>
+          </div>
+        `);
+      });
+
+      adjustStationButtonWidths();
+      debugLog("Stations displayed", `Total: ${stations.length}, Excluded: ${excludeIds.length}`);
+    } catch (error) {
+      errorLog("displayStations failed", error);
+    }
+  }
+
+  /**
+   * Display favorite stations only
+   */
+  function displayFavorites() {
+    try {
+      isShowingFavorites = true;
+      $('.favorite-list').empty();
+      $('.station-list').hide().empty();
+      $('.favorite-list').show();
+
+      favorites.sort();
+      favorites.forEach(id => {
+        const station = stations.find(s => s.id === id);
+        if (station) {
+          const stationName = `${station.id} ${station.name.replace(/\|/g, '')}`;
+          const index = stations.findIndex(s => s.id === station.id);
+          $('.favorite-list').append(`
+            <div>
+              <a href="#" class="station-link" data-idx="${index}" aria-label="Play ${stationName}">${stationName}</a>
+              <button class="fav-btn" data-id="${station.id}" aria-label="Remove from favorites" title="Remove from favorites">★</button>
+            </div>
+          `);
+        }
+      });
+
+      adjustStationButtonWidths();
+      debugLog("Favorites displayed", `Total: ${favorites.length}`);
+    } catch (error) {
+      errorLog("displayFavorites failed", error);
+    }
+  }
+
+/**
+ * Adjust station button widths for responsive display
+ * Single pass optimization
+ */
+function adjustStationButtonWidths() {
+  try {
+    let maxWidth = 0;
+
+    // Single pass: find max width among visible station buttons
+    $('.station-link:visible').each(function () {
+      const width = $(this).outerWidth();
+      maxWidth = Math.max(maxWidth, width);
+    });
+
+    // Reduce width by CONFIG ratio
+    const reducedWidth = maxWidth * CONFIG.DEFAULTS.WIDTH_REDUCTION_RATIO;
+
+    // Apply reduced width to all visible station buttons
+    $('.station-link:visible').css('width', reducedWidth);
+    debugLog("Button widths adjusted", `Max: ${maxWidth}px, Reduced: ${reducedWidth}px`);
+  } catch (error) {
+    errorLog("adjustStationButtonWidths failed", error);
+  }
+}
+
+
+
+  $(document).ready(function() {
+    try {
+      console.clear();
+      $('#versionDisplay').text(`Version: ${appVersion}`);
+      $('body').removeClass().addClass('theme-snow');
+      $('#bgImageSelect').val('https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk109_snow.png');
+      $('#themeSelect').val('theme-snow');
+      $('#bgImageSelect').val('https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk102_sha.png');
+      $('#themeSelect').val('theme-ocean');
+
+      if (!localStorage.getItem(CONFIG.STORAGE_KEYS.STATIONS)) saveStations();
+      loadStations();
+
+      // Restore exclude input value from localStorage
+      const savedExclude = localStorage.getItem(CONFIG.STORAGE_KEYS.EXCLUDE) || '';
+      $('#excludeInput').val(savedExclude);
+
+      // Restore delay timeout value from localStorage
+      const savedDelayTimeout = localStorage.getItem(CONFIG.STORAGE_KEYS.DELAY_TIMEOUT) || CONFIG.DEFAULTS.DELAY_LOAD_TIMEOUT_MS;
+      $('#delayTimeoutInput').val(savedDelayTimeout);
+      debugLog("Delay timeout loaded", `Value: ${savedDelayTimeout}ms`);
+
+      // Apply saved theme and background
+      const initialTheme = localStorage.getItem(CONFIG.STORAGE_KEYS.THEME) || CONFIG.DEFAULTS.THEME;
+      $('body').removeClass().addClass(initialTheme);
+      $('#themeSelect').val(initialTheme);
+      const initialBg = localStorage.getItem(CONFIG.STORAGE_KEYS.BACKGROUND) || $('#bgImageSelect option').eq(1).val() || '';
+      $('#bgImageSelect').val(initialBg);
+      if (initialBg) $('body').css('background-image', 'url(' + initialBg + ')');
+
+      // Persist theme/bg selections whenever user changes them
+      $('#themeSelect').on('change', function() {
+        localStorage.setItem(CONFIG.STORAGE_KEYS.THEME, $(this).val());
+        debugLog("Theme changed", $(this).val());
+      });
+      $('#bgImageSelect').on('change', function() {
+        localStorage.setItem(CONFIG.STORAGE_KEYS.BACKGROUND, $(this).val());
+        $('body').css('background-image', 'url(' + $(this).val() + ')');
+        debugLog("Background changed", $(this).val());
+      });
+
+      // Use debounce for exclude input to prevent excessive re-renders
+      $('#excludeInput').on('input', debounce(function() {
+        localStorage.setItem(CONFIG.STORAGE_KEYS.EXCLUDE, $(this).val());
+        displayStations();
+        debugLog("Exclude input updated");
+      }, 300));
+
+      // Handle delay timeout input changes
+      $('#delayTimeoutInput').on('input', function() {
+        const value = parseInt($(this).val()) || CONFIG.DEFAULTS.DELAY_LOAD_TIMEOUT_MS;
+        localStorage.setItem(CONFIG.STORAGE_KEYS.DELAY_TIMEOUT, value);
+        debugLog("Delay timeout updated", `New value: ${value}ms`);
+        $('#msg').text(`Delay timeout set to ${value}ms`);
+      });
+
+      // Set navigation handlers once
+      setNavigationHandlers();
+
+      // Default filter: English
+      stations = rawStations.filter(st => st.category === 'english');
+      $('#categoryButtons button').removeClass('active-toggle');
+      $('#categoryButtons button[data-cat="english"]').addClass('active-toggle');
+      displayStations();
+      $('.favorite-list').hide();
+      playStation(0);
+
+      let isPlaying = false;
+      const $playFirst = $('#playFirst');
+      const audio = document.getElementById('radioPlayer');
+
+      function updatePlayPauseIcon() {
+        if (audio.paused) {
+          $playFirst.html('&nbsp;&nbsp;▶&nbsp;&nbsp;');
+          $playFirst.attr('aria-label', 'Play');
+          isPlaying = false;
+        } else {
+          $playFirst.html('&nbsp;&nbsp;⏸&nbsp;&nbsp;');
+          $playFirst.attr('aria-label', 'Pause');
+          isPlaying = true;
+        }
+      }
+
+      $playFirst.off('click').on('click', function() {
+        if (isPlaying) {
+          audio.pause();
+        } else {
+          // Play first non-excluded station
+          const excludeValue = $('#excludeInput').val() || '';
+          const excludeIds = parseExcludeIds(excludeValue);
+          let firstIndex = stations.findIndex(st => !excludeIds.includes(st.id));
+          if (firstIndex !== -1) {
+            playStation(firstIndex);
+            setTimeout(() => {
+              audio.play();
+              const st = stations[firstIndex];
+              if (st) $('#msg').text(st.id + ' ' + st.name.replace(/\|/g, ' '));
+            }, 100);
+          } else {
+            $('#msg').text('All stations are excluded!');
+          }
+        }
+      });
+
+      // Sync play/pause icon with audio events
+      audio.addEventListener('play', updatePlayPauseIcon);
+      audio.addEventListener('pause', updatePlayPauseIcon);
+      updatePlayPauseIcon();
+
+      $('#playPrevious').on('click', () => {
+        if (isShowingFavorites) navigateFavorites(-1);
+        else navigateStations(-1);
+      });
+
+      $('#playNext').on('click', () => {
+        if (isShowingFavorites) navigateFavorites(1);
+        else navigateStations(1);
+      });
+
+      $('#showStations').on('click', () => {
+        isShowingFavorites = false;
+        displayStations();
+      });
+
+      $('#showFavorites').on('click', () => {
+        isShowingFavorites = true;
+        displayFavorites();
+      });
+
+          $('#clearStorage').off('click').on('click', async function() {
+        try {
+          safeClearMediaMetadata();
+          ErrorNumberLocal=0;
+          $('#msg').text('');          localStorage.removeItem(CONFIG.STORAGE_KEYS.EXCLUDE);
+          $('#excludeInput').val('');
+
+          localStorage.setItem(CONFIG.STORAGE_KEYS.DELAY_TIMEOUT, CONFIG.DEFAULTS.DELAY_LOAD_TIMEOUT_MS);
+          $('#delayTimeoutInput').val(CONFIG.DEFAULTS.DELAY_LOAD_TIMEOUT_MS);
+
+          localStorage.setItem(CONFIG.STORAGE_KEYS.THEME, CONFIG.DEFAULTS.THEME);
+          const defaultBg = $('#bgImageSelect option').eq(1).val() || '';
+          localStorage.setItem(CONFIG.STORAGE_KEYS.BACKGROUND, defaultBg);
+          $('#themeSelect').val(CONFIG.DEFAULTS.THEME).trigger('change');
+          $('#bgImageSelect').val(defaultBg).trigger('change');
+
+          if ($('#useRemoteStations').is(':checked')) {
+            const url = $('#remoteStationsUrl').val().trim();
+            if (!url) {
+              $('#msg').text('Please enter a remote stations URL.');
+              return;
+            }
+            try {
+              const response = await fetch(url, {cache: CONFIG.DEFAULTS.FETCH_CACHE});
+              if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+              const remoteStations = await response.json();
+              validateStationData(remoteStations);
+              localStorage.setItem(CONFIG.STORAGE_KEYS.STATIONS, JSON.stringify(remoteStations));
+              loadStations();
+              displayStations();
+              $('#msg').text('Stations loaded from remote URL!');
+              debugLog("Remote stations loaded successfully", `Total: ${remoteStations.length}`);
+            } catch (e) {
+              $('#msg').text(`Error: ${e.message}`);
+              errorLog("Remote station loading failed", e);
+            }
+          } else {
+            localStorage.clear();
+            localStorage.removeItem(CONFIG.STORAGE_KEYS.EXCLUDE);
+            $('#excludeInput').val('');
+            localStorage.setItem(CONFIG.STORAGE_KEYS.THEME, CONFIG.DEFAULTS.THEME);
+            const defaultBg2 = $('#bgImageSelect option').eq(1).val() || '';
+            localStorage.setItem(CONFIG.STORAGE_KEYS.BACKGROUND, defaultBg2);
+            $('#themeSelect').val(CONFIG.DEFAULTS.THEME).trigger('change');
+            $('#bgImageSelect').val(defaultBg2).trigger('change');
+            saveStations();
+            loadStations();
+            displayStations();
+            $('#msg').text('Stations loaded from default list.');
+            debugLog("Local storage cleared and reset to defaults");
+          }
+        } catch (error) {
+          errorLog("clearStorage failed", error);
+          $('#msg').text("Error clearing storage");
+        }
+      });
+
+      $('#clearFavoritesBtn').on('click', () => {
+        try {
+          favorites = [];
+          localStorage.setItem(CONFIG.STORAGE_KEYS.FAVORITES, JSON.stringify(favorites));
+          displayStations();
+          $('.favorite-list').empty().hide();
+          $('#msg').text('Favorites cleared!');
+          debugLog("Favorites cleared");
+        } catch (error) {
+          errorLog("clearFavorites failed", error);
+        }
+      });
+
+      $(document).on('click', 'a.station-link', function(e) {
+        e.preventDefault();
+        playStation($(this).data('idx'));
+      });
+
+      $(document).on('click', '.fav-btn', function(e) {
+        try {
+          const stationId = $(this).data('id');
+          const idx = favorites.indexOf(stationId);
+          if (idx === -1) {
+            favorites.push(stationId);
+            $(this).text('★');
+            $(this).attr('aria-label', 'Remove from favorites');
+          } else {
+            favorites.splice(idx, 1);
+            $(this).text('☆');
+            $(this).attr('aria-label', 'Add to favorites');
+          }
+          localStorage.setItem(CONFIG.STORAGE_KEYS.FAVORITES, JSON.stringify(favorites));
+          if (isShowingFavorites) displayFavorites();
+          debugLog("Favorite toggled", `ID: ${stationId}, Total: ${favorites.length}`);
+        } catch (error) {
+          errorLog("favorite toggle failed", error);
+        }
+      });
+
+      $('#toggleButtons').on('click', function() {
+        $('#toggleButtonsGroup').toggle();
+      });
+
+      $('#bgImageSelect').on('change', function() {
+        $('body').css('background-image', 'url(' + $(this).val() + ')');
+      });
+
+      $('#themeSelect').on('change', function() {
+        $('body').removeClass().addClass($(this).val());
+        highlightActiveStation();
+      });
+
+      $('#categoryButtons button').on('click', function() {
+        try {
+          const $btn = $(this);
+          const category = $btn.data('cat');
+
+          if ($btn.hasClass('active-toggle')) {
+            $btn.removeClass('active-toggle');
+            stations = rawStations;
+          } else {
+            $('#categoryButtons button').removeClass('active-toggle');
+            $btn.addClass('active-toggle');
+            stations = category === 'all' ? rawStations : rawStations.filter(st => st.category === category);
+          }
+          displayStations();
+          adjustStationButtonWidths();
+          debugLog("Category filter changed", category);
+        } catch (error) {
+          errorLog("Category filter failed", error);
+        }
+      });
+
+      // ============================================================================
+      // AUDIO EVENT LISTENERS
+      // ============================================================================
+      /**
+       * Play event: Fired when audio playback starts
+       */
+      audio.addEventListener('play', function() {
+        try {
+          debugLog("Audio event: play", `Station: ${stations[currentIndex]?.name || 'Unknown'}`);
+          console.log(`▶ Playback started - ${new Date().toLocaleTimeString()}`);
+          
+          // Update message with load time if available
+          if (lastStationLoadTime > 0) {
+            const station = stations[currentIndex];
+            if (station) {
+              const stationName = station.name.replace(/\|/g, '');
+              $('#msg').text(`${station.id} ${stationName} (${lastStationLoadTime}s) - ${ErrorNumberLocal}`);
+              debugLog("Message updated with load time", `${lastStationLoadTime}s`);
+            }
+          }
+        } catch (error) {
+          errorLog("play event handler failed", error);
+        }
+      });
+
+      /**
+       * Pause event: Fired when audio playback is paused
+       */
+      audio.addEventListener('pause', function() {
+        try {
+          debugLog("Audio event: pause", `Current time: ${audio.currentTime}s`);
+          console.log(`⏸ Playback paused - ${new Date().toLocaleTimeString()}`);
+        } catch (error) {
+          errorLog("pause event handler failed", error);
+        }
+      });
+
+      /**
+       * Ended event: Fired when audio playback ends
+       * Automatically plays the next station
+       */
+      audio.addEventListener('ended', function() {
+        try {
+          debugLog("Audio event: ended", `Station completed: ${stations[currentIndex]?.name || 'Unknown'}`);
+          console.log(`✓ Playback ended - Auto-advancing to next station - ${new Date().toLocaleTimeString()}`);
+          
+          // Auto-advance to next station
+          if (isShowingFavorites && favorites.length) {
+            navigateFavorites(1);
+          } else {
+            navigateStations(1);
+          }
+          
+          $('#msg').text('Advancing to next station...');
+        } catch (error) {
+          errorLog("ended event handler failed", error);
+        }
+      });
+
+      /**
+       * Error event: Fired when audio loading or playback error occurs
+       * Provides detailed error information and user feedback
+       */
+      audio.addEventListener('error', function(e) {
+        try {
+          const errorCode = audio.error?.code;
+          let errorType = 'Unknown error';
+          
+          switch (errorCode) {
+            case audio.error?.MEDIA_ERR_ABORTED:
+              errorType = 'MEDIA_ERR_ABORTED (Playback aborted)';
+              ErrorNumberLocal=2001;
+              break;
+            case audio.error?.MEDIA_ERR_NETWORK:
+              errorType = 'MEDIA_ERR_NETWORK (Network error)';
+              ErrorNumberLocal=2002;
+              break;
+            case audio.error?.MEDIA_ERR_DECODE:
+              errorType = 'MEDIA_ERR_DECODE (Decode error)';
+              ErrorNumberLocal=2003;
+              break;
+            case audio.error?.MEDIA_ERR_SRC_NOT_SUPPORTED:
+              errorType = 'MEDIA_ERR_SRC_NOT_SUPPORTED (Source not supported)';
+              ErrorNumberLocal=2004;
+              break;
+            default:
+              errorType = 'UNKNOWN_ERROR';
+              ErrorNumberLocal=2005;
+          }
+          
+          debugLog("Audio event: error", `Code: ${errorCode}, Type: ${errorType}`);
+          console.error(`✗ Audio Error - ${errorType} - ${new Date().toLocaleTimeString()}`);
+          errorLog(`Audio playback error: ${errorType}`, e);
+        } catch (error) {
+          errorLog("error event handler failed", error);
+        }
+      });
+
+      /**
+       * CanPlay event: Fired when enough data is loaded to start playing
+       * Useful for showing ready status without necessarily playing
+       */
+      audio.addEventListener('canplay', function() {
+        try {
+          debugLog("Audio event: canplay", `Duration: ${audio.duration}s, Buffered: ${audio.buffered.length} range(s)`);
+          console.log(`♫ Ready to play - ${new Date().toLocaleTimeString()}`);
+        } catch (error) {
+          errorLog("canplay event handler failed", error);
+        }
+      });
+
+      /**
+       * LoadStart event: Fired when browser starts loading media
+       * Auto-plays station if delayLoadStation is true
+       * Keeps Media Session active with loading status for delayed stations
+       */
+      audio.addEventListener('loadstart', function() {
+        try {
+          const currentStation = stations[currentIndex];
+          
+          debugLog("Audio event: loadstart", `Loading initiated for station: ${currentStation?.name || 'Unknown'}`);
+          console.log(`⟳ Loading stream - ${new Date().toLocaleTimeString()}`);
+          
+          // Check if current station has delayLoadStation flag set to true
+          if (currentStation && currentStation.delayLoadStation === true) {
+            const stationName = currentStation.name.replace(/\|/g, '');
+            const stationId = currentStation.id;
+            
+            debugLog("DelayLoadStation enabled", `Auto-playing: ${currentStation.name}`);
+            console.log(`⏱ DelayLoadStation enabled - Auto-playing: ${stationName}`);
+            
+            // Keep Media Session active with loading status (use current load time if available)
+            const currentLoadTime = lastStationLoadTime > 0 ? ` (${lastStationLoadTime}s)` : '';
+            safeSetMediaMetadata(stationId + " " + stationName + currentLoadTime, "Loading stream (may take a moment)...");
+            
+            // Display loading message to user
+            $('#msg').text(`${stationId} ${stationName} - Loading stream...`);
+            
+            // Attempt to play with error handling
+            const delayTimeout = parseInt(localStorage.getItem(CONFIG.STORAGE_KEYS.DELAY_TIMEOUT) || CONFIG.DEFAULTS.DELAY_LOAD_TIMEOUT_MS);
+            setTimeout(() => {
+              try {
+                audio.play().catch(playError => {
+                  // Silently handle play errors and continue
+                  debugLog("DelayLoadStation play attempt failed", playError.message);
+                  console.warn(`⚠ Auto-play failed (moving on): ${playError.message}`);
+                });
+              } catch (playException) {
+                // Even if exception occurs, just log and continue
+                debugLog("DelayLoadStation play exception", playException.message);
+                console.warn(`⚠ Auto-play exception (moving on): ${playException.message}`);
+              }
+            }, delayTimeout); // Delay to ensure loadstart is fully processed
+          } else {
+            // For normal stations, do NOT display loading status
+            debugLog("Normal station loading", `No delayed loading for: ${currentStation?.name || 'Unknown'}`);
+          }
+        } catch (error) {
+          errorLog("loadstart event handler failed", error);
+        }
+      });
+
+      /**
+       * Progress event: Fired periodically while downloading
+       */
+      audio.addEventListener('progress', function() {
+        try {
+          if (audio.buffered.length > 0) {
+            const bufferedEnd = audio.buffered.end(audio.buffered.length - 1);
+            debugLog("Audio event: progress", `Buffered: ${(bufferedEnd / audio.duration * 100).toFixed(1)}%`);
+          }
+        } catch (error) {
+          errorLog("progress event handler failed", error);
+        }
+      });
+
+      /**
+       * TimeUpdate event: Fired when playback position changes
+       * Disabled logging to reduce console spam - enable if needed for debugging
+       */
+      audio.addEventListener('timeupdate', function() {
+        try {
+          // Uncomment below for detailed time logging:
+          // debugLog("Audio event: timeupdate", `Position: ${audio.currentTime.toFixed(2)}s / ${audio.duration.toFixed(2)}s`);
+        } catch (error) {
+          errorLog("timeupdate event handler failed", error);
+        }
+      });
+
+      debugLog("Application initialized successfully", `Version: ${appVersion}`);
+    } catch (error) {
+      errorLog("Document ready initialization failed", error);
+      $('#msg').text("Application initialization error. Check console.");
+    }
+  });
+
+  function handlePlaybackError(stationName, errorMessage) {
+    console.error(`Playback failed for "${stationName}": ${errorMessage}`);
+    $('.station-list').removeClass('loading');
+    const currentLoadTime = lastStationLoadTime > 0 ? ` (${lastStationLoadTime}s)` : '';
+    safeSetMediaMetadata(stationName.replace(/\|/g, ' ') + currentLoadTime, `Playback error: ${errorMessage}`);
+  }
+</script>
+</body>
+</html>
