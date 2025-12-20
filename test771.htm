@@ -295,7 +295,7 @@
   // ============================================================================
   // APPLICATION CONFIGURATION & CONSTANTS
   // ============================================================================
-  const appVersion = "7.7.0.3";
+  const appVersion = "7.7.0.4";
   const DEBUG_MODE = false;
 
   // Configuration object for centralized management
@@ -665,7 +665,7 @@ const rawStations = [
         setNavigationHandlers();
         debugLog("Station loaded and playing", `ID: ${stationId}, Name: ${stationName}, Load Time: ${lastStationLoadTime}s`);
       };
-      safeSetMediaMetadata(titleWithLoadTime, "Playing#0");
+      safeSetMediaMetadata(stationId + " " + stationName, "Initializing...##");
       if (specialLoadAttribute)
       {
         console.log('specialLoadAttribute...path');
