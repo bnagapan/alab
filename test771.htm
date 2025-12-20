@@ -295,7 +295,7 @@
   // ============================================================================
   // APPLICATION CONFIGURATION & CONSTANTS
   // ============================================================================
-  const appVersion = "7.7.0.1";
+  const appVersion = "7.7.0.2";
   const DEBUG_MODE = false;
 
   // Configuration object for centralized management
@@ -442,6 +442,7 @@
   let lastStationLoadTime = 0; // Store last station load time in seconds
   let ErrorNumberLocal = 0; // Global error code variable
   let specialLoadAttribute = false;
+  let titleWithLoadTime=0;
 const rawStations = [
   { id: 100, url: "aHR0cHM6Ly9yb2dlcnMtaGxzLmxlYW5zdHJlYW0uY28vcm9nZXJzL2hhbDk1Ny5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y N|e|w|s", category: "english", delayLoadStation: false, specialLoad: false },
   { id: 101, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: ". C|B|C R|a|d|i|o", category: "english", delayLoadStation: false, specialLoad: false },
@@ -659,7 +660,7 @@ const rawStations = [
         const loadTimeMs = performance.now() - stationLoadStartTime;
         lastStationLoadTime = parseFloat((loadTimeMs / 1000).toFixed(2)); // Convert to seconds with 2 decimals
         
-        const titleWithLoadTime = `${stationId} ${stationName} (${lastStationLoadTime}s)`;
+        titleWithLoadTime = `${stationId} ${stationName} (${lastStationLoadTime}s)`;
         safeSetMediaMetadata(titleWithLoadTime, "Playing");
         setNavigationHandlers();
         debugLog("Station loaded and playing", `ID: ${stationId}, Name: ${stationName}, Load Time: ${lastStationLoadTime}s`);
@@ -688,20 +689,24 @@ const rawStations = [
       }
       else if (decodedUrl.endsWith('.m3u8')) 
       {
-            debugLog("HLS stream detected", decodedUrl);
-            if (Hls.isSupported()) {
-            console.log('HLS supported stream');
-            const hls = new Hls();
-            hls.loadSource(decodedUrl);
-            hls.attachMedia(audio);
-            audio.hlsInstance = hls;
-            hls.on(Hls.Events.MANIFEST_PARSED, onCanPlay);
-            } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
-            audio.src = decodedUrl;
-            audio.addEventListener('canplaythrough', onCanPlay, { once: true });
-            } else {
-            handlePlaybackError(stationName, "HLS not supported on this browser.");
-            }
+console.log('specialLoadAttribute...#2..path');
+        if (audioPlayer.canPlayType("application/vnd.apple.mpegurl")) {
+          audioPlayer.src = decodedUrl;
+          $(audioPlayer).one("canplaythrough", function () {
+            audioPlayer.play().catch(handlePlaybackError);
+            console.log("canplaythrough-after play-m3u8");
+            safeSetMediaMetadata(titleWithLoadTime, "Playing#1");
+          });
+          $(audioPlayer).one("loadeddata", function () {
+            audioPlayer.play().catch(handlePlaybackError);
+            console.log("loadeddata-after play");
+            safeSetMediaMetadata(titleWithLoadTime, "Playing#2");
+          });
+          $(audioPlayer).one("loadstart", function () {
+            safeSetMediaMetadata(titleWithLoadTime, "Playing#3");
+            console.log("loadstart()-canPlayType(M3U8)");
+          });
+        }
       } 
       else {
 
@@ -1207,14 +1212,16 @@ function adjustStationButtonWidths() {
         try {
           const $btn = $(this);
           const category = $btn.data('cat');
-
+          //stations = rawStations;
           if ($btn.hasClass('active-toggle')) {
             $btn.removeClass('active-toggle');
             stations = rawStations;
+            console.log('fileter-1');
           } else {
             $('#categoryButtons button').removeClass('active-toggle');
             $btn.addClass('active-toggle');
             stations = category === 'all' ? rawStations : rawStations.filter(st => st.category === category);
+            console.log('fileter-2');
           }
           displayStations();
           adjustStationButtonWidths();
@@ -1240,7 +1247,7 @@ function adjustStationButtonWidths() {
             const station = stations[currentIndex];
             if (station) {
               const stationName = station.name.replace(/\|/g, '');
-              $('#msg').text(`${station.id} ${stationName} (${lastStationLoadTime}s) - ${ErrorNumberLocal}`);
+              $('#msg').text(`${station.id} ${stationName} (${lastStationLoadTime}s) - ${ErrorNumberLocal} # ${specialLoadAttribute}`);
               debugLog("Message updated with load time", `${lastStationLoadTime}s`);
             }
           }
