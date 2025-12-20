@@ -295,7 +295,7 @@
   // ============================================================================
   // APPLICATION CONFIGURATION & CONSTANTS
   // ============================================================================
-  const appVersion = "7.7.0.4";
+  const appVersion = "7.7.0.5";
   const DEBUG_MODE = false;
 
   // Configuration object for centralized management
@@ -674,15 +674,15 @@ const rawStations = [
           $(audioPlayer).one("canplaythrough", function () {
             audioPlayer.play().catch(handlePlaybackError);
             console.log("canplaythrough-after play-m3u8");
-            safeSetMediaMetadata(titleWithLoadTime, "Playing#1");
+            //safeSetMediaMetadata(titleWithLoadTime, "Playing#1");
           });
           $(audioPlayer).one("loadeddata", function () {
             audioPlayer.play().catch(handlePlaybackError);
             console.log("loadeddata-after play");
-            safeSetMediaMetadata(titleWithLoadTime, "Playing#2");
+            //safeSetMediaMetadata(titleWithLoadTime, "Playing#2");
           });
           $(audioPlayer).one("loadstart", function () {
-            safeSetMediaMetadata(titleWithLoadTime, "Playing#3");
+            //safeSetMediaMetadata(titleWithLoadTime, "Playing#3");
             console.log("loadstart()-canPlayType(M3U8)");
           });
         }
