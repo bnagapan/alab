@@ -63,6 +63,7 @@
   <button id="startBtn">Start</button>
   <button id="stopBtn">Stop</button>
   <button id="resetBtn">StartOver</button>
+  <button id="fullscreenBtn">Fullscreen</button>
 </div>
 
 <audio id="bgAudio" loop>
@@ -76,15 +77,82 @@
 
   let seconds = 0;
   let intervalId = null;
+  let wakeLock = null;
 
   const timerEl = document.getElementById("timer");
   const startBtn = document.getElementById("startBtn");
   const stopBtn = document.getElementById("stopBtn");
   const resetBtn = document.getElementById("resetBtn");
   const audio = document.getElementById("bgAudio");
+  const fullscreenBtn = document.getElementById("fullscreenBtn");
 
-  audio.loop = true;
+  audio.loop = true; // Ensure loop in JS for safety
   audio.preload = "auto";
+  // --- Fullscreen toggle logic ---
+  function isFullscreen() {
+    return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+  }
+
+  function requestFullscreen(elem) {
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen();
+    } else if (elem.webkitRequestFullscreen) {
+      elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) {
+      elem.msRequestFullscreen();
+    }
+  }
+
+  function exitFullscreen() {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+    }
+  }
+
+  fullscreenBtn.addEventListener("click", function() {
+    if (!isFullscreen()) {
+      requestFullscreen(document.documentElement);
+      fullscreenBtn.textContent = "Exit Fullscreen";
+    } else {
+      exitFullscreen();
+      fullscreenBtn.textContent = "Fullscreen";
+    }
+  });
+
+  // Update button text on fullscreen change
+  ["fullscreenchange", "webkitfullscreenchange", "msfullscreenchange"].forEach(event => {
+    document.addEventListener(event, function() {
+      fullscreenBtn.textContent = isFullscreen() ? "Exit Fullscreen" : "Fullscreen";
+    });
+  });
+
+  async function requestWakeLock() {
+    try {
+      if ('wakeLock' in navigator) {
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeLock.addEventListener('release', () => {
+          console.log('Wake Lock was released');
+        });
+      }
+    } catch (err) {
+      console.log('Wake Lock error:', err);
+    }
+  }
+
+  function releaseWakeLock() {
+    if (wakeLock) {
+      wakeLock.release();
+      wakeLock = null;
+    }
+  }
+
+  function updateTimerDisplay() {
+    timerEl.textContent = seconds;
+  }
 
   function startTimer() {
     if (intervalId !== null) return;
@@ -94,15 +162,17 @@
     // 🔢 show first second immediately
     if (seconds === 0) {
       seconds = 1;
-      timerEl.textContent = seconds;
     }
+    updateTimerDisplay();
 
     // 🔊 start audio (mobile-safe)
     audio.play().catch(() => {});
 
+    requestWakeLock();
+
     intervalId = setInterval(() => {
       seconds++;
-      timerEl.textContent = seconds;
+      updateTimerDisplay();
 
       if (seconds >= MAX_SECONDS) {
         stopTimer();
@@ -114,14 +184,33 @@
     clearInterval(intervalId);
     intervalId = null;
     audio.pause();
+    releaseWakeLock();
   }
 
   function resetTimer() {
     stopTimer();
     seconds = 0;
-    timerEl.textContent = "1";
+    updateTimerDisplay();
     timerEl.style.display = "none";
     audio.currentTime = 0;
+  }
+  // Warn user about background audio limitations
+  if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+    window.addEventListener('DOMContentLoaded', function() {
+      const warn = document.createElement('div');
+      warn.style.position = 'fixed';
+      warn.style.bottom = '0';
+      warn.style.left = '0';
+      warn.style.width = '100%';
+      warn.style.background = 'rgba(0,0,0,0.8)';
+      warn.style.color = '#fff';
+      warn.style.textAlign = 'center';
+      warn.style.padding = '8px 0';
+      warn.style.zIndex = '9999';
+      warn.textContent = 'Note: Audio and timer will pause if your phone is locked or you leave this page. This is a browser security limitation.';
+      document.body.appendChild(warn);
+      setTimeout(() => warn.remove(), 10000);
+    });
   }
 
   startBtn.addEventListener("click", startTimer);
