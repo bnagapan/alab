@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Timer Page</title>
+
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    font-family: Arial, sans-serif;
+  }
+
+  body {
+    background-image: url("https://raw.githubusercontent.com/bnagapan/alab/main/images/sshhiva.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  #controls {
+    position: absolute;
+    top: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+  }
+
+  button {
+    padding: 14px 28px;
+    font-size: 18px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0.75);
+    color: #fff;
+  }
+
+  #timer {
+    position: absolute;
+    top: 15%;
+    right: 15%;
+    font-size: 35px; /* +25% */
+    font-weight: bold;
+    color: #fff;
+    display: none;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 12px 18px;
+    border-radius: 6px;
+  }
+</style>
+</head>
+
+<body>
+
+<div id="timer">1</div>
+
+<div id="controls">
+  <button id="startBtn">Start</button>
+  <button id="stopBtn">Stop</button>
+  <button id="resetBtn">StartOver</button>
+</div>
+
+<audio id="bgAudio" loop>
+  <source src="https://raw.githubusercontent.com/bnagapan/alab/main/audio/oo-mm-1.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+  /* ================= CONFIG ================= */
+  const MAX_SECONDS = 60;
+  /* ========================================== */
+
+  let seconds = 0;
+  let intervalId = null;
+
+  const timerEl = document.getElementById("timer");
+  const startBtn = document.getElementById("startBtn");
+  const stopBtn = document.getElementById("stopBtn");
+  const resetBtn = document.getElementById("resetBtn");
+  const audio = document.getElementById("bgAudio");
+
+  audio.loop = true;
+  audio.preload = "auto";
+
+  function startTimer() {
+    if (intervalId !== null) return;
+
+    timerEl.style.display = "block";
+
+    // 🔢 show first second immediately
+    if (seconds === 0) {
+      seconds = 1;
+      timerEl.textContent = seconds;
+    }
+
+    // 🔊 start audio (mobile-safe)
+    audio.play().catch(() => {});
+
+    intervalId = setInterval(() => {
+      seconds++;
+      timerEl.textContent = seconds;
+
+      if (seconds >= MAX_SECONDS) {
+        stopTimer();
+      }
+    }, 1000);
+  }
+
+  function stopTimer() {
+    clearInterval(intervalId);
+    intervalId = null;
+    audio.pause();
+  }
+
+  function resetTimer() {
+    stopTimer();
+    seconds = 0;
+    timerEl.textContent = "1";
+    timerEl.style.display = "none";
+    audio.currentTime = 0;
+  }
+
+  startBtn.addEventListener("click", startTimer);
+  stopBtn.addEventListener("click", stopTimer);
+  resetBtn.addEventListener("click", resetTimer);
+</script>
