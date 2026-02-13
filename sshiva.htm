@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Timer Page</title>
+<title>M e d i d a t i o n - v 1.1</title>
 
 <style>
   html, body {
@@ -23,9 +23,9 @@
 
   #controls {
     position: absolute;
-    top: 5%;
-    left: 50%;
-    transform: translateX(-50%);
+    top: 8%;
+    left: 25%; /* 50% - 15% = 35% for -15% horizontal shift */
+    transform: translateY(-50%);
     display: flex;
     gap: 12px;
   }
@@ -38,6 +38,22 @@
     cursor: pointer;
     background: rgba(0, 0, 0, 0.75);
     color: #fff;
+  }
+
+  #maxMinutesInput {
+    width: 60px;
+    font-size: 18px;
+    padding: 14px 8px; /* Match button vertical padding */
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-left: 8px;
+    background: rgba(255,255,255,0.85);
+    color: #222;
+    text-align: center;
+    height: 48px; /* Match button height (14px top + 14px bottom + 20px font) */
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
   }
 
   #timer {
@@ -63,21 +79,24 @@
   <button id="startBtn">Start</button>
   <button id="stopBtn">Stop</button>
   <button id="resetBtn">StartOver</button>
+  <input id="maxMinutesInput" type="number" min="1" max="120" value="5" title="Max Minutes" />
   <button id="fullscreenBtn">Fullscreen</button>
 </div>
 
-<audio id="bgAudio" loop>
+<audio id="bgAudio">
   <source src="https://raw.githubusercontent.com/bnagapan/alab/main/audio/oo-mm-1.mp3" type="audio/mpeg">
 </audio>
 
 <script>
   /* ================= CONFIG ================= */
-  const MAX_SECONDS = 60;
+  let MAX_MINUTES = 5; // Default value, can be changed by user
+  let MAX_SECONDS = MAX_MINUTES * 60;
   /* ========================================== */
 
   let seconds = 0;
   let intervalId = null;
   let wakeLock = null;
+  let audioEndedHandler = null;
 
   const timerEl = document.getElementById("timer");
   const startBtn = document.getElementById("startBtn");
@@ -85,8 +104,21 @@
   const resetBtn = document.getElementById("resetBtn");
   const audio = document.getElementById("bgAudio");
   const fullscreenBtn = document.getElementById("fullscreenBtn");
+  const maxMinutesInput = document.getElementById("maxMinutesInput");
+  // Update MAX_MINUTES and MAX_SECONDS when input changes
+  maxMinutesInput.addEventListener('change', function() {
+    let val = parseInt(maxMinutesInput.value, 10);
+    if (!isNaN(val) && val > 0 && val <= 120) {
+      MAX_MINUTES = val;
+      MAX_SECONDS = MAX_MINUTES * 60;
+      // If timer is running, stop and reset
+      resetTimer();
+    } else {
+      maxMinutesInput.value = MAX_MINUTES;
+    }
+  });
 
-  audio.loop = true; // Ensure loop in JS for safety
+  audio.loop = false; // Looping handled in JS only
   audio.preload = "auto";
   // --- Fullscreen toggle logic ---
   function isFullscreen() {
@@ -116,7 +148,7 @@
   fullscreenBtn.addEventListener("click", function() {
     if (!isFullscreen()) {
       requestFullscreen(document.documentElement);
-      fullscreenBtn.textContent = "Exit Fullscreen";
+      fullscreenBtn.textContent = "Exit FS";
     } else {
       exitFullscreen();
       fullscreenBtn.textContent = "Fullscreen";
@@ -126,7 +158,7 @@
   // Update button text on fullscreen change
   ["fullscreenchange", "webkitfullscreenchange", "msfullscreenchange"].forEach(event => {
     document.addEventListener(event, function() {
-      fullscreenBtn.textContent = isFullscreen() ? "Exit Fullscreen" : "Fullscreen";
+      fullscreenBtn.textContent = isFullscreen() ? "Exit FS" : "Fullscreen";
     });
   });
 
@@ -155,18 +187,41 @@
   }
 
   function startTimer() {
+    // If timer finished, resume from where left off (if not reset)
     if (intervalId !== null) return;
 
     timerEl.style.display = "block";
 
-    // 🔢 show first second immediately
-    if (seconds === 0) {
+    // If timer reached max, resume from where left off or restart if at max
+    if (seconds >= MAX_SECONDS) {
+      // Resume: start from current seconds, play audio
+      // If user wants to restart, they should use StartOver
+      // Optionally, could reset to 1, but here we resume
+      // Optionally, could reset to 0, but here we resume
+      // Just play audio and continue
+    } else if (seconds === 0) {
       seconds = 1;
     }
     updateTimerDisplay();
 
     // 🔊 start audio (mobile-safe)
-    audio.play().catch(() => {});
+    // Ensure audio loops until timer ends
+    if (audioEndedHandler) {
+      audio.removeEventListener('ended', audioEndedHandler);
+    }
+    audioEndedHandler = function() {
+      // Only loop if timer is still running
+      if (intervalId !== null && seconds < MAX_SECONDS) {
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
+      }
+    };
+    audio.addEventListener('ended', audioEndedHandler);
+    // Always reset and play from start when timer starts or resumes
+    if (seconds < MAX_SECONDS) {
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+    }
 
     requestWakeLock();
 
@@ -184,6 +239,10 @@
     clearInterval(intervalId);
     intervalId = null;
     audio.pause();
+    if (audioEndedHandler) {
+      audio.removeEventListener('ended', audioEndedHandler);
+      audioEndedHandler = null;
+    }
     releaseWakeLock();
   }
 
@@ -194,6 +253,12 @@
     timerEl.style.display = "none";
     audio.currentTime = 0;
   }
+
+  // StartOver: reset and start immediately
+  resetBtn.addEventListener("click", function() {
+    resetTimer();
+    startTimer();
+  });
   // Warn user about background audio limitations
   if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
     window.addEventListener('DOMContentLoaded', function() {
@@ -215,5 +280,4 @@
 
   startBtn.addEventListener("click", startTimer);
   stopBtn.addEventListener("click", stopTimer);
-  resetBtn.addEventListener("click", resetTimer);
 </script>
