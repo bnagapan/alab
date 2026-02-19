@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>M e d i d a t i o n - v 1.1</title>
+
+<style>
+    #clock {
+      position: fixed;
+      bottom: 38px; /* 18px + 20px */
+      right: 24px;
+      font-size: 70px;
+      color: gold;
+      background: rgba(0,0,0,0.6);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      z-index: 1000;
+      border: 2px solid gold;
+      box-shadow: 0 0 8px gold;
+    }
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    font-family: Arial, sans-serif;
+  }
+
+  body {
+    background-image: url("https://raw.githubusercontent.com/bnagapan/alab/main/images/sshhiva.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  #controls {
+    position: absolute;
+    top: 8%;
+    left: 25%; /* 50% - 15% = 35% for -15% horizontal shift */
+    transform: translateY(-50%);
+    display: flex;
+    gap: 12px;
+  }
+
+  button {
+    padding: 14px 28px;
+    font-size: 18px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0.75);
+    color: #fff;
+  }
+
+  #maxMinutesInput {
+    width: 60px;
+    font-size: 18px;
+    padding: 14px 8px; /* Match button vertical padding */
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-left: 8px;
+    background: rgba(255,255,255,0.85);
+    color: #222;
+    text-align: center;
+    height: 48px; /* Match button height (14px top + 14px bottom + 20px font) */
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+  }
+
+  #timer {
+    position: absolute;
+    top: 15%;
+    right: 15%;
+    font-size: 35px; /* +25% */
+    font-weight: bold;
+    color: #fff;
+    display: none;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 12px 18px;
+    border-radius: 6px;
+  }
+  #minutesLabel {
+    color: gold;
+    font-weight: bold;
+  }
+</style>
+</head>
+
+<body>
+<div id="clock"></div>
+
+<div id="timer"><span id="minutesLabel">0</span> min (<span id="secondsLabel">1</span> sec )</div>
+
+<div id="controls">
+  <button id="startBtn">Start</button>
+  <button id="stopBtn">Stop</button>
+  <button id="resetBtn">StartOver</button>
+  <input id="maxMinutesInput" type="number" min="1" max="120" value="5" title="Max Minutes" />
+  <button id="fullscreenBtn">Fullscreen</button>
+</div>
+
+<audio id="bgAudio">
+  <source src="https://raw.githubusercontent.com/bnagapan/alab/main/audio/oo-mm-1.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+    // Clock display logic
+    function updateClock() {
+      const now = new Date();
+      let hours = now.getHours();
+      const minutes = now.getMinutes();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12; // 0 should be 12
+      const minsStr = minutes < 10 ? '0' + minutes : minutes;
+      const timeStr = hours + ':' + minsStr + ' ' + ampm;
+      document.getElementById('clock').textContent = timeStr;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+  /* ================= CONFIG ================= */
+  let MAX_MINUTES = 5; // Default value, can be changed by user
+  let MAX_SECONDS = MAX_MINUTES * 60;
+  /* ========================================== */
+
+  let seconds = 0;
+  let intervalId = null;
+  let wakeLock = null;
+  let audioEndedHandler = null;
+
+  const timerEl = document.getElementById("timer");
+  const startBtn = document.getElementById("startBtn");
+  const stopBtn = document.getElementById("stopBtn");
+  const resetBtn = document.getElementById("resetBtn");
+  const audio = document.getElementById("bgAudio");
+  const fullscreenBtn = document.getElementById("fullscreenBtn");
+  const maxMinutesInput = document.getElementById("maxMinutesInput");
+  // Update MAX_MINUTES and MAX_SECONDS when input changes
+  maxMinutesInput.addEventListener('change', function() {
+    let val = parseInt(maxMinutesInput.value, 10);
+    if (!isNaN(val) && val > 0 && val <= 120) {
+      MAX_MINUTES = val;
+      MAX_SECONDS = MAX_MINUTES * 60;
+      // If timer is running, stop and reset
+      resetTimer();
+    } else {
+      maxMinutesInput.value = MAX_MINUTES;
+    }
+  });
+
+  audio.loop = false; // Looping handled in JS only
+  audio.preload = "auto";
+  // --- Fullscreen toggle logic ---
+  function isFullscreen() {
+    return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+  }
+
+  function requestFullscreen(elem) {
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen();
+    } else if (elem.webkitRequestFullscreen) {
+      elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) {
+      elem.msRequestFullscreen();
+    }
+  }
+
+  function exitFullscreen() {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+    }
+  }
+
+  fullscreenBtn.addEventListener("click", function() {
+    if (!isFullscreen()) {
+      requestFullscreen(document.documentElement);
+      fullscreenBtn.textContent = "Exit FS";
+    } else {
+      exitFullscreen();
+      fullscreenBtn.textContent = "Fullscreen";
+    }
+  });
+
+  // Update button text on fullscreen change
+  ["fullscreenchange", "webkitfullscreenchange", "msfullscreenchange"].forEach(event => {
+    document.addEventListener(event, function() {
+      fullscreenBtn.textContent = isFullscreen() ? "Exit FS" : "Fullscreen";
+    });
+  });
+
+  async function requestWakeLock() {
+    try {
+      if ('wakeLock' in navigator) {
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeLock.addEventListener('release', () => {
+          console.log('Wake Lock was released');
+        });
+      }
+    } catch (err) {
+      console.log('Wake Lock error:', err);
+    }
+  }
+
+  function releaseWakeLock() {
+    if (wakeLock) {
+      wakeLock.release();
+      wakeLock = null;
+    }
+  }
+
+  function updateTimerDisplay() {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    document.getElementById("minutesLabel").textContent = minutes;
+    document.getElementById("secondsLabel").textContent = secs;
+  }
+
+  function startTimer() {
+    // If timer finished, resume from where left off (if not reset)
+    if (intervalId !== null) return;
+
+    timerEl.style.display = "block";
+
+    // If timer reached max, resume from where left off or restart if at max
+    if (seconds >= MAX_SECONDS) {
+      // Resume: start from current seconds, play audio
+      // If user wants to restart, they should use StartOver
+      // Optionally, could reset to 1, but here we resume
+      // Optionally, could reset to 0, but here we resume
+      // Just play audio and continue
+    } else if (seconds === 0) {
+      seconds = 1;
+    }
+    updateTimerDisplay();
+
+    // 🔊 start audio (mobile-safe)
+    // Ensure audio loops until timer ends
+    if (audioEndedHandler) {
+      audio.removeEventListener('ended', audioEndedHandler);
+    }
+    audioEndedHandler = function() {
+      // Only loop if timer is still running
+      if (intervalId !== null && seconds < MAX_SECONDS) {
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
+      }
+    };
+    audio.addEventListener('ended', audioEndedHandler);
+    // Always reset and play from start when timer starts or resumes
+    if (seconds < MAX_SECONDS) {
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+    }
+
+    requestWakeLock();
+
+    intervalId = setInterval(() => {
+      seconds++;
+      updateTimerDisplay();
+
+      if (seconds >= MAX_SECONDS) {
+        stopTimer();
+      }
+    }, 1000);
+  }
+
+  function stopTimer() {
+    clearInterval(intervalId);
+    intervalId = null;
+    audio.pause();
+    if (audioEndedHandler) {
+      audio.removeEventListener('ended', audioEndedHandler);
+      audioEndedHandler = null;
+    }
+    releaseWakeLock();
+  }
+
+  function resetTimer() {
+    stopTimer();
+    seconds = 0;
+    updateTimerDisplay();
+    timerEl.style.display = "none";
+    audio.currentTime = 0;
+  }
+
+  // StartOver: reset and start immediately
+  resetBtn.addEventListener("click", function() {
+    resetTimer();
+    startTimer();
+  });
+  // Warn user about background audio limitations
+  if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+    window.addEventListener('DOMContentLoaded', function() {
+      const warn = document.createElement('div');
+      warn.style.position = 'fixed';
+      warn.style.bottom = '0';
+      warn.style.left = '0';
+      warn.style.width = '100%';
+      warn.style.background = 'rgba(0,0,0,0.8)';
+      warn.style.color = '#fff';
+      warn.style.textAlign = 'center';
+      warn.style.padding = '8px 0';
+      warn.style.zIndex = '9999';
+      warn.textContent = 'Note: Audio and timer will pause if your phone is locked or you leave this page. This is a browser security limitation.';
+      document.body.appendChild(warn);
+      setTimeout(() => warn.remove(), 10000);
+    });
+  }
+
+  startBtn.addEventListener("click", startTimer);
+  stopBtn.addEventListener("click", stopTimer);
+</script>
