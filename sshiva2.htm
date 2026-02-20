@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>M e d i d a t i o n - v 1.1</title>
+<title>M e d i d a t i o n - v 2.1</title>
 
 <style>
     #clock {
       position: fixed;
-      bottom: 38px; /* 18px + 20px */
+      bottom: 23%; /* moved 15% higher from bottom */
       right: 24px;
       font-size: 70px;
       color: gold;
@@ -17,8 +17,8 @@
       border-radius: 6px;
       font-weight: bold;
       z-index: 1000;
-      border: 2px solid gold;
-      box-shadow: 0 0 8px gold;
+      border: 2px solid #FFD700; /* golden default */
+      box-shadow: 0 0 8px #FFD700;
     }
   html, body {
     margin: 0;
@@ -108,6 +108,7 @@
 
 <script>
     // Clock display logic
+    let lastMinute = null;
     function updateClock() {
       const now = new Date();
       let hours = now.getHours();
@@ -117,7 +118,22 @@
       hours = hours ? hours : 12; // 0 should be 12
       const minsStr = minutes < 10 ? '0' + minutes : minutes;
       const timeStr = hours + ':' + minsStr + ' ' + ampm;
-      document.getElementById('clock').textContent = timeStr;
+      const clockEl = document.getElementById('clock');
+      clockEl.textContent = timeStr;
+      // Border color logic - only update on minute change
+      if (lastMinute !== minutes) {
+        const borderColors = [
+          '#FFD700', // Golden
+          '#00C853', // Green
+          '#2979FF', // Blue
+          '#FF9100', // Orange
+          '#D50000'  // Red
+        ];
+        const colorIdx = minutes % borderColors.length;
+        clockEl.style.borderColor = borderColors[colorIdx];
+        clockEl.style.boxShadow = `0 0 8px ${borderColors[colorIdx]}`;
+        lastMinute = minutes;
+      }
     }
     setInterval(updateClock, 1000);
     updateClock();
