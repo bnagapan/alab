@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P l a y || R a d i o || S t r e a m</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+	
+
+	
+        /* Basic reset */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+		
+		body {
+		background-image: url('https://raw.githubusercontent.com/bnagapan/alab/refs/heads/main/images/bk102_sha.png');
+		//background-image: url('https://groupbenefits.manulife.ca/gb/member-portal/assets/ciam-sign-in-DWxAuxYg.png'); /* Replace with the actual image URL */
+		background-size:cover; /* Ensures the image covers the whole page */
+		background-position: center; /* Centers the image */
+		background-repeat: no-repeat; /* Prevents repeating */
+		background-attachment: fixed; /* Keeps the image fixed while scrolling */
+		}
+
+        /* Main container */
+        #content {
+            padding: 20px;
+            max-width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        /* Header */
+        h1 {
+            font-size: 26px;
+            margin-bottom: 20px;
+        }
+		
+		/* Container for the main control buttons */
+    #controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px; /* Space between buttons */
+        margin-bottom: 15px;
+    }
+
+    /* Styling for the grouped buttons */
+    .control-btn {
+        padding: 12px;
+        background-color: #1e90ff; /* Dodger Blue */
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 16px;
+        width: 100px;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    .control-btn:hover {
+        background-color: #1c74d4; /* Slightly darker Dodger Blue */
+    }
+		
+       /* Styling for play button container and inner button - match other controls */
+    #link {
+        display: inline-block;
+        background-color: transparent;
+        text-decoration: none;
+        margin-bottom: 10px;
+        cursor: pointer;
+    }
+
+   /* #playButton {
+        display: inline-block;
+        padding: 12px; /* same padding as other buttons to match height */
+        background-color: #1e90ff; /* match other control buttons (Dodger Blue) */
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 16px;
+        width: 150px; /* same width as other buttons */
+        max-width: 100%;
+        box-sizing: border-box;
+        text-align: center;
+        line-height: 1.2; /* ensure proper vertical alignment */
+        cursor: pointer;
+    }*/
+
+    #playButton:hover { background-color: #1c74d4; }
+
+    /* Ensure playButton shrinks on small screens to remain usable */
+    @media (max-width: 420px) {
+        #playButton { width: 100% !important; padding: 10px; font-size: 15px; }
+    }
+	
+	/* --- New Styles for Control Buttons --- */
+.control-btn {
+  padding: 12px;
+  background-color: #1e90ff; /* Dodger Blue */
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 16px;
+  width: 100px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.control-btn:hover {
+  background-color: #1c74d4; /* Slightly darker Dodger Blue */
+}	
+	
+/* --- Updated Button Wrapper Layout --- */
+.button-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 10px; /* Space between buttons */
+  margin-top: 10px;
+  margin-left:10px;
+  margin-right:10px;
+
+}
+
+/* --- Updated Styles for Button Wrapper Elements --- */
+/* Replace any existing styles for these IDs with the following if not already present */
+#playButton,#prevButton,#nextButton {
+  display: inline-block;
+  padding: 12px;
+  background-color: #1e90ff; /* Dodger Blue */
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  font-size: 16px;
+  width: 150px;
+  max-width: 300px;
+  text-align: center;
+  cursor: pointer;
+}
+
+#listButton,#btnClear,#toggleButton,#favoritesButton,#template2Button,#englishButton, #showHideButton {
+  display: inline-block;
+  padding: 12px;
+  background-color: #1e90ff; /* Dodger Blue */
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  font-size: 16px;
+  width: 100px;
+  max-width: 120px;
+  text-align: center;
+  cursor: pointer;
+}
+
+#listButton:hover,
+#btnClear:hover,
+#toggleButton:hover,
+#prevButton:hover,
+#nextButton:hover,
+#favoritesButton:hover, #template2Button:hover, #englishButton:hover {
+  background-color: #1c74d4; /* Slightly darker Dodger Blue for hover */
+}
+		
+		/* Styling for the Favorites button 
+		#favoritesButton {
+		padding: 12px;
+		background-color: #1e90ff; /* Dodger Blue */
+		color: white;
+		text-decoration: none;
+		border-radius: 5px;
+		font-size: 16px;
+		width: 50%;
+		text-align: center;
+		cursor: pointer;
+		display: inline-block;
+		}*/
+
+		#favoritesButton:hover {
+		background-color: #1c74d4; /* Slightly darker Dodger Blue for hover */
+		}
+
+        /* Audio player */
+        .audio-player {
+            width: 100%;
+            margin-top: 20px;
+            max-width: 400px;
+        }
+		
+		 video::-webkit-media-controls-fullscreen-button {
+            display: none;
+        }
+		
+        /* Styling for the station list */
+        #stationList {
+            margin-top: 20px;
+        }
+		#stationList div {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		background-color: #f8f9fa;
+		padding: 12px;
+		margin-bottom: 10px;
+		border-radius: 4px;
+		font-size: 16px;
+		cursor: pointer;
+		width: 70%;
+		max-width: 250px;
+		margin-left: auto;
+		margin-right: auto;
+		text-align: left;
+		}
+
+		/* When the page is in a "media screen" state (playing / media session active)
+           reduce each station list item's width by ~10% to make room for media UI */
+		.media-screen #stationList div {
+			width: 70% !important;
+			max-width: 270px !important;
+		}
+
+		#stationList div button {
+		background: none;
+		border: none;
+		font-size: 18px;
+		cursor: pointer;
+		color: #ffcc00; /* Gold for favorite, change if needed */
+		flex-shrink: 0;
+		}
+
+        #stationList div:hover {
+            background-color: #e9ecef;
+        }
+        #stationList div.active {
+            background-color: #007bff;
+            color: white;
+        }
+        /* Responsiveness for small screens */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 22px;
+            }
+            
+            #link, #listButton, #template2Button, #prevButton, #nextButton, #stationList div {
+                font-size: 14px;
+                padding: 10px;
+                width: 90%;
+                max-width: 280px;
+            }
+        }
+
+        /* iOS / small device improvements (target iPhone 11 and similar) */
+        html, body {
+            -webkit-text-size-adjust: 100%;
+            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+            box-sizing: border-box;
+        }
+        *, *::before, *::after { box-sizing: inherit; }
+
+        /* Constrain content for phone widths and center */
+        #content {
+            margin: 0 auto;
+            max-width: 420px; /* iPhone 11 width ~414px */
+            padding: 14px;
+        }
+
+        /* Allow button wrapper to wrap and make buttons flexible */
+        .button-wrapper { flex-wrap: wrap; align-items: center; }
+        .button-wrapper > div, #buttonWrapper > div {
+            flex: 1 1 48%;
+            min-width: 140px;
+            margin: 6px;
+            -webkit-appearance: none;
+        }
+
+        /* Remove unexpected native iOS styles on clickable elements */
+        a#link, #listButton, #template2Button, #prevButton, #nextButton, #toggleButton, #btnClear, #favoritesButton, #englishButton {
+            -webkit-appearance: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Small-screen specific overrides */
+        @media (max-width: 420px) {
+            .button-wrapper { gap: 8px; }
+            a#link, #listButton, #template2Button, #prevButton, #nextButton, #toggleButton, #btnClear, #favoritesButton, #englishButton {
+                width: 100% !important;
+                max-width: none !important;
+                font-size: 15px;
+                padding: 10px;
+            }
+            #stationList div {
+                width: 100% !important;
+                max-width: none !important;
+                padding: 10px;
+                font-size: 15px;
+            }
+            #audioContainer audio { width: 100%; height: 48px; }
+            table { width: 100%; }
+            td { padding: 4px; }
+            #content { padding: 10px; }
+        }
+
+        /* iPhone 11 / Safari specific tweak: reduce station list item width */
+        @media only screen and (device-width: 414px) and (max-width: 420px) and (-webkit-min-device-pixel-ratio: 2) {
+            #stationList div {
+                width: 70% !important;
+                max-width: 280px !important;
+            }
+        }
+
+        #output {
+            display: none;
+        }
+
+        /* hide target controls when collapsed (hidden by default) */
+        body.controls-collapsed #listButton,
+        body.controls-collapsed #englishButton,
+        body.controls-collapsed #template2Button,
+        body.controls-collapsed #favoritesButton,
+        body.controls-collapsed #excludeInput,
+        body.controls-collapsed #toggleButton,
+        body.controls-collapsed #btnClear {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="content">
+        <h1>R | a | d | i | o</h1>
+        v 27.3.9.3<br><br>
+        <table border="0" cellspacing="3" cellpadding="3" align="center">
+        <tr>
+            <!-- Navigation buttons -->
+            <td> <div id="prevButton">&nbsp;⏮ &nbsp;</div> </td>
+
+            <td>
+                <!-- Clickable link to start the radio playlist -->
+                <div id="playButton">&nbsp;▶&nbsp;</div>
+            </td>
+            <td>        <div id="nextButton">&nbsp;⏭&nbsp;</div></td>
+        </tr>
+        <tr>
+            <td colspan="3"> 
+                <!-- Button to list all stations -->
+				<div id="buttonWrapper" class="button-wrapper">
+						<div id="showHideButton">Show</div>
+                        <div id="listButton" onclick="loadOriginalStations()">All Stations</div>
+                        <div id="englishButton" onclick="loadEnglishStations()">English</div>
+                        <!-- New Template 2 button -->
+                        <div id="template2Button" onclick="loadTemplate2()">Template 2</div>
+                        <div id="favoritesButton" onclick="listFavorites()">⭐ Favorites</div>
+                        <!-- Exclude IDs input -->
+                        <input id="excludeInput" placeholder="Exclude IDs (e.g. 1,4,7)"
+                            style="padding:10px;border-radius:5px;border:1px solid #ccc;width:150px;max-width:100%;"
+                            oninput="updateExcludedIds(this.value)" title="Type comma-separated station IDs to exclude" />
+
+				</div>
+
+            </td>
+           
+        </tr>
+       
+        <tr>
+            <td colspan="3">            
+              <div id="toggleButton" onclick="toggleTextArea()">Logs</div>
+              <div id="btnClear" onclick="clearData()">Clear</div>
+            </td>
+        </tr>
+		 <tr>
+            <td colspan="3">
+                <!-- Dynamic Audio player elements will be appended here -->
+                <div id="audioContainer"></div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3"><textarea id="output" name="w3review" rows="15" cols="65" style="display:none">
+    At w3schools.com you will learn how to make a website. They offer free tutorials in all web development technologies.
+    </textarea></td>
+        </tr>
+        </table>
+    </div>
+
+    <div id="stationList"></div>
+
+    <script>
+var currentStationIndex = 0;
+    var audioPlayer = document.createElement("audio");
+    var hls = null; // Single instance of HLS.js
+    var excludedIds = []; // station ids to exclude from display
+
+    audioPlayer.controls = true;
+    audioPlayer.autoplay = true;
+    audioPlayer.setAttribute("playsinline", "true");
+
+    document.getElementById("audioContainer").appendChild(audioPlayer);
+	
+		 // Base64 encoded station URLs
+        var originalStations  = [
+            { id: 1, url: "aHR0cHM6Ly9yb2dlcnMtaGxzLmxlYW5zdHJlYW0uY28vcm9nZXJzL2hhbDk1Ny5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y N|e|w|s" },
+            { id: 2, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: ". C|B|C R|a|d|i|o" },
+			{ id: 3, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NDI4L2F1ZGlv", name: ". Hello F|M" },
+            { id: 4, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NTQzL2F1ZGlv", name: ". M|i|r|c|y F|M" },
+            { id: 5, url: "aHR0cHM6Ly9zdHJ3My5vcGVuc3RyZWFtLmNvLzEzMTE=", name: ". R|a|d|i|o| |c|i|t|y F|M" },
+			{ id: 6, url: "aHR0cDovL2Fpci5wYy5jZG4uYml0Z3Jhdml0eS5jb20vYWlyL2xpdmUvcGJhdWRpbzA3OC9tYXN0ZXIubTN1OA==", name: ". D|h|a|r|a|m|a|p|u|r|i F|M" }	,		
+            { id: 7, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9hYWQ0ZTUxcXo3enV2", name: ". KS Chitra FM" },
+            { id: 8, url: "aHR0cDovL3BzcmxpdmUyLmxpc3Rlbm9uLmluL2lybGl0ZT9haD0wZTgxNzQ5ZTM3Nzg5ZTVmYjhjMjkwOTI2Y2U4N2UzZg==", name: ". I|l|a|y|a|r|a|j|a Lite R|a|d|i|o" },
+            { id: 9, url: "aHR0cDovL3BzcmxpdmUyLmxpc3Rlbm9uLmluL2lyYmVhdD9haD0wZTgxNzQ5ZTM3Nzg5ZTVmYjhjMjkwOTI2Y2U4N2UzZg==", name: ". I|l|a|y|a|r|a|j|a R|a|d|i|o" },
+            { id: 10, url: "aHR0cDovL3BzcmxpdmUyLmxpc3Rlbm9uLmluL2FycmxpdGU/YWg9MGU4MTc0OWUzNzc4OWU1ZmI4YzI5MDkyNmNlODdlM2Y=", name: ". A|R| R|a|h|m|a|n Lite" },
+            { id: 11, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtLzBjeXMyaDQxdzBodnY=", name: ". A|R|R F|M" }                
+           
+        ];
+	
+			// Start with the original stations
+		var stations = originalStations.slice();
+
+		// Template 2 stations list (provided)
+		var template2Stations = [
+			{ id: 1, url: "aHR0cHM6Ly9yb2dlcnMtaGxzLmxlYW5zdHJlYW0uY28vcm9nZXJzL2hhbDk1Ny5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y N|e|w|s" },
+			{ id: 2, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQxMDUwL0VTX1JQVkMvbWFzdGVyLm0zdTg=", name: ". C|B|C R|a|d|i|o" },
+			{ id: 3, url: "aHR0cHM6Ly9jaGktbGl2ZTEtYWlzLXJlbGF5MS5sZWFuc3RyZWFtLmNvL3JvZ2Vycy90b3I2ODAuc3RyZWFtL3BsYXlsaXN0Lm0zdDg=", name: ". C|B|C| |T|o|r|o|n|t|o" },
+			{ id: 4, url: "aHR0cHM6Ly9oZWwtYWlzLWVkZ2UxLmxlYW5zdHJlYW0uY28vcm9nZXJzL3RvcjY4MC5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y| |N|e|w|s| |T|o|r|o|n|t|o" },
+			{ id: 5, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NDI4L2F1ZGlv", name: ". Hello F|M" },
+			{ id: 5, url: "aHR0cHM6Ly9saXN0ZW4ub3BlbnN0cmVhbS5jby80NTQzL2F1ZGlv", name: ". M|i|r|c|y F|M" },
+			{ id: 6, url: "aHR0cHM6Ly9zdHJ3My5vcGVuc3RyZWFtLmNvLzEzMTE=", name: ". R|a|d|i|o| |c|i|t|y F|M" },
+			{ id: 7, url: "aHR0cHM6Ly9yYWRpb3MuY3JhYmRhbmNlLmNvbTo4MDAyLzI=", name: ". S|u|r|y|a|n| |F|M| |9|3|.|5" },
+			{ id: 8, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9yMmduMXBnbTRxcnV2", name: ". B|I|G| |F|M" },
+			{ id: 9, url: "aHR0cDovL2Fpci5wYy5jZG4uYml0Z3Jhdml0eS5jb20vYWlyL2xpdmUvcGJhdWRpbzA3OC9tYXN0ZXIubTN1OA==", name: ". D|h|a|r|a|m|a|p|u|r|i F|M" },
+			{ id: 10, url: "aHR0cHM6Ly9wc3JsaXZlMi5saXN0ZW5vbi5pbi9hbmlydWQ/YWg9MGU4MTc0OWUzNzc4OWU1ZmI4YzI5MDkyNmNlODdlM2Y=", name: "A|n|i|r|u|d|h| |R|a|d|i|o" },						
+			{ id: 11, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9ka3hmdGc2azd0enV2", name: ". t|a|m|i|l|-|2|0|2|1|-|l|a|t|e|s|t|-|h|i|t|s" },
+			{ id: 12, url: "aHR0cHM6Ly9wc3JsaXZlMi5saXN0ZW5vbi5pbi9pcmJlYXQ/YWg9MGU4MTc0OWUzNzc4OWU1ZmI4YzI5MDkyNmNlODdlM2Y=", name: ". I|l|a|y|a|r|a|j|a| |S|u|p|e|r| |B|e|a|t|s| |R|a|d|i|o" },
+			{ id: 13, url: "aHR0cHM6Ly9zcHNlcnZlci5zc2Nhc3QydS5pbi9kaW5kaWd1bGNpdHlmbS9zdHJlYW0=", name: ". D|i|n|d|i|g|u|l| |F|M" },
+			{ id: 14, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtLzBjeXMyaDQxdzBodnY=", name: ". A|R|R F|M" },
+			{ id: 15, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL3g4YnlxaGE0YjQ4dXY=", name: ". V|i|j|a|y" },
+			{ id: 16, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL3V2ZGJ5Z202YTQ4dXY=", name: ". K|J| |Y|e|s|u|d|a|s" },
+			{ id: 17, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9hcXA5N2YzejIzOHV2", name: ". R|a|j|i|n|i| |R|a|d|i|o" },
+			{ id: 18, url: "aHR0cDovL3N0cmVhbS56ZW5vLmZtL2Q1c2t3Y3Q3aHF6dXY=", name: ". G|V|P" },
+			{ id: 19, url: "aHR0cHM6Ly9zdHJlYW0uemVuby5mbS9vYjZ0amc4Z3VscHR2", name: ". H|a|r|r|i|s| |J|a|y|a|r|a|j" }
+
+					];
+
+    // Template 3 stations (new)
+    const template3Stations = [
+      { id: 100, url: "aHR0cHM6Ly9yb2dlcnMtaGxzLmxlYW5zdHJlYW0uY28vcm9nZXJzL2hhbDk1Ny5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y N|e|w|s", category: "english" },
+      { id: 101, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg3L0VTX1IxQUhGL21hc3Rlci5tM3U4", name: ". C|B|C R|a|d|i|o", category: "english" },
+      { id: 102, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQwOTg2L0VTX1IxQUZSL2FkYXB0aXZlXzE5Mi9jaHVua2xpc3RfYW8ubTN1OA==", name: ". C|B|C M|o|n|c", category: "english" },
+      { id: 103, url: "aHR0cHM6Ly9jYmNyYWRpb2xpdmUuYWthbWFpemVkLm5ldC9obHMvbGl2ZS8yMDQxMDUwL0VTX1IxUFZDL21hc3Rlci5tM3U4", name: ". C|B|C| |T|o|r|o|n|t|o", category: "english" },
+      { id: 104, url: "aHR0cHM6Ly9oZWwtYWlzLWVkZ2UxLmxlYW5zdHJlYW0uY28vcm9nZXJzL3RvcjY4MC5zdHJlYW0vcGxheWxpc3QubTN1OA==", name: ". C|i|t|y| |T|o|r|o|n|t|o" },
+      { id: 105, url: "aHR0cDovL3N0cmVhbS5yZXZtYS5paHJobHMuY29tL3pjNjA0Mz8=", name: ". N|B|C| |N|e|w|s", category: "english" },
+      { id: 106, url: "aHR0cHM6Ly90dW5laW4uY2Ruc3RyZWFtMS5jb20vNDQyNF85Ni5tcDM/", name: ". A|B|C| |N|e|w|s", category: "english" }
+     ];
+
+    function decodeBase64Url(base64Url) {
+        return atob(base64Url);
+    }
+
+     function playStation(index) {
+      currentStationIndex = index % stations.length;
+      var station = stations[currentStationIndex];
+      var decodedUrl = decodeBase64Url(station.url);
+		var parser = document.createElement('a');
+		parser.href = decodedUrl;
+
+		// Get the server name (hostname)
+		var serverName = parser.hostname;
+		writeOutput('Server Name :'+ serverName);
+      var stationName = station.name.replace(/\|/g, "");
+
+      $("#stationList div").removeClass("active");
+      $("#stationList div").eq(currentStationIndex).addClass("active");
+      writeOutput('---------------------------------------');
+      writeOutput("currentStationIndex = " + currentStationIndex);
+      writeOutput("Playing: " + stationName + " (" + decodedUrl + ")");
+
+      // Stop and reset audio before switching stations
+      if (hls) {
+        hls.destroy();
+        hls = null;
+      }
+      audioPlayer.pause();
+      audioPlayer.src = ""; // Clean reset
+
+      if (decodedUrl.endsWith(".m3u8")) {
+        if (audioPlayer.canPlayType("application/vnd.apple.mpegurl")) {
+          audioPlayer.src = decodedUrl;
+          $(audioPlayer).one("canplaythrough", function () {
+            audioPlayer.play().catch(handlePlaybackError);
+            writeOutput("canplaythrough-after play-m3u8");
+          });
+          $(audioPlayer).one("loadeddata", function () {
+            audioPlayer.play().catch(handlePlaybackError);
+            writeOutput("loadeddata-after play");
+            UpdateMediaSession(stationName, "Streaming...");
+          });
+          $(audioPlayer).one("loadstart", function () {
+            UpdateMediaSession(stationName, "Loading...");
+            writeOutput("loadstart()-canPlayType(M3U8)");
+          });
+        } else if (Hls.isSupported()) {
+          hls = new Hls();
+          hls.loadSource(decodedUrl);
+          hls.attachMedia(audioPlayer);
+          hls.on(Hls.Events.MANIFEST_PARSED, function () {
+            audioPlayer.play().catch(handlePlaybackError);
+            writeOutput("HLS MANIFEST_PARSED - playing station");
+          });
+        } else {
+          writeOutput("Error: M3U8 format not supported.");
+        }
+      } else {
+        audioPlayer.src = decodedUrl;
+        $(audioPlayer).one("canplaythrough", function () {
+          audioPlayer.play().catch(handlePlaybackError);
+          writeOutput("canplaythrough-after play-regular stream");
+        });
+        $(audioPlayer).one("loadeddata", function () {
+          audioPlayer.play().catch(handlePlaybackError);
+          writeOutput("loadeddata-after play-regular stream");
+          UpdateMediaSession(stationName, "Streaming...");
+        });
+        $(audioPlayer).one("loadstart", function () {
+          UpdateMediaSession(stationName, "Loading...");
+          writeOutput("loadstart()-else");
+        });
+      }
+
+      // Media Session API updates using jQuery (if available)
+      if ("mediaSession" in navigator) {
+        // include station id in the MediaMetadata title so iPhone playback screen shows the id
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: station.id + stationName,
+          artist: "Live Radio" + ": " + serverName,
+          album: "Streaming"
+        });
+        navigator.mediaSession.setActionHandler("previoustrack", function () {
+          playStation((currentStationIndex - 1 + stations.length) % stations.length);
+        });
+        navigator.mediaSession.setActionHandler("nexttrack", function () {
+          playStation((currentStationIndex + 1) % stations.length);
+        });
+        navigator.mediaSession.setActionHandler("play", function () {
+          audioPlayer.play();
+	  writeOutput('PLAY');
+        });
+        navigator.mediaSession.setActionHandler("pause", function () {
+          audioPlayer.pause();
+	  writeOutput('PAUSE');
+        });
+        navigator.mediaSession.setActionHandler("stop", function () {
+          audioPlayer.pause();
+          audioPlayer.currentTime = 0;
+	  writeOutput('STOP');
+        });
+      }
+    }
+	
+	function UpdateSessionNew()
+	{
+		if ("mediaSession" in navigator) {
+		navigator.mediaSession.setActionHandler("previoustrack", function () {
+		playStation((currentStationIndex - 1 + stations.length) % stations.length);
+		});
+		navigator.mediaSession.setActionHandler("nexttrack", function () {
+		playStation((currentStationIndex + 1) % stations.length);
+		});
+		writeOutput("UpdateSessionNew()...");
+		}
+	}
+
+    // Update Media Session helper
+    function UpdateMediaSession(stationName, msg, stationId, serverNameParam) {
+      // stationId and serverNameParam are optional; include id in title when available
+      if ("mediaSession" in navigator) {
+        var titlePrefix = stationId ? (stationId) : ((currentStationIndex + 1));
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: titlePrefix + stationName,
+          artist: "Live Radio" + ": " + (serverNameParam || ""),
+          album: msg
+        });
+        navigator.mediaSession.setActionHandler("previoustrack", function () {
+          playStation((currentStationIndex - 1 + stations.length) % stations.length);
+        });
+        navigator.mediaSession.setActionHandler("nexttrack", function () {
+          playStation((currentStationIndex + 1) % stations.length);
+        });
+      }
+      writeOutput("UpdateMediaSession() - " + currentStationIndex +" - Completed");
+    }
+
+    function handlePlaybackError(error) {
+      writeOutput("Playback error: " + error.message);
+      console.error("Playback error:", error);
+      UpdateMediaSession("Error", "Error");
+      writeOutput("handlePlaybackError()");
+    }
+
+    // Render station list using jQuery (applies exclusions immediately)
+    function listStations() {
+      try {
+        var favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+        // Ensure favorites are numbers (stored as indexes)
+        favorites = favorites.map(function(n){ return Number(n); });
+
+        // Build display list applying exclusions to the current stations array
+        var display = applyExclusionsToArray(stations);
+
+        $("#stationList").html(
+          display.map(function(s){
+            // find real index in stations array so play/toggle work correctly
+            var realIdx = stations.findIndex(function(st){ return Number(st.id) === Number(s.id); });
+            var isActive = (realIdx === currentStationIndex) ? 'active' : '';
+            var label = (s.id + s.name.replace(/\|/g, ""));
+            var fav = (favorites.includes(realIdx) ? '★' : '☆');
+            return '<div onclick="playStation(' + realIdx + ')" id="station-' + s.id + '" class="' + isActive + '">' +
+                   label +
+                   '<button onclick="event.stopPropagation(); toggleFavorite(' + realIdx + ')">' + fav + '</button>' +
+                   '</div>';
+          }).join("")
+        );
+      } catch (e) {
+        console.error('listStations error', e);
+        writeOutput('listStations error: ' + e.message);
+      }
+    }
+
+    function toggleFavorite(index) {
+      let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+      if (favorites.includes(index)) {
+        favorites = favorites.filter(i => i !== index);
+      } else {
+        favorites.push(index);
+      }
+      localStorage.setItem("favorites", JSON.stringify(favorites));
+      listStations(); // Refresh list using jQuery
+    }
+
+    function listFavorites() {
+      let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+      if (favorites.length === 0) {
+        alert("No favorite stations yet!");
+        return;
+      }
+      // Map stored favorite indices to current stations where possible, then exclude by id
+      let sortedFavorites = favorites
+        .map(function(i){ return stations[i]; })
+        .filter(function(s){ return !!s; })
+        .filter(function(s){ return !excludedIds.includes(Number(s.id)); })
+        .sort(function(a,b){ return a.id - b.id; });
+      $("#stationList").html(
+        sortedFavorites
+          .map(
+            function(s){
+              var idx = stations.findIndex(function(st){ return st.id === s.id; });
+              return `<div onclick="playStation(${idx})" id="station-${s.id}" class="active">
+                ${s.id + s.name.replace(/\|/g, "")}
+                <button onclick="event.stopPropagation(); toggleFavorite(${idx})">★</button>
+              </div>`;
+            }
+          )
+          .join("")
+      );
+      if (sortedFavorites.length>0) {
+        var firstIdx = stations.findIndex(function(st){ return st.id === sortedFavorites[0].id; });
+        if (firstIdx !== -1) playStation(firstIdx);
+      }
+    }
+
+   // Helper functions to switch station lists using jQuery
+    function loadTemplate2() {
+      stations = applyExclusionsToArray(template2Stations.slice()); // clear current list and load Template 2 stations (apply exclusions)
+      currentStationIndex = 0;
+      listStations();
+      writeOutput("Template 2 loaded with new station list.");
+    }
+
+    function loadEnglishStations() {
+      // Load the English station set (template3Stations)
+      if (typeof template3Stations !== 'undefined' && Array.isArray(template3Stations)) {
+        stations = applyExclusionsToArray(template3Stations.slice());
+        currentStationIndex = 0;
+        listStations();
+        writeOutput('English (Template 3) stations loaded.');
+      } else {
+        writeOutput('template3Stations is not available.');
+      }
+    }
+
+    function loadOriginalStations() {
+      stations = applyExclusionsToArray(originalStations.slice()); // reload original station list (apply exclusions)
+      currentStationIndex = 0;
+      listStations();
+      writeOutput("Original station list reloaded.");
+    }
+
+    // Helper: apply exclusion filter to an array of station objects
+    function applyExclusionsToArray(arr) {
+      if (!Array.isArray(arr)) return [];
+      if (!excludedIds || excludedIds.length === 0) return arr.slice();
+      return arr.filter(function(s) { return !excludedIds.includes(Number(s.id)); });
+    }
+
+    // Parse comma-separated IDs and update excludedIds, then refresh list
+    function updateExcludedIds(val) {
+      var v = (typeof val !== 'undefined') ? val : (document.getElementById('excludeInput') ? document.getElementById('excludeInput').value : '');
+      // Persist the raw exclude input so it is remembered across reloads
+      try { localStorage.setItem('excludeInputValue', v || ''); } catch(e) { /* ignore storage errors */ }
+      if (!v) {
+        excludedIds = [];
+      } else {
+        excludedIds = v.split(',').map(function(x){ return parseInt(x.trim(),10); }).filter(function(n){ return !isNaN(n); });
+      }
+      // Refresh stations display to apply exclusions
+      // If stations currently reference an excluded id, adjust currentStationIndex
+      if (stations && stations.length && stations[currentStationIndex] && excludedIds.includes(Number(stations[currentStationIndex].id))) {
+        var firstAvailable = stations.findIndex(function(s){ return !excludedIds.includes(Number(s.id)); });
+        if (firstAvailable === -1) {
+          audioPlayer.pause();
+          writeOutput('All stations excluded. Playback stopped.');
+        } else {
+          currentStationIndex = firstAvailable;
+          playStation(currentStationIndex);
+        }
+      }
+      listStations();
+    }
+
+    function writeOutput(txt) {
+        $('#output').val(txt + '\n' + $('#output').val());
+    }
+
+    $('#link').click(function () {
+        playStation(currentStationIndex);
+        listStations();
+    });
+
+    $('#nextButton').click(function () {
+        playStation((currentStationIndex + 1) % stations.length);
+    });
+
+    $('#prevButton').click(function () {
+        playStation((currentStationIndex - 1 + stations.length) % stations.length);
+    });
+
+    $(document).ready(function() {
+        // Restore exclude input value from localStorage (if available)
+        try {
+          var savedExclude = localStorage.getItem('excludeInputValue') || '';
+          if (savedExclude && savedExclude.length > 0) {
+            $('#excludeInput').val(savedExclude);
+            // parse into excludedIds without triggering updateExcludedIds (avoid double list render)
+            excludedIds = savedExclude.split(',').map(function(x){ return parseInt(x.trim(),10); }).filter(function(n){ return !isNaN(n); });
+          } else {
+            excludedIds = [];
+          }
+        } catch(e) {
+          excludedIds = [];
+        }
+
+        // By default load the English stations (template3Stations) on page load
+        if (typeof template3Stations !== 'undefined' && Array.isArray(template3Stations)) {
+          stations = applyExclusionsToArray(template3Stations.slice());
+          currentStationIndex = 0;
+          listStations();
+          if (stations.length > 0) {
+            playStation(0);
+          }
+        } else {
+          // Fallback to original stations
+          stations = applyExclusionsToArray(originalStations.slice());
+          currentStationIndex = 0;
+          listStations();
+          if (stations.length > 0) {
+            playStation(0);
+          }
+        }
+
+        // Initialize controls hidden by default and wire the Show/Hide button
+        try {
+          document.body.classList.add('controls-collapsed');
+          $('#showHideButton').text('Show');
+          $('#showHideButton').click(function(){
+            var collapsed = document.body.classList.toggle('controls-collapsed');
+            $(this).text(collapsed ? 'Show' : 'Hide');
+          });
+        } catch(e) { /* ignore */ }
+    });
+	
+	function toggleTextArea() {
+		var textArea = document.getElementById('output');
+		if (textArea.style.display === 'none') {
+		textArea.style.display = 'block';
+		} else {
+		textArea.style.display = 'none';
+		}
+		}
+		
+		function clearData() {
+			$('#output').val('');
+			navigator.mediaSession.metadata = null;
+			writeOutput('Media session cleared')
+			localStorage.setItem("favorites", JSON.stringify([])); // Set the value to an empty array
+			writeOutput('Favorite local storage cleared')
+			// Clear stored exclude input and reset exclusions
+			excludedIds = [];
+			try { localStorage.removeItem('excludeInputValue'); } catch(e) { }
+			$('#excludeInput').val('');
+			writeOutput('Exclude input cleared from local storage')
+			// Remove media screen visual state
+			try { document.body.classList.remove('media-screen'); } catch(e) { }
+			listStations();
+			}
+</script>
+
+</body>
+<br><br><br>
+</html>
