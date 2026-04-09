@@ -7,6 +7,11 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
+      /* Increase audioContainer size by 20% */
+      #audioContainer {
+        transform: scale(1.2);
+        transform-origin: center;
+      }
 	
 
 	
@@ -337,7 +342,7 @@
 <body>
     <div id="content">
         <h1>R | a | d | i | o</h1>
-        v 27.3.9.7<br><br>
+        v 27.3.9.8<br><br>
         <table border="0" cellspacing="3" cellpadding="3" align="center">
         <tr>
             <!-- Navigation buttons -->
@@ -824,8 +829,8 @@ var enableOutput = false;
             if (document.visibilityState === 'visible') {
               // Only try to resume if audio was playing before
               if (audioPlayer.paused && audioPlayer.src) {
-                audioPlayer.play().then(function() {
-                  writeOutput('Resumed playback after returning to foreground.');
+                audioPlayer.pause().then(function() {
+                  writeOutput('Paused playback after returning to foreground.');
                 }).catch(function(e) {
                   writeOutput('Could not auto-resume playback: ' + (e && e.message ? e.message : e));
                 });
