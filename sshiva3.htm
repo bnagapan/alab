@@ -196,6 +196,7 @@
 
   let seconds = 0;
   let intervalId = null;
+  let isTimerRunning = false;
   let wakeLock = null;
   let audioEndedHandler = null;
 
@@ -213,7 +214,7 @@
       MAX_MINUTES = val;
       MAX_SECONDS = MAX_MINUTES * 60;
       // Update display if timer hasn't started yet
-      if (intervalId === null && seconds === 0) {
+      if (!isTimerRunning && seconds === 0) {
         updateTimerDisplay();
       }
       // If timer is running, it will continue with the new MAX_SECONDS
@@ -278,10 +279,17 @@
   timerOptions.forEach(option => {
     option.addEventListener("click", function() {
       const minutes = parseInt(this.getAttribute("data-minutes"), 10);
-      maxMinutesInput.value = minutes;
-      MAX_MINUTES = minutes;
-      MAX_SECONDS = MAX_MINUTES * 60;
-      resetTimer();
+      if (isTimerRunning) {
+        MAX_MINUTES += minutes;
+        MAX_SECONDS += minutes * 60;
+        maxMinutesInput.value = MAX_MINUTES;
+      } else {
+        maxMinutesInput.value = minutes;
+        MAX_MINUTES = minutes;
+        MAX_SECONDS = MAX_MINUTES * 60;
+        resetTimer();
+        startTimer();
+      }
       timerOptionsContainer.classList.remove("show");
     });
   });
@@ -322,7 +330,7 @@
 
   function startTimer() {
     // If timer finished, resume from where left off (if not reset)
-    if (intervalId !== null) return;
+    if (isTimerRunning) return;
 
     timerEl.style.display = "block";
 
@@ -345,15 +353,14 @@
     }
     audioEndedHandler = function() {
       // Only loop if timer is still running
-      if (intervalId !== null && seconds < MAX_SECONDS) {
+      if (isTimerRunning && seconds < MAX_SECONDS) {
         audio.currentTime = 0;
         audio.play().catch(() => {});
       }
     };
     audio.addEventListener('ended', audioEndedHandler);
-    // Always reset and play from start when timer starts or resumes
+    // Continue audio from its paused position when the timer resumes
     if (seconds < MAX_SECONDS) {
-      audio.currentTime = 0;
       audio.play().catch(() => {});
     }
 
@@ -367,11 +374,13 @@
         stopTimer();
       }
     }, 1000);
+    isTimerRunning = true;
   }
 
   function stopTimer() {
     clearInterval(intervalId);
     intervalId = null;
+    isTimerRunning = false;
     audio.pause();
     if (audioEndedHandler) {
       audio.removeEventListener('ended', audioEndedHandler);
